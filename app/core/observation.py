@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — Observation Text Generator
+Astroman Skywatcher — Observation Text Generator
 Generates premium Georgian-language observation guides.
 """
 import logging

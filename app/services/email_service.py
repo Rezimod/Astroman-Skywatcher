@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — Email Service
+Astroman Skywatcher — Email Service
 Supports SMTP and SendGrid.
 """
 import smtplib
@@ -143,7 +143,7 @@ def _build_html_email(
             <a href="{settings.astroman_store_url}" style="color:#818cf8;text-decoration:none;">astroman.ge</a>
         </div>
         <div style="color:#475569;font-size:11px;">
-            © ASTROMAN Sky Intelligence · {settings.location_name}
+            © Astroman Skywatcher · {settings.location_name}
         </div>
     </div>
 </div>

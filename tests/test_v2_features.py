@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — Tests for v2.0 Features
+Astroman Skywatcher — Tests for v2.0 Features
 """
 import pytest
 import sys

@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — Database Initialization Script
+Astroman Skywatcher — Database Initialization Script
 Run: python scripts/init_db.py
 """
 import asyncio

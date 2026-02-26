@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — Visibility Score Engine
+Astroman Skywatcher — Visibility Score Engine
 
 Calculates a 0–100 observation visibility score from weather conditions
 and moon brightness. The formula is intentionally simple and tunable.

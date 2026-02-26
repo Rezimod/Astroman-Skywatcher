@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence System
+Astroman Skywatcher System
 Main FastAPI Application
 """
 import logging
@@ -35,7 +35,7 @@ logger = logging.getLogger("astroman")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan — startup & shutdown."""
-    logger.info("🔭 ASTROMAN Sky Intelligence starting...")
+    logger.info("🔭 Astroman Skywatcher starting...")
 
     # Initialize database
     await init_db()
@@ -51,12 +51,12 @@ async def lifespan(app: FastAPI):
 
     # Shutdown
     stop_scheduler()
-    logger.info("ASTROMAN Sky Intelligence stopped")
+    logger.info("Astroman Skywatcher stopped")
 
 
 # --- App ---
 app = FastAPI(
-    title="ASTROMAN Sky Intelligence",
+    title="Astroman Skywatcher",
     description="ავტომატური ასტრონომიული დაკვირვების სისტემა",
     version="2.0.0",
     lifespan=lifespan,

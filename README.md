@@ -1,4 +1,4 @@
-# 🔭 ASTROMAN Sky Intelligence System
+# 🔭 Astroman Skywatcher System
 
 **ავტომატური ასტრონომიული დაკვირვების სისტემა თბილისისთვის**
 
@@ -23,7 +23,7 @@
 ## 📁 პროექტის სტრუქტურა
 
 ```
-astroman-sky-intelligence/
+astroman-skywatcher/
 ├── app/
 │   ├── __init__.py
 │   ├── main.py                  # FastAPI application entry
@@ -78,8 +78,8 @@ astroman-sky-intelligence/
 ### 1. კლონირება და სეტაპი
 
 ```bash
-git clone https://github.com/your-org/astroman-sky-intelligence.git
-cd astroman-sky-intelligence
+git clone https://github.com/your-org/astroman-skywatcher.git
+cd astroman-skywatcher
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt

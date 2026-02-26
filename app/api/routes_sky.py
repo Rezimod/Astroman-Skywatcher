@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — Real-Time Sky API
+Astroman Skywatcher — Real-Time Sky API
 
 GET /api/sky/live?lat=...&lon=...
 

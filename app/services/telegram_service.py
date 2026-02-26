@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — Telegram Bot Service
+Astroman Skywatcher — Telegram Bot Service
 Optional Telegram notification integration.
 """
 import logging

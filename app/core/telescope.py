@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — Telescope Smart Linking
+Astroman Skywatcher — Telescope Smart Linking
 Dynamic product recommendation based on observation conditions.
 """
 import logging

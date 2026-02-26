@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — Subscriber Routes
+Astroman Skywatcher — Subscriber Routes
 """
 import logging
 import aiosqlite

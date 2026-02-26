@@ -1,2 +1,2 @@
-# ASTROMAN Sky Intelligence System
+# Astroman Skywatcher System
 __version__ = "2.0.0"

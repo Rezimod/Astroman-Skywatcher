@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — Dashboard Routes
+Astroman Skywatcher — Dashboard Routes
 Public-facing observation panel.
 """
 from datetime import datetime

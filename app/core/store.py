@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — WooCommerce Store Integration
+Astroman Skywatcher — WooCommerce Store Integration
 
 Fetches products from WooCommerce REST API v3.
 Includes simple in-memory TTL cache (no Redis needed for MVP).

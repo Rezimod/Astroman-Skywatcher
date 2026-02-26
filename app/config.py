@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — Configuration
+Astroman Skywatcher — Configuration
 """
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     )
 
     # Application
-    app_name: str = "ASTROMAN Sky Intelligence"
+    app_name: str = "Astroman Skywatcher"
     app_env: str = "development"
     app_debug: bool = False
     app_secret_key: str = "change-me-in-production"
@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     smtp_username: str = ""
     smtp_password: str = ""
     smtp_from_email: str = "sky@astroman.ge"
-    smtp_from_name: str = "ASTROMAN Sky Intelligence"
+    smtp_from_name: str = "Astroman Skywatcher"
     sendgrid_api_key: str = ""
     sendgrid_from_email: str = "sky@astroman.ge"
 

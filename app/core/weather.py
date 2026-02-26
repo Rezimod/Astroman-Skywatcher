@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — Weather Service
+Astroman Skywatcher — Weather Service
 OpenWeather API integration for observation conditions.
 Falls back to Open-Meteo (free, no key required) when no OpenWeather key is set.
 """

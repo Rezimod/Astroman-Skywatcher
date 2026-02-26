@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — Store API
+Astroman Skywatcher — Store API
 
 GET /api/store/products     → WooCommerce product listing
 GET /api/store/products/{slug} → Single product by slug

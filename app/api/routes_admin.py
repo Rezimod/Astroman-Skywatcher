@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — Admin Routes
+Astroman Skywatcher — Admin Routes
 Protected admin panel with observation management.
 """
 import json

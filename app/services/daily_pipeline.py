@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — Daily Pipeline
+Astroman Skywatcher — Daily Pipeline
 Orchestrates data collection, text generation, and notifications.
 """
 import json

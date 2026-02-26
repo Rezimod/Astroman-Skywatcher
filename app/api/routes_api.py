@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — REST API
+Astroman Skywatcher — REST API
 Programmatic access to observation data.
 """
 import json
@@ -117,7 +117,7 @@ async def health_check():
     from app.services.scheduler import get_scheduler_status
     return {
         "status": "ok",
-        "service": "ASTROMAN Sky Intelligence",
+        "service": "Astroman Skywatcher",
         "version": "2.0.0",
         "timezone": settings.timezone,
         "location": settings.location_name,

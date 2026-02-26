@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — Pydantic Models
+Astroman Skywatcher — Pydantic Models
 """
 from pydantic import BaseModel, EmailStr
 from typing import Optional

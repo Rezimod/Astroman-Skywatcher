@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — Astronomy Engine
+Astroman Skywatcher — Astronomy Engine
 Uses Skyfield and Ephem for accurate astronomical calculations.
 Supports both default (Tbilisi) and arbitrary lat/lon queries.
 """

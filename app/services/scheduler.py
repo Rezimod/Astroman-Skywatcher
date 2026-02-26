@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — Scheduler
+Astroman Skywatcher — Scheduler
 APScheduler-based cron jobs for daily and weekly tasks.
 
 NOTIFICATION ARCHITECTURE (Feature 6):

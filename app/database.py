@@ -1,5 +1,5 @@
 """
-ASTROMAN Sky Intelligence — Database Layer (SQLite)
+Astroman Skywatcher — Database Layer (SQLite)
 """
 import aiosqlite
 import logging
