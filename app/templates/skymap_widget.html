@@ -1,0 +1,694 @@
+{# ════════════════════════════════════════════════════════════════════ #}
+{# SKY MAP WIDGET — საქართველოს ცა (Sky of Georgia)                   #}
+{# Scoped styles + interactive canvas + self-contained JS engine      #}
+{# All IDs/classes prefixed with "sky-" to avoid dashboard conflicts  #}
+{# ════════════════════════════════════════════════════════════════════ #}
+
+<style>
+/* ── Sky Map Widget: scoped to #sky-app ─────────────────────────── */
+#sky-app { width:100%; background:#03050d; overflow:hidden; font-family:'Courier New',monospace; color:#a0b8ff; }
+#sky-app * { box-sizing:border-box; margin:0; padding:0; }
+
+#sky-header { display:flex; align-items:center; justify-content:space-between; padding:13px 18px; background:rgba(6,10,26,0.97); border-bottom:1px solid rgba(60,90,200,0.12); flex-wrap:wrap; gap:8px; }
+#sky-title-block { display:flex; align-items:center; gap:10px; }
+#sky-title { color:#8aabff; font-size:14px; font-weight:700; letter-spacing:0.1em; }
+#sky-subtitle { color:rgba(100,130,200,0.5); font-size:10px; margin-top:2px; }
+#sky-controls { display:flex; gap:5px; flex-wrap:wrap; }
+.sky-ctrl-btn { background:rgba(20,28,55,0.5); border:1px solid rgba(40,55,110,0.3); border-radius:7px; padding:5px 10px; color:#384870; font-size:10px; cursor:pointer; font-family:inherit; transition:all 0.15s; }
+.sky-ctrl-btn.on { background:rgba(80,120,255,0.16); border-color:rgba(80,120,255,0.35); color:#8aabff; }
+.sky-ctrl-btn:hover { border-color:rgba(80,120,255,0.4); color:#8aabff; }
+
+#sky-help-panel { display:none; background:rgba(10,14,35,0.97); border-bottom:1px solid rgba(60,90,200,0.1); padding:10px 18px; gap:20px; flex-wrap:wrap; font-size:11px; color:rgba(140,170,240,0.7); }
+#sky-help-panel.visible { display:flex; }
+#sky-help-panel span { color:#a0c0ff; }
+
+#sky-canvas-wrap { position:relative; line-height:0; background:#01020a; }
+#sky-canvas { width:100%; display:block; cursor:grab; touch-action:none; }
+#sky-canvas.dragging { cursor:grabbing; }
+
+#sky-live-badge { position:absolute; top:12px; right:12px; display:flex; align-items:center; gap:5px; background:rgba(4,7,18,0.88); border:1px solid rgba(80,255,120,0.2); border-radius:20px; padding:4px 11px; color:#55ee75; font-size:10px; letter-spacing:0.1em; pointer-events:none; }
+#sky-live-dot { width:6px; height:6px; border-radius:50%; background:#55ee75; animation:skyLivePulse 1.8s ease-in-out infinite; }
+
+#sky-tooltip { display:none; position:absolute; top:12px; left:12px; background:rgba(4,7,22,0.96); border:1px solid rgba(80,120,255,0.28); border-radius:10px; padding:9px 14px; pointer-events:none; box-shadow:0 4px 16px rgba(0,0,40,0.5); min-width:160px; }
+#sky-tooltip.visible { display:block; }
+#sky-tip-name { color:#a0c0ff; font-size:13px; font-weight:700; margin-bottom:3px; }
+#sky-tip-info { color:rgba(120,150,210,0.65); font-size:10px; }
+#sky-tip-info b { color:#a0c0ff; }
+
+#sky-dir-bar { display:flex; align-items:center; justify-content:center; gap:4px; padding:9px 14px; border-top:1px solid rgba(60,90,200,0.1); background:rgba(5,8,20,0.88); flex-wrap:wrap; }
+.sky-dir-btn { background:rgba(15,22,50,0.5); border:1px solid rgba(35,50,100,0.3); border-radius:6px; padding:5px 9px; color:#2d3d68; font-size:11px; cursor:pointer; font-family:inherit; font-weight:700; min-width:34px; text-align:center; transition:all 0.12s; }
+.sky-dir-btn.active { background:rgba(80,120,255,0.22); border-color:rgba(80,120,255,0.45); color:#8aabff; }
+.sky-dir-btn:hover { border-color:rgba(80,120,255,0.35); color:#6688cc; }
+#sky-fov-wrap { margin-left:auto; display:flex; align-items:center; gap:7px; font-size:10px; color:rgba(70,100,170,0.55); }
+#sky-fov-slider { width:68px; accent-color:#5580ff; cursor:pointer; }
+#sky-fov-val { color:rgba(100,140,220,0.6); min-width:30px; }
+
+#sky-sel-panel { display:none; margin:10px 14px 14px; background:rgba(10,15,40,0.8); border-radius:13px; padding:13px 16px; }
+#sky-sel-panel.visible { display:flex; align-items:center; gap:14px; }
+#sky-sel-icon { width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+#sky-sel-info { flex:1; }
+#sky-sel-name { color:#c8d8ff; font-size:15px; font-weight:700; margin-bottom:6px; }
+#sky-sel-stats { display:flex; gap:18px; flex-wrap:wrap; }
+.sky-stat-label { color:rgba(100,130,200,0.45); font-size:9px; letter-spacing:0.08em; margin-bottom:2px; }
+.sky-stat-val { font-size:12px; }
+#sky-sel-close { background:none; border:none; color:rgba(100,130,200,0.35); font-size:22px; cursor:pointer; padding:2px 6px; line-height:1; border-radius:6px; transition:color 0.1s; }
+#sky-sel-close:hover { color:#a0b8ff; }
+
+#sky-planet-bar { padding:9px 14px 13px; border-top:1px solid rgba(60,90,200,0.08); display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+.sky-planet-label { color:rgba(80,110,170,0.4); font-size:9px; letter-spacing:0.1em; margin-right:2px; }
+.sky-planet-btn { display:flex; align-items:center; gap:6px; border-radius:8px; padding:5px 10px; cursor:pointer; font-family:inherit; border:1px solid rgba(35,45,80,0.3); background:rgba(15,20,45,0.5); transition:all 0.12s; }
+.sky-planet-btn:hover { filter:brightness(1.3); }
+.sky-planet-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.sky-planet-name { font-size:11px; color:#3a4870; }
+.sky-planet-alt { font-size:10px; font-weight:700; }
+
+@keyframes skyLivePulse { 0%,100%{opacity:1;box-shadow:0 0 5px #55ee75;} 50%{opacity:0.25;box-shadow:none;} }
+</style>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SKY MAP — ცის რუკა                                             -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div>
+  <div class="flex items-center gap-2 mb-3">
+    <div class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse flex-shrink-0"></div>
+    <h2 class="text-base sm:text-lg text-gray-200">🔭 ცის რუკა — საქართველოს ცა</h2>
+  </div>
+
+  <div class="overflow-hidden" style="border-radius:20px; border:1px solid rgba(255,255,255,0.07);">
+    <div id="sky-app">
+
+      <!-- HEADER -->
+      <div id="sky-header">
+        <div id="sky-title-block">
+          <span style="font-size:22px">🔭</span>
+          <div>
+            <div id="sky-title">საქართველოს ცა</div>
+            <div id="sky-subtitle">--</div>
+          </div>
+        </div>
+        <div id="sky-controls">
+          <button class="sky-ctrl-btn on" id="sky-btn-stars"  onclick="skyToggle('stars')">★ ვარსკვლავები</button>
+          <button class="sky-ctrl-btn on" id="sky-btn-const"  onclick="skyToggle('const')">⌖ თანავარსკ.</button>
+          <button class="sky-ctrl-btn on" id="sky-btn-labels" onclick="skyToggle('labels')">𝐀 წარწერები</button>
+          <button class="sky-ctrl-btn"    id="sky-btn-help"   onclick="skyToggle('help')">? დახმარება</button>
+        </div>
+      </div>
+
+      <!-- HELP PANEL -->
+      <div id="sky-help-panel">
+        <div><span>🖱 გადათრევა</span> — ცის ბრუნვა</div>
+        <div><span>🖱 კლიკი</span> — პლანეტის დეტალები</div>
+        <div><span>⚲ სქროლი</span> — ხედვის კუთხე</div>
+        <div><span>📱 სვლა</span> — ბრუნვა</div>
+        <div><span>🧭 ღილაკები</span> — მიმართულება</div>
+      </div>
+
+      <!-- SKY CANVAS -->
+      <div id="sky-canvas-wrap">
+        <canvas id="sky-canvas" width="900" height="420"></canvas>
+        <div id="sky-live-badge"><div id="sky-live-dot"></div>პირდაპირი</div>
+        <div id="sky-tooltip">
+          <div id="sky-tip-name"></div>
+          <div id="sky-tip-info"></div>
+        </div>
+      </div>
+
+      <!-- DIRECTION BAR -->
+      <div id="sky-dir-bar">
+        <button class="sky-dir-btn" data-skaz="0"   onclick="skySetDir(0)">ჩ</button>
+        <button class="sky-dir-btn" data-skaz="45"  onclick="skySetDir(45)">ჩ-აღ</button>
+        <button class="sky-dir-btn" data-skaz="90"  onclick="skySetDir(90)">აღ</button>
+        <button class="sky-dir-btn" data-skaz="135" onclick="skySetDir(135)">სამ-აღ</button>
+        <button class="sky-dir-btn active" data-skaz="180" onclick="skySetDir(180)">სამ</button>
+        <button class="sky-dir-btn" data-skaz="225" onclick="skySetDir(225)">სამ-დ</button>
+        <button class="sky-dir-btn" data-skaz="270" onclick="skySetDir(270)">დას</button>
+        <button class="sky-dir-btn" data-skaz="315" onclick="skySetDir(315)">ჩ-დ</button>
+        <div id="sky-fov-wrap">
+          <span>ხედვა</span>
+          <input id="sky-fov-slider" type="range" min="60" max="340" step="10" value="180" oninput="skySetFov(+this.value)">
+          <span id="sky-fov-val">180°</span>
+        </div>
+      </div>
+
+      <!-- SELECTED BODY PANEL -->
+      <div id="sky-sel-panel">
+        <div id="sky-sel-icon"></div>
+        <div id="sky-sel-info">
+          <div id="sky-sel-name"></div>
+          <div id="sky-sel-stats"></div>
+        </div>
+        <button id="sky-sel-close" onclick="skyCloseSel()">×</button>
+      </div>
+
+      <!-- PLANET BAR -->
+      <div id="sky-planet-bar">
+        <span class="sky-planet-label">პლანეტები:</span>
+        <div id="sky-planets"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+// ═══════════════════════════════════════════════════════════════
+// ASTRONOMY ENGINE — Tbilisi: 41.6938°N, 44.8015°E
+// ═══════════════════════════════════════════════════════════════
+const DEG = Math.PI / 180, RAD = 180 / Math.PI;
+const SKY_LAT = 41.6938, SKY_LON = 44.8015;
+
+function julianDay(d) { return d.valueOf() / 86400000 + 2440587.5; }
+function fmod(a, b) { return ((a % b) + b) % b; }
+function gmst(jd) {
+  const T = (jd - 2451545) / 36525;
+  return fmod(280.46061837 + 360.98564736629 * (jd - 2451545) + 0.000387933 * T * T - T * T * T / 38710000, 360);
+}
+function lst(jd, lon) { return fmod(gmst(jd) + lon, 360); }
+
+function equToHoriz(ra, dec, lstDeg, latDeg) {
+  const ha = fmod(lstDeg - ra, 360) * DEG, d = dec * DEG, l = latDeg * DEG;
+  const sinAlt = Math.sin(d) * Math.sin(l) + Math.cos(d) * Math.cos(l) * Math.cos(ha);
+  const alt = Math.asin(Math.max(-1, Math.min(1, sinAlt))) * RAD;
+  const cosAlt = Math.cos(alt * DEG);
+  if (Math.abs(cosAlt) < 1e-9) return { alt, az: 0 };
+  const cosAz = (Math.sin(d) - Math.sin(alt * DEG) * Math.sin(l)) / (cosAlt * Math.cos(l));
+  let az = Math.acos(Math.max(-1, Math.min(1, cosAz))) * RAD;
+  if (Math.sin(ha) > 0) az = 360 - az;
+  return { alt, az };
+}
+
+function sunLon(T) {
+  const L0 = fmod(280.46646 + 36000.76983 * T, 360);
+  const M = fmod(357.52911 + 35999.05029 * T, 360) * DEG;
+  const C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * Math.sin(M)
+          + (0.019993 - 0.000101 * T) * Math.sin(2 * M)
+          + 0.000289 * Math.sin(3 * M);
+  return { lon: fmod(L0 + C, 360), r: 1.000001018 * (1 - 0.0167086 * Math.cos(M)) };
+}
+
+function ecl2eq(lon, lat, T) {
+  const eps = (23.439291111 - 0.013004167 * T) * DEG;
+  const lr = lon * DEG, br = lat * DEG;
+  const sinDec = Math.sin(br) * Math.cos(eps) + Math.cos(br) * Math.sin(eps) * Math.sin(lr);
+  const dec = Math.asin(Math.max(-1, Math.min(1, sinDec))) * RAD;
+  const y = Math.sin(lr) * Math.cos(eps) - Math.tan(br) * Math.sin(eps);
+  const ra = fmod(Math.atan2(y, Math.cos(lr)) * RAD, 360);
+  return { ra: ra < 0 ? ra + 360 : ra, dec };
+}
+
+const PLANET_DATA = {
+  Mercury: [252.2509, 149472.6746, 0.3871],
+  Venus:   [181.9798,  58517.8156, 0.7233],
+  Mars:    [355.4330,  19140.2993, 1.5237],
+  Jupiter: [ 34.3515,   3034.9057, 5.2029],
+  Saturn:  [ 50.0774,   1222.1138, 9.5366],
+  Uranus:  [314.0550,    428.4882, 19.1913],
+  Neptune: [304.3487,    218.4862, 30.0690],
+};
+
+const SKY_PLANETS = [
+  { name:"მერკური", en:"Mercury", sym:"☿", col:"#c8c8d8", sz:5,  mag:0.5  },
+  { name:"ვენერა",  en:"Venus",   sym:"♀", col:"#ffe8b0", sz:8,  mag:-4.0 },
+  { name:"მარსი",   en:"Mars",    sym:"♂", col:"#ff7050", sz:6,  mag:1.0  },
+  { name:"იუპიტერი",en:"Jupiter", sym:"♃", col:"#f5dfa0", sz:11, mag:-2.5 },
+  { name:"სატურნი", en:"Saturn",  sym:"♄", col:"#e8d8a8", sz:9,  mag:0.8  },
+  { name:"ურანი",   en:"Uranus",  sym:"⛢", col:"#90dce8", sz:5,  mag:5.7  },
+  { name:"ნეპტუნი", en:"Neptune", sym:"♆", col:"#6090f8", sz:5,  mag:8.0  },
+];
+
+function skyComputePositions(date) {
+  const jd = julianDay(date), T = (jd - 2451545) / 36525;
+  const sun = sunLon(T), sunEq = ecl2eq(sun.lon, 0, T);
+  const mL = fmod(218.3165 + 481267.8813 * T, 360);
+  const mM = fmod(134.9634 + 477198.8676 * T, 360) * DEG;
+  const mD = fmod(297.8502 + 445267.1115 * T, 360) * DEG;
+  const mF = fmod(93.2720  + 483202.0175 * T, 360) * DEG;
+  const mLon = mL + 6.289 * Math.sin(mM) - 1.274 * Math.sin(2 * mD - mM)
+             + 0.658 * Math.sin(2 * mD) - 0.214 * Math.sin(2 * mM)
+             - 0.186 * Math.sin(fmod(357.5291 + 35999.0503 * T, 360) * DEG);
+  const moonEq = ecl2eq(fmod(mLon, 360), 5.128 * Math.sin(mF), T);
+  const moonPhase = fmod(mD * RAD, 360) / 360;
+  const sLr = sun.lon * DEG;
+
+  const res = [
+    { name:"მზე",    type:"sun",  ...sunEq,  mag:-26.7 },
+    { name:"მთვარე", type:"moon", ...moonEq, mag:-12.6, phase:moonPhase },
+  ];
+  SKY_PLANETS.forEach(p => {
+    const [L0, dL, r] = PLANET_DATA[p.en];
+    const L = fmod(L0 + dL * T, 360) * DEG;
+    const gx = r * Math.cos(L) - sun.r * Math.cos(sLr);
+    const gy = r * Math.sin(L) - sun.r * Math.sin(sLr);
+    const gLon = fmod(Math.atan2(gy, gx) * RAD, 360);
+    res.push({ ...p, type:"planet", ...ecl2eq(gLon < 0 ? gLon + 360 : gLon, 0, T) });
+  });
+  return res;
+}
+
+// ── Stars ──────────────────────────────────────────────────────
+const SKY_STARS = [
+  {n:"Sirius",    ra:101.287, dec:-16.716, mag:-1.46, c:"#cce8ff"},
+  {n:"Canopus",   ra: 95.988, dec:-52.696, mag:-0.74, c:"#fff8e0"},
+  {n:"Arcturus",  ra:213.915, dec: 19.182, mag:-0.04, c:"#ffb040"},
+  {n:"Vega",      ra:279.235, dec: 38.784, mag: 0.03, c:"#d0e8ff"},
+  {n:"Capella",   ra: 79.172, dec: 45.998, mag: 0.08, c:"#ffe878"},
+  {n:"Rigel",     ra: 78.634, dec: -8.202, mag: 0.13, c:"#b8d0ff"},
+  {n:"Procyon",   ra:114.826, dec:  5.225, mag: 0.34, c:"#fff0e0"},
+  {n:"Betelgeuse",ra: 88.793, dec:  7.407, mag: 0.42, c:"#ff8030"},
+  {n:"Altair",    ra:297.696, dec:  8.868, mag: 0.77, c:"#e8f0ff"},
+  {n:"Aldebaran", ra: 68.980, dec: 16.509, mag: 0.87, c:"#ff6030"},
+  {n:"Spica",     ra:201.298, dec:-11.161, mag: 1.04, c:"#c0d4ff"},
+  {n:"Antares",   ra:247.352, dec:-26.432, mag: 1.09, c:"#ff4020"},
+  {n:"Pollux",    ra:116.329, dec: 28.026, mag: 1.14, c:"#ffb860"},
+  {n:"Fomalhaut", ra:344.413, dec:-29.622, mag: 1.17, c:"#d0e8ff"},
+  {n:"Deneb",     ra:310.358, dec: 45.280, mag: 1.25, c:"#e0ecff"},
+  {n:"Regulus",   ra:152.093, dec: 11.967, mag: 1.36, c:"#d0e0ff"},
+  {n:"Adhara",    ra:104.656, dec:-28.972, mag: 1.50, c:"#b8d0ff"},
+  {n:"Castor",    ra:113.649, dec: 31.888, mag: 1.58, c:"#e8f4ff"},
+  {n:"Dubhe",     ra:165.932, dec: 61.751, mag: 1.79, c:"#ffd870"},
+  {n:"Bellatrix", ra: 81.283, dec:  6.350, mag: 1.64, c:"#c0d0ff"},
+  {n:"Elnath",    ra: 81.573, dec: 28.608, mag: 1.65, c:"#d8eaff"},
+  {n:"Alnilam",   ra: 84.053, dec: -1.202, mag: 1.70, c:"#c0d8ff"},
+  {n:"Alnitak",   ra: 85.190, dec: -1.943, mag: 1.74, c:"#c0d4ff"},
+  {n:"Alkaid",    ra:206.885, dec: 49.313, mag: 1.85, c:"#c8d8ff"},
+  {n:"Mizar",     ra:200.981, dec: 54.925, mag: 2.04, c:"#e0ecff"},
+  {n:"Alioth",    ra:193.507, dec: 55.960, mag: 1.76, c:"#e0ecff"},
+  {n:"Merak",     ra:165.460, dec: 56.382, mag: 2.37, c:"#e8f0ff"},
+  {n:"Phecda",    ra:178.458, dec: 53.695, mag: 2.44, c:"#e8f0ff"},
+  {n:"Megrez",    ra:183.856, dec: 57.033, mag: 3.31, c:"#e8f0ff"},
+  {n:"Schedar",   ra: 10.127, dec: 56.537, mag: 2.24, c:"#ffb860"},
+  {n:"Caph",      ra:  2.294, dec: 59.150, mag: 2.27, c:"#fff0e0"},
+  {n:"Ruchbah",   ra: 21.454, dec: 60.235, mag: 2.68, c:"#e8f0ff"},
+  {n:"Polaris",   ra: 37.954, dec: 89.264, mag: 1.97, c:"#fff8e8"},
+  {n:"Kochab",    ra:222.676, dec: 74.156, mag: 2.07, c:"#ffb040"},
+  {n:"Alpheratz", ra:  2.097, dec: 29.091, mag: 2.06, c:"#c8d8ff"},
+  {n:"Mirfak",    ra: 51.081, dec: 49.861, mag: 1.79, c:"#fff0c0"},
+  {n:"Hamal",     ra: 31.793, dec: 23.462, mag: 2.01, c:"#ffb050"},
+  {n:"Denebola",  ra:177.265, dec: 14.572, mag: 2.14, c:"#d8ecff"},
+  {n:"Alphard",   ra:141.897, dec: -8.659, mag: 1.99, c:"#ff9840"},
+  {n:"Enif",      ra:326.046, dec:  9.875, mag: 2.38, c:"#ffb060"},
+  {n:"Markab",    ra:346.190, dec: 15.212, mag: 2.49, c:"#e0ecff"},
+];
+
+const SKY_CONSTELLATIONS = [
+  { pairs:[["Betelgeuse","Alnilam"],["Alnilam","Rigel"],["Alnilam","Alnitak"],["Alnitak","Rigel"],["Betelgeuse","Bellatrix"],["Bellatrix","Alnilam"]], c:"#4466aa" },
+  { pairs:[["Dubhe","Merak"],["Merak","Phecda"],["Phecda","Megrez"],["Megrez","Alioth"],["Alioth","Mizar"],["Mizar","Alkaid"],["Megrez","Dubhe"]], c:"#446688" },
+  { pairs:[["Schedar","Caph"],["Schedar","Ruchbah"],["Ruchbah","Caph"]], c:"#446688" },
+];
+
+const SKY_STAR_MAP = {};
+SKY_STARS.forEach(s => SKY_STAR_MAP[s.n] = s);
+
+const SKY_CARDINALS = [
+  {l:"ჩ",az:0},{l:"ჩ-აღ",az:45},{l:"აღ",az:90},{l:"სამ-აღ",az:135},
+  {l:"სამ",az:180},{l:"სამ-დ",az:225},{l:"დას",az:270},{l:"ჩ-დ",az:315},
+];
+const SKY_MAIN_DIR = new Set(["ჩ","აღ","სამ","დას"]);
+
+// ── State ──────────────────────────────────────────────────────
+let skyAzCenter = 180, skyFovDeg = 180;
+let skyShowStars = true, skyShowConst = true, skyShowLabels = true;
+let skySelected = null, skyHovered = null, skyRenderData = [];
+let skyIsDragging = false, skyDragStartX = 0, skyAzAtDrag = 180;
+let skyTouchOriginX = 0, skyTouchOriginY = 0;
+
+const skyCanvas = document.getElementById("sky-canvas");
+const skyCtx    = skyCanvas.getContext("2d");
+
+// ── Helpers ────────────────────────────────────────────────────
+function skyHexRgb(h) {
+  if (!h || h.length < 7) return "128,160,255";
+  return `${parseInt(h.slice(1,3),16)},${parseInt(h.slice(3,5),16)},${parseInt(h.slice(5,7),16)}`;
+}
+
+function skyToXY(az, alt, W, H) {
+  let dAz = az - skyAzCenter;
+  while (dAz >  180) dAz -= 360;
+  while (dAz < -180) dAz += 360;
+  const hY = H * 0.70;
+  return { x: W / 2 + (dAz / skyFovDeg) * W, y: hY - (alt / 90) * hY * 0.92 };
+}
+
+// ── Draw ───────────────────────────────────────────────────────
+function skyDraw() {
+  const W = skyCanvas.width, H = skyCanvas.height, hY = H * 0.70;
+  skyCtx.clearRect(0, 0, W, H);
+
+  const hr = new Date().getHours() + new Date().getMinutes() / 60;
+  const isNight = hr < 5.5 || hr > 20.5, isTwi = !isNight && (hr < 7 || hr > 19);
+  const sky = skyCtx.createLinearGradient(0, 0, 0, hY);
+  if (isNight)     { sky.addColorStop(0,"#010409"); sky.addColorStop(0.5,"#050a1a"); sky.addColorStop(1,"#0c1330"); }
+  else if (isTwi)  { sky.addColorStop(0,"#0a1030"); sky.addColorStop(0.5,"#1a2a60"); sky.addColorStop(1,"#3a5080"); }
+  else             { sky.addColorStop(0,"#0f2060"); sky.addColorStop(0.5,"#1e50a0"); sky.addColorStop(1,"#3a80c0"); }
+  skyCtx.fillStyle = sky; skyCtx.fillRect(0, 0, W, hY);
+
+  const gnd = skyCtx.createLinearGradient(0, hY, 0, H);
+  gnd.addColorStop(0,"#0d180d"); gnd.addColorStop(1,"#060b06");
+  skyCtx.fillStyle = gnd; skyCtx.fillRect(0, hY, W, H - hY);
+
+  if (isNight) {
+    const mw = skyCtx.createLinearGradient(W * .25, 0, W * .75, hY);
+    mw.addColorStop(0,"rgba(60,80,150,0)"); mw.addColorStop(.5,"rgba(60,80,150,.055)"); mw.addColorStop(1,"rgba(60,80,150,0)");
+    skyCtx.fillStyle = mw; skyCtx.fillRect(0, 0, W, hY);
+  }
+
+  const now = new Date(), jd = julianDay(now), localST = lst(jd, SKY_LON);
+
+  // Stars
+  if (skyShowStars) {
+    SKY_STARS.forEach(s => {
+      const { alt, az } = equToHoriz(s.ra, s.dec, localST, SKY_LAT);
+      if (alt < -6) return;
+      const { x, y } = skyToXY(az, alt, W, H);
+      if (x < -30 || x > W + 30) return;
+      const alpha = alt < 0 ? Math.max(0, (alt + 6) / 6) * .4 : Math.min(1, alt / 12 * .5 + .5);
+      const sz = Math.max(.3, (3.6 - s.mag) * .48);
+      skyCtx.globalAlpha = alpha * .65;
+      const g = skyCtx.createRadialGradient(x, y, 0, x, y, sz * 4.5);
+      g.addColorStop(0, s.c + "cc"); g.addColorStop(.5, s.c + "44"); g.addColorStop(1, "transparent");
+      skyCtx.fillStyle = g; skyCtx.beginPath(); skyCtx.arc(x, y, sz * 4.5, 0, 2 * Math.PI); skyCtx.fill();
+      skyCtx.globalAlpha = alpha;
+      skyCtx.fillStyle = s.c; skyCtx.beginPath(); skyCtx.arc(x, y, sz, 0, 2 * Math.PI); skyCtx.fill();
+      skyCtx.globalAlpha = 1;
+    });
+  }
+
+  // Constellations
+  if (skyShowConst) {
+    const sm = {};
+    SKY_STARS.forEach(s => {
+      const { alt, az } = equToHoriz(s.ra, s.dec, localST, SKY_LAT);
+      sm[s.n] = { ...skyToXY(az, alt, W, H), alt };
+    });
+    SKY_CONSTELLATIONS.forEach(con => {
+      con.pairs.forEach(([a, b]) => {
+        const sa = sm[a], sb = sm[b];
+        if (!sa || !sb || sa.alt < 0 || sb.alt < 0) return;
+        if (sa.x < -50 || sb.x < -50 || sa.x > W + 50 || sb.x > W + 50) return;
+        skyCtx.beginPath(); skyCtx.moveTo(sa.x, sa.y); skyCtx.lineTo(sb.x, sb.y);
+        skyCtx.strokeStyle = con.c + "50"; skyCtx.lineWidth = 0.8;
+        skyCtx.setLineDash([3, 6]); skyCtx.stroke(); skyCtx.setLineDash([]);
+      });
+    });
+  }
+
+  // Altitude rings
+  [10, 30, 60].forEach(alt => {
+    const { y } = skyToXY(skyAzCenter, alt, W, H);
+    skyCtx.beginPath(); skyCtx.moveTo(0, y); skyCtx.lineTo(W, y);
+    skyCtx.strokeStyle = "rgba(80,120,200,.09)"; skyCtx.lineWidth = 1;
+    skyCtx.setLineDash([2, 10]); skyCtx.stroke(); skyCtx.setLineDash([]);
+    skyCtx.fillStyle = "rgba(100,150,255,.28)"; skyCtx.font = "10px monospace";
+    skyCtx.fillText(alt + "°", 8, y - 4);
+  });
+
+  // Horizon line
+  skyCtx.beginPath(); skyCtx.moveTo(0, hY); skyCtx.lineTo(W, hY);
+  const hg = skyCtx.createLinearGradient(0, hY, W, hY);
+  hg.addColorStop(0,"rgba(60,100,200,.08)"); hg.addColorStop(.5,"rgba(80,140,255,.32)"); hg.addColorStop(1,"rgba(60,100,200,.08)");
+  skyCtx.strokeStyle = hg; skyCtx.lineWidth = 1; skyCtx.stroke();
+
+  // Cardinal directions
+  skyCtx.textAlign = "center";
+  SKY_CARDINALS.forEach(({ l, az }) => {
+    const { x } = skyToXY(az, 0, W, H);
+    if (x < -10 || x > W + 10) return;
+    const main = SKY_MAIN_DIR.has(l);
+    skyCtx.beginPath(); skyCtx.moveTo(x, hY - 7); skyCtx.lineTo(x, hY + 7);
+    skyCtx.strokeStyle = main ? "rgba(100,150,255,.55)" : "rgba(80,110,180,.35)";
+    skyCtx.lineWidth = main ? 1.5 : 1; skyCtx.stroke();
+    skyCtx.fillStyle = main ? "#7090ff" : "rgba(80,110,200,.45)";
+    skyCtx.font = (main ? "bold 12" : "9") + "px monospace";
+    skyCtx.fillText(l, x, hY + 22);
+  });
+  skyCtx.textAlign = "left";
+
+  // Celestial bodies
+  const bodies = skyComputePositions(now);
+  const newRD = [];
+
+  bodies.forEach(body => {
+    const { alt, az } = equToHoriz(body.ra, body.dec, localST, SKY_LAT);
+    const { x, y } = skyToXY(az, alt, W, H);
+    if (x < -60 || x > W + 60) return;
+    const isAbove = alt > 0;
+    const alpha = isAbove ? 1 : (alt > -10 ? Math.max(0, (alt + 10) / 10) * .25 : 0);
+    if (alpha < .04) return;
+    newRD.push({ ...body, alt, az, x, y });
+
+    skyCtx.save();
+    skyCtx.globalAlpha = alpha;
+
+    if (body.type === "sun") {
+      const sz = 16;
+      const sg = skyCtx.createRadialGradient(x, y, 0, x, y, sz * 3.5);
+      sg.addColorStop(0,"rgba(255,230,80,.9)"); sg.addColorStop(.4,"rgba(255,180,30,.25)"); sg.addColorStop(1,"transparent");
+      skyCtx.fillStyle = sg; skyCtx.beginPath(); skyCtx.arc(x, y, sz * 3.5, 0, 2 * Math.PI); skyCtx.fill();
+      skyCtx.fillStyle = "#ffe050"; skyCtx.beginPath(); skyCtx.arc(x, y, sz, 0, 2 * Math.PI); skyCtx.fill();
+      if (skyShowLabels) { skyCtx.fillStyle = "rgba(255,225,90,.75)"; skyCtx.font = "11px 'Courier New',monospace"; skyCtx.fillText("☀ მზე", x + sz + 5, y - 4); }
+
+    } else if (body.type === "moon") {
+      const sz = 13;
+      const mg = skyCtx.createRadialGradient(x, y, 0, x, y, sz * 3.5);
+      mg.addColorStop(0,"rgba(200,215,255,.35)"); mg.addColorStop(1,"transparent");
+      skyCtx.fillStyle = mg; skyCtx.beginPath(); skyCtx.arc(x, y, sz * 3.5, 0, 2 * Math.PI); skyCtx.fill();
+      skyCtx.fillStyle = "#ccd8f0"; skyCtx.beginPath(); skyCtx.arc(x, y, sz, 0, 2 * Math.PI); skyCtx.fill();
+      const ph = body.phase || 0;
+      skyCtx.save();
+      skyCtx.beginPath(); skyCtx.arc(x, y, sz, 0, 2 * Math.PI); skyCtx.clip();
+      skyCtx.fillStyle = "rgba(4,7,18,.88)";
+      skyCtx.beginPath();
+      if (ph < .5) {
+        skyCtx.arc(x, y, sz, Math.PI / 2, -Math.PI / 2, false);
+        skyCtx.ellipse(x, y, Math.abs(Math.cos(ph * 2 * Math.PI)) * sz, sz, 0, -Math.PI / 2, Math.PI / 2, false);
+      } else {
+        skyCtx.arc(x, y, sz, -Math.PI / 2, Math.PI / 2, false);
+        skyCtx.ellipse(x, y, Math.abs(Math.cos(ph * 2 * Math.PI)) * sz, sz, 0, Math.PI / 2, -Math.PI / 2, false);
+      }
+      skyCtx.fill(); skyCtx.restore();
+      if (skyShowLabels) { skyCtx.fillStyle = "rgba(180,200,255,.75)"; skyCtx.font = "11px 'Courier New',monospace"; skyCtx.fillText("☽ მთვარე", x + sz + 5, y - 4); }
+
+    } else {
+      const sz = (body.sz || 6) * Math.max(.55, Math.min(1, alt / 25 + .45));
+      const isHov = skyHovered === body.name, isSel = skySelected && skySelected.name === body.name;
+      if (isSel || isHov) {
+        skyCtx.beginPath(); skyCtx.arc(x, y, sz + 9, 0, 2 * Math.PI);
+        skyCtx.strokeStyle = isSel ? body.col + "ee" : body.col + "55";
+        skyCtx.lineWidth = isSel ? 1.5 : 1; skyCtx.stroke();
+      }
+      const pg = skyCtx.createRadialGradient(x, y, 0, x, y, sz * 5);
+      pg.addColorStop(0, body.col + "bb"); pg.addColorStop(.35, body.col + "30"); pg.addColorStop(1, "transparent");
+      skyCtx.fillStyle = pg; skyCtx.beginPath(); skyCtx.arc(x, y, sz * 5, 0, 2 * Math.PI); skyCtx.fill();
+      const bg = skyCtx.createRadialGradient(x - sz * .3, y - sz * .3, 0, x, y, sz);
+      bg.addColorStop(0, "#fff"); bg.addColorStop(.25, body.col); bg.addColorStop(1, body.col + "88");
+      skyCtx.fillStyle = bg; skyCtx.beginPath(); skyCtx.arc(x, y, sz, 0, 2 * Math.PI); skyCtx.fill();
+      if (body.name === "სატურნი") {
+        skyCtx.save(); skyCtx.translate(x, y); skyCtx.scale(1, .28);
+        skyCtx.beginPath(); skyCtx.arc(0, 0, sz * 2.4, 0, 2 * Math.PI);
+        skyCtx.strokeStyle = body.col + "99"; skyCtx.lineWidth = sz * .85; skyCtx.stroke();
+        skyCtx.restore();
+      }
+      if (skyShowLabels) {
+        skyCtx.fillStyle = `rgba(${skyHexRgb(body.col)},${isAbove ? (isHov || isSel ? 1 : .72) : .25})`;
+        skyCtx.font = (isHov || isSel ? "bold " : "") + "11px 'Courier New',monospace";
+        skyCtx.fillText(`${body.sym} ${body.name}`, x + sz + 6, y - sz + 2);
+      }
+    }
+    skyCtx.restore();
+  });
+
+  skyRenderData = newRD;
+
+  // Mountain silhouette
+  skyCtx.fillStyle = "#07100a";
+  skyCtx.beginPath(); skyCtx.moveTo(0, H); skyCtx.lineTo(0, hY);
+  [[.04,-16],[.09,-9],[.14,-22],[.20,-14],[.26,-32],[.31,-19],[.36,-11],
+   [.41,-26],[.47,-20],[.51,-38],[.56,-28],[.61,-16],[.66,-31],[.71,-21],
+   [.77,-14],[.82,-27],[.87,-11],[.91,-18],[.95,-9],[.98,-6],[1,-4]
+  ].forEach(([px, py]) => skyCtx.lineTo(px * W, hY + py));
+  skyCtx.lineTo(W, H); skyCtx.closePath(); skyCtx.fill();
+}
+
+// ── Hit test ───────────────────────────────────────────────────
+function skyGetBodyAt(cx, cy) {
+  const rect = skyCanvas.getBoundingClientRect();
+  const mx = (cx - rect.left) * (skyCanvas.width / rect.width);
+  const my = (cy - rect.top)  * (skyCanvas.height / rect.height);
+  let best = null, bestD = Infinity;
+  skyRenderData.forEach(b => {
+    const d = Math.hypot(mx - b.x, my - b.y), r = (b.sz || 12) * 2 + 12;
+    if (d < r && d < bestD) { best = b; bestD = d; }
+  });
+  return best;
+}
+
+// ── UI updates ─────────────────────────────────────────────────
+function skyUpdateClock() {
+  const now = new Date();
+  const ts = now.toLocaleTimeString("ka-GE", { hour:"2-digit", minute:"2-digit", second:"2-digit" });
+  const ds = now.toLocaleDateString("ka-GE", { year:"numeric", month:"short", day:"numeric" });
+  const el = document.getElementById("sky-subtitle");
+  if (el) el.textContent = `${ds} · ${ts} · 41.69°N 44.80°E`;
+}
+
+function skyUpdateDirButtons() {
+  document.querySelectorAll(".sky-dir-btn").forEach(btn => {
+    const az = +btn.dataset.skaz;
+    const diff = Math.abs(fmod(skyAzCenter - az + 180, 360) - 180);
+    btn.classList.toggle("active", diff < 14);
+  });
+}
+
+function skyUpdatePlanetBar() {
+  const now = new Date(), jd = julianDay(now), localST = lst(jd, SKY_LON);
+  const positions = skyComputePositions(now)
+    .filter(b => b.type === "planet")
+    .map(b => ({ ...b, alt: equToHoriz(b.ra, b.dec, localST, SKY_LAT).alt }));
+  const bar = document.getElementById("sky-planets");
+  if (!bar) return;
+  bar.innerHTML = "";
+  positions.forEach(b => {
+    const above = b.alt > 0;
+    const altCol = b.alt > 20 ? "#60ee80" : b.alt > 0 ? "#e0c050" : "#e06050";
+    const btn = document.createElement("button");
+    btn.className = "sky-planet-btn";
+    btn.style.background = above ? `rgba(${skyHexRgb(b.col)},.1)` : "rgba(15,20,45,.5)";
+    btn.style.borderColor = above ? b.col + "40" : "rgba(35,45,80,.3)";
+    btn.innerHTML = `
+      <span class="sky-planet-dot" style="background:${above ? b.col : "#2a304a"};box-shadow:${above ? `0 0 5px ${b.col}` : "none"}"></span>
+      <span class="sky-planet-name" style="color:${above ? "#9ab8ff" : "#3a4870"}">${b.sym} ${b.name}</span>
+      <span class="sky-planet-alt" style="color:${altCol}">${b.alt.toFixed(0)}°</span>
+    `;
+    btn.onclick = () => skySelectBody(b);
+    btn.onmouseenter = () => btn.style.borderColor = b.col + "80";
+    btn.onmouseleave = () => btn.style.borderColor = above ? b.col + "40" : "rgba(35,45,80,.3)";
+    bar.appendChild(btn);
+  });
+}
+
+function skySelectBody(b) {
+  if (skySelected && skySelected.name === b.name) { skyCloseSel(); return; }
+  skySelected = b;
+  const panel = document.getElementById("sky-sel-panel");
+  const icon  = document.getElementById("sky-sel-icon");
+  icon.style.background  = `radial-gradient(circle at 32% 32%, #fff, ${b.col || "#8aabff"}, ${b.col || "#8aabff"}55)`;
+  icon.style.boxShadow   = `0 0 18px ${b.col || "#5580ff"}40`;
+  icon.style.border      = `1px solid ${b.col || "#5580ff"}44`;
+  icon.textContent = b.sym || (b.type === "moon" ? "☽" : "☀");
+  document.getElementById("sky-sel-name").textContent = b.name;
+  const altCol = b.alt > 20 ? "#80ff90" : b.alt > 0 ? "#ffd060" : "#ff7060";
+  document.getElementById("sky-sel-stats").innerHTML = `
+    <div><div class="sky-stat-label">სიმაღლე</div><div class="sky-stat-val" style="color:${altCol}">${(b.alt || 0).toFixed(2)}°</div></div>
+    <div><div class="sky-stat-label">აზიმუტი</div><div class="sky-stat-val" style="color:#a0b8ff">${(b.az || 0).toFixed(1)}°</div></div>
+    <div><div class="sky-stat-label">სიკაშკაშე</div><div class="sky-stat-val" style="color:#a0b8ff">${(b.mag || 0).toFixed(1)} mag</div></div>
+    <div><div class="sky-stat-label">სტატუსი</div><div class="sky-stat-val" style="color:${b.alt > 0 ? "#80ff90" : "#ff7060"}">${b.alt > 0 ? "ჰორიზონტზე მაღლა ✓" : "ჰორიზონტს ქვემოთ ✗"}</div></div>
+  `;
+  panel.classList.add("visible");
+  skyDraw();
+}
+
+function skyCloseSel() {
+  skySelected = null;
+  document.getElementById("sky-sel-panel").classList.remove("visible");
+  skyDraw();
+}
+
+// ── Toggle controls ────────────────────────────────────────────
+function skyToggle(key) {
+  if (key === "stars")  { skyShowStars  = !skyShowStars;  document.getElementById("sky-btn-stars").classList.toggle("on", skyShowStars); }
+  if (key === "const")  { skyShowConst  = !skyShowConst;  document.getElementById("sky-btn-const").classList.toggle("on", skyShowConst); }
+  if (key === "labels") { skyShowLabels = !skyShowLabels; document.getElementById("sky-btn-labels").classList.toggle("on", skyShowLabels); }
+  if (key === "help")   { document.getElementById("sky-help-panel").classList.toggle("visible"); document.getElementById("sky-btn-help").classList.toggle("on"); }
+  skyDraw();
+}
+
+function skySetDir(az) { skyAzCenter = az; skyUpdateDirButtons(); skyDraw(); }
+function skySetFov(v)  { skyFovDeg = v; document.getElementById("sky-fov-val").textContent = v + "°"; skyDraw(); }
+
+// Make toggle functions global so onclick= attributes work
+window.skyToggle  = skyToggle;
+window.skySetDir  = skySetDir;
+window.skySetFov  = skySetFov;
+window.skyCloseSel = skyCloseSel;
+
+// ── Mouse events ───────────────────────────────────────────────
+skyCanvas.addEventListener("mousedown", e => {
+  skyIsDragging = true; skyDragStartX = e.clientX; skyAzAtDrag = skyAzCenter;
+  skyCanvas.classList.add("dragging");
+});
+skyCanvas.addEventListener("mousemove", e => {
+  if (skyIsDragging) {
+    const rect = skyCanvas.getBoundingClientRect();
+    skyAzCenter = fmod(skyAzAtDrag - (e.clientX - skyDragStartX) * (skyFovDeg / rect.width), 360);
+    skyUpdateDirButtons(); skyDraw(); return;
+  }
+  const b = skyGetBodyAt(e.clientX, e.clientY);
+  const newHov = b ? b.name : null;
+  if (newHov !== skyHovered) { skyHovered = newHov; skyDraw(); }
+  skyCanvas.style.cursor = b ? "pointer" : "grab";
+  const tt = document.getElementById("sky-tooltip");
+  if (b) {
+    document.getElementById("sky-tip-name").textContent = (b.sym || "·") + " " + b.name;
+    document.getElementById("sky-tip-info").innerHTML = `სიმაღლე: <b>${(b.alt || 0).toFixed(1)}°</b> · აზიმუტი: <b>${(b.az || 0).toFixed(1)}°</b> · ${(b.mag || 0).toFixed(1)} mag`;
+    tt.classList.add("visible");
+  } else tt.classList.remove("visible");
+});
+skyCanvas.addEventListener("mouseup", e => {
+  const moved = Math.abs(e.clientX - skyDragStartX) > 4;
+  skyIsDragging = false; skyCanvas.classList.remove("dragging");
+  if (!moved) { const b = skyGetBodyAt(e.clientX, e.clientY); if (b) skySelectBody(b); else skyCloseSel(); }
+});
+skyCanvas.addEventListener("mouseleave", () => {
+  skyIsDragging = false; skyCanvas.classList.remove("dragging");
+  skyHovered = null; document.getElementById("sky-tooltip").classList.remove("visible"); skyDraw();
+});
+skyCanvas.addEventListener("wheel", e => {
+  e.preventDefault();
+  skyFovDeg = Math.max(60, Math.min(340, skyFovDeg + e.deltaY * .25));
+  document.getElementById("sky-fov-slider").value = skyFovDeg;
+  document.getElementById("sky-fov-val").textContent = skyFovDeg + "°";
+  skyDraw();
+}, { passive: false });
+
+// ── Touch events ───────────────────────────────────────────────
+skyCanvas.addEventListener("touchstart", e => {
+  if (e.touches.length === 1) {
+    skyIsDragging = true; skyDragStartX = e.touches[0].clientX; skyAzAtDrag = skyAzCenter;
+    skyTouchOriginX = e.touches[0].clientX; skyTouchOriginY = e.touches[0].clientY;
+  }
+}, { passive: true });
+skyCanvas.addEventListener("touchmove", e => {
+  if (e.touches.length === 1 && skyIsDragging) {
+    e.preventDefault();
+    const dx = e.touches[0].clientX - skyDragStartX;
+    const rect = skyCanvas.getBoundingClientRect();
+    skyAzCenter = fmod(skyAzAtDrag - dx * (skyFovDeg / rect.width), 360);
+    skyUpdateDirButtons(); skyDraw();
+  }
+}, { passive: false });
+skyCanvas.addEventListener("touchend", e => {
+  skyIsDragging = false;
+  const t = e.changedTouches[0];
+  const moved = Math.hypot(t.clientX - skyTouchOriginX, t.clientY - skyTouchOriginY);
+  if (moved < 8) { const b = skyGetBodyAt(t.clientX, t.clientY); if (b) skySelectBody(b); else skyCloseSel(); }
+}, { passive: true });
+
+// ── Resize & init ──────────────────────────────────────────────
+function skyResizeCanvas() {
+  const W = skyCanvas.offsetWidth;
+  skyCanvas.width  = W * (window.devicePixelRatio || 1);
+  skyCanvas.height = Math.round(W * 420 / 900) * (window.devicePixelRatio || 1);
+  skyCanvas.style.height = Math.round(W * 420 / 900) + "px";
+  skyDraw();
+}
+
+window.addEventListener("resize", skyResizeCanvas);
+skyResizeCanvas();
+skyUpdateClock();
+skyUpdatePlanetBar();
+setInterval(() => { skyUpdateClock(); skyUpdatePlanetBar(); skyDraw(); }, 10000);
+setInterval(skyUpdateClock, 1000);
+
+})(); // end IIFE — no global variable leakage
+</script>

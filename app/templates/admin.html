@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}ადმინისტრაცია — ASTROMAN{% endblock %}
+
+{% block content %}
+{% if not authenticated %}
+<!-- Login Form -->
+<div class="max-w-md mx-auto mt-12">
+    <div class="glass-strong p-6 sm:p-8 animate-in">
+        <div class="text-center mb-8">
+            <div class="text-3xl mb-3">🔐</div>
+            <h1 class="text-xl font-light text-gray-100">ადმინ პანელი</h1>
+        </div>
+        {% if error %}
+        <div class="glass-card p-3 mb-6 text-sm text-red-400" style="border-color: rgba(239,68,68,0.2)">
+            {{ error }}
+        </div>
+        {% endif %}
+        <form method="POST" action="/admin/login" class="space-y-4">
+            <div>
+                <label class="block text-xs text-gray-400 uppercase tracking-wider mb-2">მომხმარებელი</label>
+                <input type="text" name="username" required
+                       class="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 sm:py-3.5 text-base text-gray-200 placeholder-gray-600 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none transition-all">
+            </div>
+            <div>
+                <label class="block text-xs text-gray-400 uppercase tracking-wider mb-2">პაროლი</label>
+                <input type="password" name="password" required
+                       class="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 sm:py-3.5 text-base text-gray-200 placeholder-gray-600 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none transition-all">
+            </div>
+            <button type="submit"
+                    class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3.5 sm:py-4 rounded-2xl text-sm sm:text-base font-medium transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/20 active:scale-[0.98]">
+                შესვლა
+            </button>
+        </form>
+    </div>
+</div>
+
+{% else %}
+<!-- Admin Dashboard -->
+<div class="space-y-6 animate-in">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+            <h1 class="text-2xl font-light text-gray-100">ადმინისტრაცია</h1>
+            <p class="text-sm text-gray-500 mt-1">ASTROMAN Sky Intelligence System</p>
+        </div>
+        <a href="/admin/logout" class="text-sm text-gray-500 hover:text-gray-400 transition-colors self-start sm:self-auto">გასვლა →</a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 stagger">
+        <div class="glass-card p-6">
+            <div class="text-xs text-indigo-400 uppercase tracking-wider mb-1">გამომწერები</div>
+            <div class="text-3xl font-mono text-white">{{ subscriber_count }}</div>
+        </div>
+        <div class="glass-card p-6">
+            <div class="text-xs text-indigo-400 uppercase tracking-wider mb-1">დაკვირვებები</div>
+            <div class="text-3xl font-mono text-white">{{ recent_observations|length }}</div>
+        </div>
+        <div class="glass-card p-6">
+            <div class="text-xs text-indigo-400 uppercase tracking-wider mb-1">გაგზავნილი ემაილები</div>
+            <div class="text-3xl font-mono text-white">{{ recent_emails|length }}</div>
+        </div>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-6">
+
+        <!-- Quick Actions -->
+        <div class="glass p-5 sm:p-6 space-y-6">
+            <h2 class="text-lg font-light text-gray-100">⚡ სწრაფი მოქმედებები</h2>
+
+            <div>
+                <h3 class="text-sm text-gray-400 mb-3">ტესტ ემაილის გაგზავნა</h3>
+                <form id="testEmailForm" class="flex flex-col sm:flex-row gap-2">
+                    <input type="email" name="email" placeholder="test@example.com" required
+                           class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-base text-gray-200 placeholder-gray-600 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none min-h-[44px]">
+                    <button type="submit"
+                            class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3 rounded-xl text-sm font-medium transition-all whitespace-nowrap min-h-[44px]">
+                        გაგზავნა
+                    </button>
+                </form>
+                <div id="testEmailResult" class="mt-2 text-xs hidden"></div>
+            </div>
+
+            <div>
+                <h3 class="text-sm text-gray-400 mb-3">ყოველდღიური პროცესის გაშვება</h3>
+                <button id="triggerDailyBtn"
+                        class="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-600 text-white px-5 py-3 rounded-xl text-sm font-medium transition-all min-h-[44px]">
+                    🚀 ახლავე გაშვება
+                </button>
+                <div id="triggerResult" class="mt-2 text-xs hidden"></div>
+            </div>
+
+            <div>
+                <h3 class="text-sm text-gray-400 mb-3">დაკვირვების ტექსტის ჩანაცვლება</h3>
+                <form method="POST" action="/admin/override-observation" class="space-y-3">
+                    <input type="date" name="date" required
+                           class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-base text-gray-200 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none min-h-[44px]">
+                    <textarea name="text" rows="4" placeholder="ჩანაცვლების ტექსტი ქართულად..." required
+                              class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-base text-gray-200 placeholder-gray-600 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none resize-none" style="line-height:1.6"></textarea>
+                    <button type="submit"
+                            class="w-full sm:w-auto bg-amber-700 hover:bg-amber-600 text-white px-5 py-3 rounded-xl text-sm font-medium transition-all min-h-[44px]">
+                        ჩანაცვლება
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Subscribers List -->
+        <div class="glass rounded-2xl overflow-hidden">
+            <div class="px-5 sm:px-6 py-4 border-b border-white/5">
+                <h2 class="text-lg font-light text-gray-100">📧 გამომწერები</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <div class="overflow-y-auto max-h-96">
+                    <table class="w-full min-w-[280px]">
+                        <thead>
+                            <tr class="bg-white/[0.03]">
+                                <th class="px-4 py-2 text-left text-xs text-indigo-400 uppercase">ემაილი</th>
+                                <th class="px-4 py-2 text-left text-xs text-indigo-400 uppercase">დონე</th>
+                                <th class="px-4 py-2 text-left text-xs text-indigo-400 uppercase">სტატუსი</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/[0.03]">
+                            {% for sub in subscribers %}
+                            <tr class="hover:bg-white/[0.02] transition-colors">
+                                <td class="px-4 py-3 text-sm text-gray-300">{{ sub.email }}</td>
+                                <td class="px-4 py-3 text-xs text-gray-500">{{ sub.level }}</td>
+                                <td class="px-4 py-3">
+                                    {% if sub.is_active %}
+                                    <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
+                                    {% else %}
+                                    <span class="inline-block w-2 h-2 rounded-full bg-gray-700"></span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Telescope Promotion -->
+    <div class="glass p-5 sm:p-6">
+        <h2 class="text-lg font-light text-gray-100 mb-4">🔭 ტელესკოპის პრომოციის დამატება</h2>
+        <form method="POST" action="/admin/add-promotion" class="flex flex-col sm:grid sm:grid-cols-4 gap-3">
+            <input type="text" name="name" placeholder="სახელი" required
+                   class="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-base text-gray-200 placeholder-gray-600 focus:ring-2 focus:ring-indigo-500/50 outline-none min-h-[44px]">
+            <input type="text" name="slug" placeholder="product-slug" required
+                   class="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-base text-gray-200 placeholder-gray-600 font-mono focus:ring-2 focus:ring-indigo-500/50 outline-none min-h-[44px]">
+            <select name="category"
+                    class="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-base text-gray-200 focus:ring-2 focus:ring-indigo-500/50 outline-none min-h-[44px]" style="background-color: rgba(255,255,255,0.05)">
+                <option value="beginner" style="background:#0d1025">დამწყები</option>
+                <option value="intermediate" style="background:#0d1025">საშუალო</option>
+                <option value="advanced" style="background:#0d1025">მოწინავე</option>
+                <option value="accessory" style="background:#0d1025">აქსესუარი</option>
+            </select>
+            <button type="submit"
+                    class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3 rounded-xl text-sm font-medium transition-all min-h-[44px]">
+                დამატება
+            </button>
+        </form>
+    </div>
+
+    <!-- Recent Observations -->
+    <div class="glass rounded-2xl overflow-hidden">
+        <div class="px-5 sm:px-6 py-4 border-b border-white/5">
+            <h2 class="text-lg font-light text-gray-100">📊 ბოლო დაკვირვებები</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[480px]">
+                <thead>
+                    <tr class="bg-white/[0.03]">
+                        <th class="px-4 sm:px-6 py-3 text-left text-xs text-indigo-400 uppercase">თარიღი</th>
+                        <th class="px-4 sm:px-6 py-3 text-left text-xs text-indigo-400 uppercase">მთვარე</th>
+                        <th class="px-4 sm:px-6 py-3 text-left text-xs text-indigo-400 uppercase">ღრუბლები</th>
+                        <th class="px-4 sm:px-6 py-3 text-left text-xs text-indigo-400 uppercase">ტელესკოპი</th>
+                        <th class="px-4 sm:px-6 py-3 text-left text-xs text-indigo-400 uppercase">Override</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/[0.03]">
+                    {% for obs in recent_observations %}
+                    <tr class="hover:bg-white/[0.02] transition-colors">
+                        <td class="px-4 sm:px-6 py-3 font-mono text-sm text-gray-300">{{ obs.date }}</td>
+                        <td class="px-4 sm:px-6 py-3 text-sm text-gray-400" style="line-height:1.6">{{ obs.moon_phase }}</td>
+                        <td class="px-4 sm:px-6 py-3 font-mono text-sm text-gray-400">{{ obs.cloud_coverage }}%</td>
+                        <td class="px-4 sm:px-6 py-3 text-sm text-gray-400" style="line-height:1.6">{{ obs.recommended_telescope }}</td>
+                        <td class="px-4 sm:px-6 py-3">
+                            {% if obs.is_override %}
+                            <span class="text-amber-400 text-xs">✏️ Yes</span>
+                            {% else %}
+                            <span class="text-gray-700 text-xs">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('testEmailForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = e.target.email.value;
+    const result = document.getElementById('testEmailResult');
+    result.classList.remove('hidden');
+    result.textContent = 'იგზავნება...';
+    result.className = 'mt-2 text-xs text-gray-400';
+    try {
+        const formData = new FormData();
+        formData.append('email', email);
+        const resp = await fetch('/admin/send-test-email', { method: 'POST', body: formData });
+        const data = await resp.json();
+        if (data.success) {
+            result.textContent = '✅ ტესტ ემაილი გაიგზავნა!';
+            result.className = 'mt-2 text-xs text-green-400';
+        } else {
+            result.textContent = '❌ გაგზავნა ვერ მოხერხდა';
+            result.className = 'mt-2 text-xs text-red-400';
+        }
+    } catch {
+        result.textContent = '❌ შეცდომა';
+        result.className = 'mt-2 text-xs text-red-400';
+    }
+});
+
+document.getElementById('triggerDailyBtn')?.addEventListener('click', async () => {
+    const result = document.getElementById('triggerResult');
+    const btn = document.getElementById('triggerDailyBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ მუშავდება...';
+    result.classList.remove('hidden');
+    try {
+        const resp = await fetch('/admin/trigger-daily', { method: 'POST' });
+        const data = await resp.json();
+        if (data.success) {
+            result.textContent = `✅ გაიგზავნა ${data.result.sent}/${data.result.subscribers} გამომწერთან`;
+            result.className = 'mt-2 text-xs text-green-400';
+        } else {
+            result.textContent = '❌ შეცდომა';
+            result.className = 'mt-2 text-xs text-red-400';
+        }
+    } catch {
+        result.textContent = '❌ შეცდომა';
+        result.className = 'mt-2 text-xs text-red-400';
+    }
+    btn.disabled = false;
+    btn.textContent = '🚀 ახლავე გაშვება';
+});
+</script>
+{% endblock %}

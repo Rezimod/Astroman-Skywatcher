@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ka" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ASTROMAN Sky Intelligence{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Noto Sans Georgian', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        cosmos: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                            950: '#1e1b4b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Animations */
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in { animation: fadeIn 0.5s ease-out forwards; }
+
+        .stagger > * {
+            opacity: 0;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        .stagger > *:nth-child(1) { animation-delay: 0.05s; }
+        .stagger > *:nth-child(2) { animation-delay: 0.10s; }
+        .stagger > *:nth-child(3) { animation-delay: 0.15s; }
+        .stagger > *:nth-child(4) { animation-delay: 0.20s; }
+        .stagger > *:nth-child(5) { animation-delay: 0.25s; }
+        .stagger > *:nth-child(6) { animation-delay: 0.30s; }
+
+        /* Glass — duplicated here for guaranteed availability */
+        .glass {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 20px;
+        }
+        .glass-strong {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Legacy — kept for fallback */
+        .glow-border {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.12), inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body class="min-h-screen text-gray-200 antialiased overflow-x-hidden">
+
+    <!-- Navigation -->
+    <nav class="border-b border-white/5 bg-black/40 backdrop-blur-2xl sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between h-14 sm:h-16">
+                <a href="/" class="flex items-center gap-2 sm:gap-3">
+                    <span class="text-xl sm:text-2xl">🔭</span>
+                    <div>
+                        <span class="text-xs sm:text-sm font-semibold tracking-[0.2em] sm:tracking-[0.3em] text-indigo-400 uppercase">ASTROMAN</span>
+                        <span class="hidden sm:inline text-xs text-gray-600 ml-2">Sky Intelligence</span>
+                    </div>
+                </a>
+
+                <!-- Desktop nav -->
+                <div class="hidden sm:flex items-center gap-6">
+                    <a href="/" class="text-sm text-gray-400 hover:text-indigo-300 transition-colors">დაკვირვება</a>
+                    <a href="/subscribe" class="text-sm text-gray-400 hover:text-indigo-300 transition-colors">გამოწერა</a>
+                    <a href="/admin" class="text-sm text-gray-600 hover:text-gray-400 transition-colors">ადმინი</a>
+                </div>
+
+                <!-- Mobile hamburger -->
+                <button id="mobile-menu-btn" class="sm:hidden text-gray-400 p-2 -mr-2" aria-label="მენიუ">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile overlay menu -->
+    <div id="mobile-menu" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-2xl"></div>
+        <div class="relative flex flex-col items-center justify-center h-full gap-8">
+            <a href="/" class="text-2xl text-white hover:text-indigo-300 transition-colors">დაკვირვება</a>
+            <a href="/subscribe" class="text-2xl text-white hover:text-indigo-300 transition-colors">გამოწერა</a>
+            <a href="/admin" class="text-xl text-gray-500 hover:text-gray-300 transition-colors">ადმინი</a>
+            <button id="mobile-menu-close" class="mt-12 text-gray-600 hover:text-gray-400 text-sm uppercase tracking-widest transition-colors">✕ დახურვა</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 mt-16 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 text-center">
+            <div class="text-xs sm:text-sm text-gray-700">© ASTROMAN Sky Intelligence · თბილისი</div>
+            <a href="https://astroman.ge" class="text-xs text-indigo-500/60 hover:text-indigo-400 transition-colors mt-1 inline-block">
+                astroman.ge
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu
+        document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        });
+        document.getElementById('mobile-menu-close')?.addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.add('hidden');
+            document.body.style.overflow = '';
+        });
+        document.querySelectorAll('#mobile-menu a').forEach(a => {
+            a.addEventListener('click', () => {
+                document.getElementById('mobile-menu').classList.add('hidden');
+                document.body.style.overflow = '';
+            });
+        });
+
+        // Auto-refresh every 5 minutes
+        setTimeout(() => location.reload(), 300000);
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
