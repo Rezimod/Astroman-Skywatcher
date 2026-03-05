@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}{{ planet.name_ka }} — ASTROMAN Skywatcher{% endblock %}
+
+{% block head %}
+<style>
+.telescope-img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 16px;
+    display: block;
+    background: #050510;
+}
+.aperture-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+}
+.planet-hero-glow {
+    position: absolute;
+    inset: -40%;
+    border-radius: 50%;
+    opacity: 0.12;
+    filter: blur(60px);
+    pointer-events: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6 animate-in">
+
+    <!-- Back nav -->
+    <div class="flex items-center justify-between">
+        <a href="/planets" class="inline-flex items-center gap-2 text-xs text-indigo-400/60 hover:text-indigo-300 transition-colors uppercase tracking-widest">
+            ← პლანეტები
+        </a>
+        <!-- Prev / Next -->
+        <div class="flex items-center gap-3">
+            {% if prev_planet %}
+            <a href="/planets/{{ prev_planet.slug }}" class="text-xl hover:scale-110 transition-transform" title="{{ prev_planet.name_ka }}"
+               style="filter: drop-shadow(0 0 6px {{ prev_planet.color }}66)">{{ prev_planet.emoji }}</a>
+            {% endif %}
+            {% if next_planet %}
+            <a href="/planets/{{ next_planet.slug }}" class="text-xl hover:scale-110 transition-transform" title="{{ next_planet.name_ka }}"
+               style="filter: drop-shadow(0 0 6px {{ next_planet.color }}66)">{{ next_planet.emoji }}</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Hero Card -->
+    <div class="glass-strong p-6 sm:p-8 relative overflow-hidden">
+        <!-- Background glow -->
+        <div class="planet-hero-glow" style="background: {{ planet.color }};"></div>
+
+        <div class="relative flex flex-col sm:flex-row items-center sm:items-start gap-6">
+            <!-- Big emoji -->
+            <div class="relative flex-shrink-0">
+                <div class="text-7xl sm:text-8xl"
+                     style="filter: drop-shadow(0 0 20px {{ planet.color }}88)">{{ planet.emoji }}</div>
+            </div>
+
+            <!-- Info -->
+            <div class="text-center sm:text-left flex-1 min-w-0">
+                <div class="text-[10px] uppercase tracking-widest mb-2"
+                     style="color: {{ planet.color }}99">{{ planet.type }}</div>
+                <h1 class="text-3xl sm:text-4xl font-light text-white mb-1" style="line-height:1.2">
+                    {{ planet.name_ka }}
+                </h1>
+                <div class="text-sm text-gray-500 mb-3">{{ planet.name_en }} · {{ planet.distance_ka }}</div>
+                <p class="text-sm text-gray-400 mb-4" style="line-height:1.8">{{ planet.desc_ka }}</p>
+                <div class="inline-flex items-center gap-2 text-xs px-3 py-2 rounded-xl"
+                     style="background: {{ planet.color }}10; border: 1px solid {{ planet.color }}25; color: {{ planet.color }}cc">
+                    <span>⏰</span>
+                    <span>{{ planet.best_time_ka }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Telescope Views -->
+    <div>
+        <h2 class="text-base sm:text-lg text-gray-100 font-medium section-header mb-5">
+            🔭 ტელესკოპის ხედები — 3 ზომა
+        </h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+            {% for view in planet.views %}
+            <div class="glass-card overflow-hidden group hover:scale-[1.02] transition-all duration-300"
+                 style="border-top: 2px solid {{ planet.color }}44;">
+                <!-- Image -->
+                <div class="relative overflow-hidden" style="aspect-ratio:1/1; background:#03050d;">
+                    <img
+                        src="{{ view.img }}"
+                        alt="{{ planet.name_ka }} — {{ view.aperture }}"
+                        class="telescope-img group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                    />
+                    <!-- Fallback if image fails -->
+                    <div class="absolute inset-0 hidden items-center justify-center text-6xl"
+                         style="display:none; background: radial-gradient(circle, {{ planet.color }}22, #03050d);">
+                        {{ planet.emoji }}
+                    </div>
+                    <!-- Aperture badge overlay -->
+                    <div class="absolute top-3 left-3">
+                        <span class="aperture-badge px-2.5 py-1.5 rounded-full"
+                              style="background: rgba(0,0,0,0.75); border: 1px solid {{ planet.color }}44; color: {{ planet.color }}; backdrop-filter: blur(10px);">
+                            {{ view.aperture }}
+                        </span>
+                    </div>
+                    <!-- Mag badge -->
+                    <div class="absolute top-3 right-3">
+                        <span class="aperture-badge px-2 py-1 rounded-full text-gray-400"
+                              style="background: rgba(0,0,0,0.75); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(10px);">
+                            {{ view.mag }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Card body -->
+                <div class="p-4">
+                    <div class="text-sm font-medium text-white mb-2" style="line-height:1.4">
+                        {{ view.label_ka }}
+                    </div>
+                    <p class="text-xs text-gray-500" style="line-height:1.7">{{ view.desc_ka }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Buy telescope CTA -->
+    <div class="glass p-5 sm:p-6 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+        <div class="text-4xl animate-float flex-shrink-0">🔭</div>
+        <div class="flex-1 min-w-0">
+            <div class="text-sm text-white font-medium mb-1">{{ planet.name_ka }}ს სანახავად ASTROMAN ტელესკოპი</div>
+            <div class="text-xs text-gray-500">70mm ან 90mm ტელესკოპი — საუკეთესო ბალანსი ხარისხსა და ფასსა შორის</div>
+        </div>
+        <a href="https://astroman.ge/teleskopi/" target="_blank"
+           class="flex-shrink-0 inline-flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-medium transition-all duration-300 hover:-translate-y-0.5"
+           style="background: {{ planet.color }}20; color: {{ planet.color }}; border: 1px solid {{ planet.color }}40;">
+            ტელესკოპი →
+        </a>
+    </div>
+
+    <!-- All planets nav -->
+    <div class="glass p-4 sm:p-5">
+        <div class="text-xs text-gray-700 uppercase tracking-widest mb-3 text-center">სხვა პლანეტები</div>
+        <div class="flex flex-wrap justify-center gap-3">
+            {% set all_planets = [
+                ('moon','🌕','მთვარე','#f0e68c'),
+                ('mercury','⚫','მერკური','#9ca3af'),
+                ('venus','🟡','ვენერა','#fbbf24'),
+                ('mars','🔴','მარსი','#f87171'),
+                ('jupiter','🟠','იუპიტერი','#fb923c'),
+                ('saturn','🪐','სატურნი','#eab308'),
+                ('uranus','🔵','ურანი','#22d3ee'),
+                ('neptune','💙','ნეპტუნი','#60a5fa'),
+            ] %}
+            {% for slug, emoji, name, color in all_planets %}
+            <a href="/planets/{{ slug }}"
+               class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition-all duration-200 hover:scale-105 {% if slug == planet.slug %}ring-1{% endif %}"
+               style="background: {{ color }}10; border: 1px solid {{ color }}{{ '44' if slug == planet.slug else '20' }}; color: {{ color }}{{ 'ff' if slug == planet.slug else '99' }};">
+                <span style="filter: drop-shadow(0 0 4px {{ color }}66)">{{ emoji }}</span>
+                <span>{{ name }}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
