@@ -492,12 +492,12 @@
     <div class="mt-6">
         <div class="flex items-center justify-between gap-4 mb-4 px-1">
             <h2 class="text-base sm:text-lg text-gray-100 font-medium section-header whitespace-nowrap">🪐 პლანეტების გზამკვლევი</h2>
-            <a href="/planets" class="text-xs text-indigo-400 hover:text-indigo-300 transition-colors whitespace-nowrap">ყველა →</a>
+            <span class="text-xs text-gray-600">დააჭირე — ნახე ტელესკოპით</span>
         </div>
-        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-9 gap-2 sm:gap-3">
-            {% set planet_list = [
+        <div class="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3">
+            {% set planet_cards = [
                 ('moon',    '🌕', 'მთვარე',   '#f0e68c'),
-                ('mercury', '⚪', 'მერკური',  '#9ca3af'),
+                ('mercury', '⚫', 'მერკური',  '#9ca3af'),
                 ('venus',   '🟡', 'ვენერა',   '#fbbf24'),
                 ('mars',    '🔴', 'მარსი',    '#f87171'),
                 ('jupiter', '🟠', 'იუპიტერი', '#fb923c'),
@@ -505,39 +505,45 @@
                 ('uranus',  '🔵', 'ურანი',    '#22d3ee'),
                 ('neptune', '💙', 'ნეპტუნი',  '#60a5fa'),
             ] %}
-            {% for slug, emoji, name_ka, color in planet_list %}
-            <a href="/planets/{{ slug }}"
-               class="glass-card p-3 sm:p-4 text-center group hover:scale-105 transition-all duration-200"
-               style="border-top-color: {{ color }}22;">
-                <div class="text-2xl sm:text-3xl mb-1.5" style="filter: drop-shadow(0 0 6px {{ color }}66)">{{ emoji }}</div>
-                <div class="text-[10px] sm:text-xs text-gray-400 group-hover:text-white transition-colors" style="line-height:1.4">{{ name_ka }}</div>
-            </a>
+            {% for slug, emoji, name_ka, color in planet_cards %}
+            <button onclick="openPlanetModal('{{ slug }}')"
+               class="glass-card p-3 text-center group hover:scale-105 transition-all duration-200 cursor-pointer"
+               style="border-top-color: {{ color }}33;">
+                <div class="text-2xl sm:text-3xl mb-1" style="filter: drop-shadow(0 0 6px {{ color }}66)">{{ emoji }}</div>
+                <div class="text-[10px] text-gray-500 group-hover:text-white transition-colors truncate">{{ name_ka }}</div>
+            </button>
             {% endfor %}
         </div>
     </div>
 
-    {# ── Sky Map — always visible in all modes ── #}
-    <div class="mt-8 mb-2">
-        <div class="flex items-center justify-between gap-4 mb-3 px-1">
-            <h2 class="text-base sm:text-lg text-gray-100 font-medium section-header whitespace-nowrap">🗺 ცის რუკა</h2>
-            <span class="text-xs text-gray-600 text-right">გადაათრიე · კლიკი = დეტალები · სქროლი = გადიდება</span>
+    <!-- Planet Modal Overlay -->
+    <div id="planet-modal" class="fixed inset-0 z-[70] hidden" role="dialog" aria-modal="true">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/75 backdrop-blur-sm" onclick="closePlanetModal()"></div>
+        <!-- Sheet — slides up from bottom on mobile, centered on desktop -->
+        <div id="planet-modal-sheet"
+             class="absolute bottom-0 left-0 right-0 sm:inset-0 sm:flex sm:items-center sm:justify-center sm:p-6 pointer-events-none">
+            <div class="pointer-events-auto w-full sm:max-w-2xl max-h-[92vh] sm:max-h-[88vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl"
+                 style="background: rgba(8,8,22,0.97); border: 1px solid rgba(255,255,255,0.1); border-top-color: rgba(255,255,255,0.15);">
+
+                <!-- Drag handle (mobile) -->
+                <div class="flex justify-center pt-3 pb-1 sm:hidden">
+                    <div class="w-10 h-1 rounded-full bg-white/20"></div>
+                </div>
+
+                <!-- Modal content (filled by JS) -->
+                <div id="planet-modal-content" class="p-5 sm:p-6"></div>
+            </div>
         </div>
     </div>
+
+    {# ── Sky Map — always visible in all modes ── #}
     {% include "skymap_widget.html" %}
 
 </div>
 {% endblock %}
 
 {% block scripts %}
-{% if best_planet and is_night %}
-<!-- Sticky planet pill (mobile) -->
-<div class="sticky-pill sm:hidden" id="planet-pill">
-    <span class="text-yellow-400">⭐</span>
-    <span>დღეს ეძებე: <strong class="text-white">{{ best_planet.name_ka }}</strong></span>
-    <span class="text-gray-600 text-[10px]">· {{ best_planet.altitude|round(0)|int }}° · {{ best_planet.azimuth | azimuth_direction }}</span>
-</div>
-{% endif %}
-
 <script>
     // Live Tbilisi clock
     function updateClock() {
@@ -588,16 +594,180 @@
         chevron && chevron.classList.toggle('open', !isOpen);
     }
 
-    // Sticky pill — hide when hero badge is visible
-    const pill = document.getElementById('planet-pill');
-    if (pill) {
-        const heroBadge = document.getElementById('hero-badge');
-        if (heroBadge) {
-            const observer = new IntersectionObserver(entries => {
-                pill.classList.toggle('hide', entries[0].isIntersecting);
-            }, { threshold: 0.5 });
-            observer.observe(heroBadge);
-        }
+    // ─────────────────────────────────────────────
+    // Planet Modal Data + Logic
+    // ─────────────────────────────────────────────
+    const PLANETS = {
+        moon: {
+            emoji: '🌕', name: 'მთვარე', nameEn: 'Moon', color: '#f0e68c', type: 'სატელიტი',
+            dist: '~384,400 კმ დედამიწიდან',
+            desc: 'ყველაზე ადვილი სამიზნე — კრატერები, მთები და ზღვები (მარია) უმარტივეს ოპტიკაშიც კარგად ჩანს. ნახევარი ფაზა ყველაზე შთამბეჭდავია.',
+            views: [
+                { ap: '50mm', mag: '25x–50x', label: 'სრული დისკი', desc: 'ძირითადი კრატერები და მუქი მარია ჩანს. კარგი პირველი დაკვირვება.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/FullMoon2010.jpg/400px-FullMoon2010.jpg' },
+                { ap: '70mm', mag: '50x–100x', label: 'კრატერების დეტალი', desc: 'ტიხო, კოპერნიკი, მთის ჯაჭვები და რეი-სისტემები ნათლად ჩანს.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Full_Moon_Luc_Viatour.jpg/400px-Full_Moon_Luc_Viatour.jpg' },
+                { ap: '90mm', mag: '100x–150x', label: 'მაღალი დეტალი', desc: 'შიდა სტრუქტურა, ცენტრალური მთები, ვულკანური ნაოჭები. ტერმინატორზე ჩრდილები 3D ეფექტს ქმნის.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Clair_de_Lune_%E2%80%94_Moon_in_high_resolution_%28cropped%29.jpg/400px-Clair_de_Lune_%E2%80%94_Moon_in_high_resolution_%28cropped%29.jpg' },
+            ]
+        },
+        mercury: {
+            emoji: '⚫', name: 'მერკური', nameEn: 'Mercury', color: '#9ca3af', type: 'კლდოვანი პლანეტა',
+            dist: '~77 მლნ კმ მზიდან',
+            desc: 'მზის ყველაზე ახლო პლანეტა. ჩანს მხოლოდ მზის ჩასვლის/ამოსვლის მახლობლად ჰორიზონტზე. ვენერის მსგავსი ფაზები ჩანს ტელესკოპით.',
+            views: [
+                { ap: '50mm', mag: '25x–50x', label: 'ნათელი წერტილი', desc: 'ფაზები ჯერ არ ჩანს, მაგრამ ვარსკვლავებისგან გამოარჩევს. ყოველთვის ჰორიზონტთან ახლოს.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Mercury_in_color_-_Prockter07_centered.jpg/400px-Mercury_in_color_-_Prockter07_centered.jpg' },
+                { ap: '70mm', mag: '70x–100x', label: 'პატარა დისკი', desc: 'მცირე დისკი ჩანს. კარგ პირობებში ფაზა შესამჩნევია — ნამგალი ან ნახევარი.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Mercury_in_true_color.jpg/400px-Mercury_in_true_color.jpg' },
+                { ap: '90mm', mag: '100x–150x', label: 'ფაზა მკაფიოდ', desc: 'ფაზა მკაფიოდ ჩანს. ზედაპირის დეტალები ატმოსფერული დამახინჯების გამო ძნელია.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Mercury_Mariner_10.jpg/400px-Mercury_Mariner_10.jpg' },
+            ]
+        },
+        venus: {
+            emoji: '🟡', name: 'ვენერა', nameEn: 'Venus', color: '#fbbf24', type: 'კლდოვანი პლანეტა',
+            dist: '~38–261 მლნ კმ დედამიწიდან',
+            desc: 'ყველაზე კაშკაშა პლანეტა ცაზე (mag −3.5 to −4.9). „საღამოს ვარსკვლავი" ან „დილის ვარსკვლავი". ფაზები გალილეომ 1610 წელს დაადასტურა.',
+            views: [
+                { ap: '50mm', mag: '30x–50x', label: 'კაშკაშა, ფაზა ჩანს', desc: 'ვენერა ძალიან კაშკაშაა — სრული, ნახევარი ან ნამგალი ფაზა ჩანს 50mm-ითაც.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Venus-real_color.jpg/400px-Venus-real_color.jpg' },
+                { ap: '70mm', mag: '50x–100x', label: 'ფაზა მკაფიოდ', desc: 'ვენერის ფაზა კარგად ჩანს. დიდი ნამგალის დროს დისკი შთამბეჭდავია.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/PIA23791.jpg/400px-PIA23791.jpg' },
+                { ap: '90mm', mag: '100x–150x', label: 'ღრუბლების სტრუქტურა', desc: 'UV ფილტრით ღრუბლოვანი ნიმუშები ჩანს. ფილტრი კონტრასტს გაუმჯობესებს.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Venuspioneeruv.jpg/400px-Venuspioneeruv.jpg' },
+            ]
+        },
+        mars: {
+            emoji: '🔴', name: 'მარსი', nameEn: 'Mars', color: '#f87171', type: 'კლდოვანი პლანეტა',
+            dist: '~54–401 მლნ კმ დედამიწიდან',
+            desc: 'წითელი პლანეტა — ჟანგის მტვრით დაფარული. ოპოზიციის დროს (ყოველ ~2 წელიწადში) ზედაპირის დეტალები, პოლარული ყინვები და გიგანტური ვულკანები ჩანს.',
+            views: [
+                { ap: '50mm', mag: '50x–75x', label: 'ნარინჯისფერი დისკი', desc: 'მარსი პატარა ნარინჯისფერ-წითელ დისკად ჩანს. ოპოზიციის გარეთ დეტალები ძნელია.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/400px-OSIRIS_Mars_true_color.jpg' },
+                { ap: '70mm', mag: '100x–150x', label: 'პოლარული ყინვა', desc: 'ოპოზიციის დროს პოლარული ყინვის ქუდი და მუქი ზღვები (სირტები) ჩანს.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Mars_transparent.png/400px-Mars_transparent.png' },
+                { ap: '90mm', mag: '150x–200x', label: 'ზედაპირის დეტალი', desc: 'ვალეს მარინერის სისტემა და მსხვილი კრატერები ჩანს. 150x+ ვულკანებს ავლენს.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Mars_Valles_Marineris.jpeg/400px-Mars_Valles_Marineris.jpeg' },
+            ]
+        },
+        jupiter: {
+            emoji: '🟠', name: 'იუპიტერი', nameEn: 'Jupiter', color: '#fb923c', type: 'გაზის გიგანტი',
+            dist: '~588–968 მლნ კმ დედამიწიდან',
+            desc: 'მზის სისტემის უდიდესი პლანეტა. 4 გალილეური თანამგზავრი (იო, ევროპა, განიმედი, კალისტო) 40x-ზე ჩანს. დიდი წითელი ლაქა — 400 წლის ჭექა-ქუხილი.',
+            views: [
+                { ap: '50mm', mag: '40x–70x', label: '2 ზოლი + 4 თანამგზავრი', desc: '2 მთავარი ღრუბლოვანი ზოლი ჩანს. 4 გალილეური თანამგზავრი პატარა ვარსკვლავებივით.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Jupiter.jpg/400px-Jupiter.jpg' },
+                { ap: '70mm', mag: '80x–120x', label: 'ღრუბლოვანი ნიმუშები', desc: '4–6 ზოლი ჩანს. დიდი წითელი ლაქა (GRS) სამხრეთ ეკვატორულ ზოლში.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Jupiter_and_its_shrunken_Great_Red_Spot.jpg/400px-Jupiter_and_its_shrunken_Great_Red_Spot.jpg' },
+                { ap: '90mm', mag: '150x–200x', label: 'GRS + ატმოსფეროს ტურბ.', desc: 'დიდი წითელი ლაქა მკაფიოდ. ზოლების ფესტონები და ატმოსფერული ტურბულენტობა შთამბეჭდავია.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Latest_NASA_Juno_Image_of_Jupiter.jpg/400px-Latest_NASA_Juno_Image_of_Jupiter.jpg' },
+            ]
+        },
+        saturn: {
+            emoji: '🪐', name: 'სატურნი', nameEn: 'Saturn', color: '#eab308', type: 'გაზის გიგანტი',
+            dist: '~1.2–1.7 მლრდ კმ დედამიწიდან',
+            desc: 'სოლარული სისტემის ყველაზე ლამაზი სანახაობა. რგოლები ყინულისა და კლდის ნაწილაკებისგანაა — 50x-ზე მკაფიოდ ჩანს. კასინის ხვრელი 100x+-ზე.',
+            views: [
+                { ap: '50mm', mag: '50x–70x', label: 'რგოლები ჩანს!', desc: 'სატურნის რგოლები 50mm-ითაც მკაფიოდ ჩანს — ერთ-ერთი ყველაზე შთამბეჭდავი სანახაობა ამ ზომის ტელესკოპში.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Saturn_%28planet%29_large.jpg/400px-Saturn_%28planet%29_large.jpg' },
+                { ap: '70mm', mag: '80x–120x', label: 'კასინის ხვრელი', desc: 'კასინის ხვრელი (რგოლებს შორის ბნელი სივრცე) ჩანს. ტიტანი — ყვითელი მთვარე — სატურნის გვერდით.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Saturn_during_Equinox.jpg/400px-Saturn_during_Equinox.jpg' },
+                { ap: '90mm', mag: '150x–200x', label: 'A, B, C რგოლები', desc: 'A, B და C რგოლები ცალ-ცალკე გამოირჩევა. ბნელი ზოლები ატმოსფეროში და ენცელადუსი ჩანს.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Saturn_from_Cassini_Orbiter_%282004-10-06%29.jpg/400px-Saturn_from_Cassini_Orbiter_%282004-10-06%29.jpg' },
+            ]
+        },
+        uranus: {
+            emoji: '🔵', name: 'ურანი', nameEn: 'Uranus', color: '#22d3ee', type: 'ყინულის გიგანტი',
+            dist: '~2.6–3.2 მლრდ კმ დედამიწიდან',
+            desc: 'მეთანის ატმოსფეროს გამო ცისფერ-მწვანე ფერი. ბინოკლით ხელმისაწვდომია, ტელესკოპით პატარა მოცისფრო დისკი ჩანს.',
+            views: [
+                { ap: '50mm', mag: '50x–100x', label: 'ვარსკვლავი ან დისკი?', desc: 'ვარსკვლავს ჰგავს, მაგრამ მოცისფრო-მწვანე ფერი გამოარჩევს. მაღალ გადიდებაზე პატარა დისკი.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Uranus2.jpg/400px-Uranus2.jpg' },
+                { ap: '70mm', mag: '100x–150x', label: 'მოცისფრო დისკი', desc: 'ურანის დისკი მკაფიოა. ეგზოტიკური ცისფერ-მწვანე ფერი — მეთანი ითვისებს წითელ სინათლეს.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Uranus_as_seen_by_NASA%27s_Voyager_2_%28remastered%29_-_JPEG_converted.jpg/400px-Uranus_as_seen_by_NASA%27s_Voyager_2_%28remastered%29_-_JPEG_converted.jpg' },
+                { ap: '90mm', mag: '150x–200x', label: 'უნიკალური ფერი', desc: 'მოცისფრო-მწვანე ფერი შთამბეჭდავია. ტიტანია/ობერონი (მსხვილი მთვარეები) ხელმისაწვდომია.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Uranus_rings.jpg/400px-Uranus_rings.jpg' },
+            ]
+        },
+        neptune: {
+            emoji: '💙', name: 'ნეპტუნი', nameEn: 'Neptune', color: '#60a5fa', type: 'ყინულის გიგანტი',
+            dist: '~4.3–4.7 მლრდ კმ დედამიწიდან',
+            desc: 'ყველაზე შორეული პლანეტა — 1846 წელს მათემატიკური გამოთვლებით აღმოაჩინეს. mag 7.8 — ბინოკლით ხელმისაწვდომია. 90mm+-ით პატარა ცისფერი დისკი ჩანს.',
+            views: [
+                { ap: '50mm', mag: '50x–75x', label: 'ძნელი სამიზნე', desc: 'ძლივს შესამჩნევი ვარსკვლავი (mag 7.9). ვარსკვლავური რუქის გარეშე ძნელია პოვნა.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg/400px-Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg' },
+                { ap: '70mm', mag: '100x–150x', label: 'ცისფერი ელფერი', desc: 'ცისფერი ელფერი მაღალ გადიდებაზე. ვარსკვლავებს შორის ძლივს ჩანს.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Neptunstorm.jpg/400px-Neptunstorm.jpg' },
+                { ap: '90mm', mag: '150x–200x', label: 'ცისფერი დისკი!', desc: 'პატარა ცისფერი დისკი — ეს შთამბეჭდავი მიღწევაა! ტრიტონი კი 200mm+-ს მოითხოვს.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Neptune_Voyager2_trim.jpg/400px-Neptune_Voyager2_trim.jpg' },
+            ]
+        },
+    };
+
+    function openPlanetModal(slug) {
+        const p = PLANETS[slug];
+        if (!p) return;
+
+        const content = document.getElementById('planet-modal-content');
+        content.innerHTML = `
+            <!-- Close button -->
+            <button onclick="closePlanetModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/10 transition-all text-lg z-10">✕</button>
+
+            <!-- Hero row -->
+            <div class="flex items-center gap-4 mb-5">
+                <div class="text-5xl flex-shrink-0" style="filter: drop-shadow(0 0 16px ${p.color}88)">${p.emoji}</div>
+                <div>
+                    <div class="text-[10px] uppercase tracking-widest mb-1" style="color:${p.color}88">${p.type}</div>
+                    <div class="text-xl font-semibold text-white">${p.name}</div>
+                    <div class="text-xs text-gray-600">${p.nameEn} · ${p.dist}</div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <p class="text-sm text-gray-400 mb-5 leading-relaxed">${p.desc}</p>
+
+            <!-- Divider -->
+            <div class="flex items-center gap-3 mb-4">
+                <div class="flex-1 h-px bg-white/5"></div>
+                <span class="text-xs text-gray-700 uppercase tracking-widest">ტელესკოპის ხედები</span>
+                <div class="flex-1 h-px bg-white/5"></div>
+            </div>
+
+            <!-- 3 telescope images -->
+            <div class="grid grid-cols-3 gap-3 mb-5">
+                ${p.views.map(v => `
+                <div class="rounded-2xl overflow-hidden" style="border: 1px solid ${p.color}22; border-top-color: ${p.color}44; background:#03050d;">
+                    <div class="relative" style="aspect-ratio:1/1; overflow:hidden; background:#03050d;">
+                        <img src="${v.img}" alt="${v.label}"
+                             style="width:100%;height:100%;object-fit:cover;display:block;"
+                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+                             loading="lazy"/>
+                        <div style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;font-size:2.5rem;background:radial-gradient(circle,${p.color}22,#03050d);">${p.emoji}</div>
+                        <div style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,0.78);border:1px solid ${p.color}44;color:${p.color};font-size:0.62rem;font-family:monospace;padding:3px 7px;border-radius:20px;backdrop-filter:blur(8px);">${v.ap}</div>
+                        <div style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.65);color:#6b7280;font-size:0.6rem;font-family:monospace;padding:2px 6px;border-radius:20px;">${v.mag}</div>
+                    </div>
+                    <div class="p-2.5">
+                        <div class="text-xs font-medium text-white mb-1" style="line-height:1.3">${v.label}</div>
+                        <div class="text-[10px] text-gray-600" style="line-height:1.5">${v.desc}</div>
+                    </div>
+                </div>`).join('')}
+            </div>
+
+            <!-- CTA -->
+            <a href="https://astroman.ge/teleskopi/" target="_blank"
+               class="flex items-center justify-center gap-2 w-full py-3 rounded-2xl text-sm font-medium transition-all hover:-translate-y-0.5"
+               style="background:${p.color}18;border:1px solid ${p.color}35;color:${p.color};">
+                🔭 ASTROMAN ტელესკოპი ${p.name}ს სანახავად →
+            </a>
+        `;
+
+        // Make content position relative for close button
+        content.style.position = 'relative';
+
+        // Show modal
+        const modal = document.getElementById('planet-modal');
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+
+        // Animate in
+        const sheet = document.getElementById('planet-modal-sheet');
+        sheet.style.transform = 'translateY(100%)';
+        sheet.style.transition = 'none';
+        requestAnimationFrame(() => {
+            sheet.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+            sheet.style.transform = 'translateY(0)';
+        });
     }
+
+    function closePlanetModal() {
+        const modal = document.getElementById('planet-modal');
+        const sheet = document.getElementById('planet-modal-sheet');
+        sheet.style.transition = 'transform 0.3s cubic-bezier(0.4,0,0.2,1)';
+        sheet.style.transform = 'translateY(100%)';
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+            sheet.style.transform = '';
+        }, 300);
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlanetModal(); });
 </script>
 {% endblock %}
