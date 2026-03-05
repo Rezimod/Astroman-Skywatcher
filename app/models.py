@@ -35,6 +35,7 @@ class PlanetInfo(BaseModel):
     is_visible: bool
     magnitude: float
     constellation: str = ""
+    visibility_type: str = "naked_eye"  # "naked_eye" | "binoculars" | "telescope"
 
 
 class PlanetLiveInfo(PlanetInfo):
