@@ -30,13 +30,13 @@
 
     <!-- Stat Cards — always shown in all modes -->
     <div class="grid grid-cols-2 gap-3 lg:grid-cols-4 stagger">
-        <div class="glass-card p-4 sm:p-5 text-center">
-            <div class="text-2xl mb-2">🌅</div>
-            <div class="text-xs sm:text-sm text-indigo-400 uppercase tracking-wider mb-1">მზის ჩასვლა</div>
-            <div class="text-xl sm:text-2xl font-mono text-white font-semibold">{{ observation.sunset_time }}</div>
+        <div class="glass-card p-5 sm:p-6 text-center">
+            <div class="text-3xl mb-3">🌅</div>
+            <div class="text-[10px] text-indigo-400 uppercase tracking-widest mb-2">მზის ჩასვლა</div>
+            <div class="stat-value">{{ observation.sunset_time }}</div>
         </div>
-        <div class="glass-card p-4 sm:p-5 text-center">
-            <div class="text-2xl mb-2">
+        <div class="glass-card p-5 sm:p-6 text-center">
+            <div class="text-3xl mb-3">
                 {% if observation.moon_illumination < 5 %}🌑
                 {% elif observation.moon_illumination < 25 %}🌒
                 {% elif observation.moon_illumination < 50 %}🌓
@@ -44,19 +44,19 @@
                 {% elif observation.moon_illumination < 95 %}🌖
                 {% else %}🌕{% endif %}
             </div>
-            <div class="text-xs sm:text-sm text-indigo-400 uppercase tracking-wider mb-1">მთვარე</div>
-            <div class="text-xl sm:text-2xl font-mono text-white font-semibold">{{ observation.moon_illumination|round(0)|int }}%</div>
-            <div class="text-xs text-gray-500 mt-1" style="line-height:1.6">{{ observation.moon_phase }}</div>
+            <div class="text-[10px] text-indigo-400 uppercase tracking-widest mb-2">მთვარე</div>
+            <div class="stat-value">{{ observation.moon_illumination|round(0)|int }}%</div>
+            <div class="text-[10px] text-gray-600 mt-1.5" style="line-height:1.6">{{ observation.moon_phase }}</div>
         </div>
-        <div class="glass-card p-4 sm:p-5 text-center">
-            <div class="text-2xl mb-2">☁️</div>
-            <div class="text-xs sm:text-sm text-indigo-400 uppercase tracking-wider mb-1">ღრუბლები</div>
-            <div class="text-xl sm:text-2xl font-mono text-white font-semibold">{{ observation.cloud_coverage }}%</div>
+        <div class="glass-card p-5 sm:p-6 text-center">
+            <div class="text-3xl mb-3">☁️</div>
+            <div class="text-[10px] text-indigo-400 uppercase tracking-widest mb-2">ღრუბლები</div>
+            <div class="stat-value">{{ observation.cloud_coverage }}%</div>
         </div>
-        <div class="glass-card p-4 sm:p-5 text-center">
-            <div class="text-2xl mb-2">🌡</div>
-            <div class="text-xs sm:text-sm text-indigo-400 uppercase tracking-wider mb-1">ტემპერატურა</div>
-            <div class="text-xl sm:text-2xl font-mono text-white font-semibold">{{ observation.temperature|round(0)|int }}°C</div>
+        <div class="glass-card p-5 sm:p-6 text-center">
+            <div class="text-3xl mb-3">🌡</div>
+            <div class="text-[10px] text-indigo-400 uppercase tracking-widest mb-2">ტემპერატურა</div>
+            <div class="stat-value">{{ observation.temperature|round(0)|int }}°C</div>
         </div>
     </div>
 
@@ -184,8 +184,8 @@
 
             <!-- Planet Section -->
             <div class="glass p-4 sm:p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-base sm:text-lg text-gray-200">🪐 ხილული პლანეტები</h2>
+                <div class="flex items-center justify-between mb-5">
+                    <h2 class="text-base sm:text-lg text-gray-100 font-medium section-header">🪐 ხილული პლანეტები</h2>
                     <div class="flex items-center gap-2">
                         <span class="text-xs text-gray-600 font-mono bg-white/5 px-2.5 py-1 rounded-full">{{ visible_planets|length }}/7</span>
                         <span class="text-xs text-gray-700 font-mono bg-white/5 px-2.5 py-1 rounded-full" title="შეუიარაღებელი თვალით ხილული">👁 {{ visible_planets | selectattr('visibility_type', 'eq', 'naked_eye') | list | length }}</span>
@@ -197,38 +197,65 @@
                 <!-- Mobile: card layout -->
                 <div class="block lg:hidden space-y-3 stagger">
                     {% for planet in visible_planets %}
+                    {% if planet.name == 'Mercury' %}{% set orb = 'orb-mercury' %}
+                    {% elif planet.name == 'Venus' %}{% set orb = 'orb-venus' %}
+                    {% elif planet.name == 'Mars' %}{% set orb = 'orb-mars' %}
+                    {% elif planet.name == 'Jupiter' %}{% set orb = 'orb-jupiter' %}
+                    {% elif planet.name == 'Saturn' %}{% set orb = 'orb-saturn' %}
+                    {% elif planet.name == 'Uranus' %}{% set orb = 'orb-uranus' %}
+                    {% elif planet.name == 'Neptune' %}{% set orb = 'orb-neptune' %}
+                    {% else %}{% set orb = 'orb-mercury' %}{% endif %}
                     <div class="glass-card p-4">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center gap-2">
+                        <div class="planet-card-toggle flex items-center justify-between" onclick="togglePlanet(this)">
+                            <div class="flex items-center gap-3">
+                                <div class="planet-orb {{ orb }}"></div>
                                 {% if planet == best_planet %}<span class="text-yellow-400 text-sm">⭐</span>{% endif %}
-                                <span class="text-base font-semibold text-white" style="line-height:1.6">{{ planet.name_ka }}</span>
+                                <span class="text-sm font-semibold text-white">{{ planet.name_ka }}</span>
                                 <span class="text-xs text-gray-600">({{ planet.name }})</span>
                             </div>
-                            {% if planet == best_planet %}
-                            <span class="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30">საუკეთესო</span>
-                            {% elif planet.visibility_type == 'binoculars' %}
-                            <span class="text-[10px] bg-yellow-500/10 text-yellow-600 px-2 py-0.5 rounded-full border border-yellow-500/20" title="ბინოკლი საჭიროა">🔭 ბინოკლი</span>
-                            {% elif planet.visibility_type == 'telescope' %}
-                            <span class="text-[10px] bg-gray-500/10 text-gray-500 px-2 py-0.5 rounded-full border border-gray-500/20" title="ტელესკოპი საჭიროა">🔭 ტელესკოპი</span>
-                            {% endif %}
+                            <div class="flex items-center gap-2">
+                                {% if planet == best_planet %}
+                                <span class="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30">საუკეთესო</span>
+                                {% elif planet.visibility_type == 'binoculars' %}
+                                <span class="text-[10px] bg-yellow-500/10 text-yellow-600 px-2 py-0.5 rounded-full border border-yellow-500/20">🔭 ბინოკლი</span>
+                                {% elif planet.visibility_type == 'telescope' %}
+                                <span class="text-[10px] bg-gray-500/10 text-gray-500 px-2 py-0.5 rounded-full border border-gray-500/20">🔭 ტელ.</span>
+                                {% endif %}
+                                <svg class="expand-chevron w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-y-2 gap-x-4 text-sm">
-                            <div>
-                                <span class="text-gray-500 text-xs">სიმაღლე</span>
-                                <div class="text-white font-mono">{{ planet.altitude|round(1) }}°</div>
-                            </div>
-                            <div>
-                                <span class="text-gray-500 text-xs">სიკაშკაშე</span>
-                                <div class="text-white font-mono">{{ planet.magnitude }} <span class="text-gray-600 text-xs">mag</span></div>
-                            </div>
-                            <div>
-                                <span class="text-gray-500 text-xs">თანავარსკვლავედი</span>
-                                <div class="text-gray-300" style="line-height:1.6">{{ planet.constellation }}</div>
-                            </div>
-                            <div>
-                                <span class="text-gray-500 text-xs">სიმაღლის ბარი</span>
-                                <div class="mt-1.5 h-1.5 bg-gray-800 rounded-full overflow-hidden">
-                                    <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500" style="width: {{ [planet.altitude / 90 * 100, 100]|min }}%"></div>
+                        <!-- Collapsed summary -->
+                        <div class="flex gap-4 mt-2 text-xs text-gray-500">
+                            <span class="font-mono text-gray-400">{{ planet.altitude|round(1) }}°</span>
+                            <span class="font-mono text-gray-500">mag {{ planet.magnitude }}</span>
+                            <span class="text-gray-600">{{ planet.azimuth | azimuth_direction }}</span>
+                        </div>
+                        <!-- Expandable detail -->
+                        <div class="planet-detail">
+                            <div class="mt-3 pt-3 border-t border-white/5 grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
+                                <div>
+                                    <span class="text-gray-600 text-xs">სიმაღლე</span>
+                                    <div class="text-white font-mono">{{ planet.altitude|round(1) }}°</div>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600 text-xs">სიკაშკაშე</span>
+                                    <div class="text-white font-mono">{{ planet.magnitude }} <span class="text-gray-600 text-xs">mag</span></div>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600 text-xs">მიმართულება</span>
+                                    <div class="text-gray-300">{{ planet.azimuth | azimuth_direction }}</div>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600 text-xs">თანავარსკვლავედი</span>
+                                    <div class="text-gray-300">{{ planet.constellation }}</div>
+                                </div>
+                                <div class="col-span-2">
+                                    <span class="text-gray-600 text-xs">სიმაღლის ბარი</span>
+                                    <div class="mt-1.5 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                                        <div class="h-full rounded-full" style="width:{{ [planet.altitude/90*100,100]|min }}%; background: var(--c-{{ planet.name|lower }}, #818cf8)"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -283,8 +310,8 @@
             <!-- Altitude Bars -->
             {% if visible_planets %}
             <div class="glass p-4 sm:p-6">
-                <h2 class="text-base sm:text-lg text-gray-200 mb-1">📡 სიმაღლე ჰორიზონტიდან</h2>
-                <p class="text-xs text-gray-600 mb-5">0° — 90° (ზენიტი)</p>
+                <h2 class="text-base sm:text-lg text-gray-100 font-medium section-header mb-1">📡 სიმაღლე ჰორიზონტიდან</h2>
+                <p class="text-xs text-gray-700 mb-5 pl-3">0° — 90° (ზენიტი)</p>
                 <div class="space-y-3">
                     {% for planet in visible_planets %}
                     {% if planet.name == 'Mercury' %}{% set pcolor = '#9ca3af' %}
@@ -313,8 +340,7 @@
             <!-- Observation Guide -->
             <div class="glass p-4 sm:p-6">
                 <div class="flex items-center gap-3 mb-4">
-                    <div class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse flex-shrink-0"></div>
-                    <h2 class="text-base sm:text-lg text-gray-200">დაკვირვების გზამკვლევი</h2>
+                    <h2 class="text-base sm:text-lg text-gray-100 font-medium section-header">დაკვირვების გზამკვლევი</h2>
                 </div>
                 <div class="space-y-3 text-sm text-gray-300" style="line-height:1.8">
                     {% for line in observation.observation_text.split('\n') %}
@@ -357,25 +383,18 @@
 
             <!-- Moon Phase -->
             <div class="glass p-5 sm:p-6 text-center">
-                <div class="text-xs tracking-widest text-indigo-400 uppercase mb-4">მთვარის ფაზა</div>
-                <div class="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4">
-                    <div class="w-full h-full rounded-full" style="background: radial-gradient(circle at 38% 35%, #f0f0d8, #c8c8a0 50%, #808070); box-shadow: 0 0 30px rgba(245,245,200,0.1), inset -3px -3px 10px rgba(0,0,0,0.4)"></div>
-                    <div class="absolute rounded-full bg-gray-800/20" style="width:12px;height:12px;top:30%;left:40%"></div>
-                    <div class="absolute rounded-full bg-gray-800/15" style="width:7px;height:7px;top:55%;left:58%"></div>
-                    <div class="absolute rounded-full bg-gray-800/20" style="width:9px;height:9px;top:18%;left:63%"></div>
-                    {% if observation.moon_illumination < 5 %}
-                    <div class="absolute inset-0 rounded-full bg-gray-950/95"></div>
-                    {% elif observation.moon_illumination < 50 %}
-                    <div class="absolute inset-0 rounded-full overflow-hidden">
-                        <div class="absolute inset-0" style="background: radial-gradient(ellipse at {{ 115 - observation.moon_illumination }}% 50%, rgba(3,7,18,0.97) 38%, rgba(3,7,18,0.15) 60%, transparent 70%)"></div>
-                    </div>
-                    {% elif observation.moon_illumination < 98 %}
-                    <div class="absolute inset-0 rounded-full overflow-hidden">
-                        <div class="absolute inset-0" style="background: radial-gradient(ellipse at {{ 170 - observation.moon_illumination * 0.7 }}% 50%, rgba(3,7,18,0.97) 28%, rgba(3,7,18,0.1) 52%, transparent 62%)"></div>
-                    </div>
-                    {% endif %}
+                <div class="text-xs tracking-widest text-indigo-400 uppercase mb-4 section-header inline-block">მთვარის ფაზა</div>
+                <div class="mb-4">
+                    <span class="moon-emoji">
+                        {% if observation.moon_illumination < 5 %}🌑
+                        {% elif observation.moon_illumination < 25 %}🌒
+                        {% elif observation.moon_illumination < 50 %}🌓
+                        {% elif observation.moon_illumination < 75 %}🌔
+                        {% elif observation.moon_illumination < 95 %}🌖
+                        {% else %}🌕{% endif %}
+                    </span>
                 </div>
-                <h3 class="text-base text-gray-200 font-light mb-1" style="line-height:1.6">{{ observation.moon_phase }}</h3>
+                <h3 class="text-base text-white font-medium mb-1" style="line-height:1.6">{{ observation.moon_phase }}</h3>
                 <div class="text-sm text-gray-500 mb-3">{{ observation.moon_illumination|round(0)|int }}% განათებული</div>
                 <div class="h-2 bg-gray-800/60 rounded-full overflow-hidden">
                     <div class="h-full rounded-full"
@@ -385,21 +404,21 @@
 
             <!-- Observation Quality -->
             <div class="glass p-5 sm:p-6">
-                <div class="text-xs tracking-widest text-indigo-400 uppercase mb-4">დაკვირვების ხარისხი</div>
+                <div class="text-xs tracking-widest text-indigo-400 uppercase mb-4 section-header inline-block">დაკვირვების ხარისხი</div>
                 {% set q = (100 - observation.cloud_coverage) %}
                 {% if observation.moon_illumination > 60 %}{% set q = q - 15 %}{% endif %}
                 {% if q < 0 %}{% set q = 0 %}{% endif %}
 
                 <div class="flex items-center gap-4 mb-4">
                     <div class="relative w-16 h-16 flex-shrink-0">
-                        <svg class="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
+                        <svg class="w-16 h-16 -rotate-90 {% if q >= 70 %}ring-excellent{% elif q >= 40 %}ring-good{% elif q >= 20 %}ring-moderate{% else %}ring-poor{% endif %}" viewBox="0 0 64 64">
                             <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7"/>
                             <circle cx="32" cy="32" r="26" fill="none"
                                 stroke="{% if q >= 70 %}#22c55e{% elif q >= 40 %}#eab308{% elif q >= 20 %}#f97316{% else %}#ef4444{% endif %}"
                                 stroke-width="7" stroke-linecap="round"
                                 stroke-dasharray="{{ q * 1.634 }} 163.4"/>
                         </svg>
-                        <div class="absolute inset-0 flex items-center justify-center text-xs font-mono text-gray-300">{{ q }}%</div>
+                        <div class="absolute inset-0 flex items-center justify-center text-xs font-mono text-white font-semibold">{{ q }}%</div>
                     </div>
                     <div class="min-w-0">
                         {% if q >= 70 %}
@@ -470,12 +489,25 @@
     {% endif %}
 
     {# ── Sky Map — always visible in all modes ── #}
+    <div class="glass p-4 sm:p-5 flex items-center justify-between mt-2">
+        <h2 class="text-base sm:text-lg text-gray-100 font-medium section-header">🗺 ცის რუკა</h2>
+        <span class="text-xs text-gray-600">გადაათრიე · კლიკი = დეტალები · სქროლი = zoom</span>
+    </div>
     {% include "skymap_widget.html" %}
 
 </div>
 {% endblock %}
 
 {% block scripts %}
+{% if best_planet and is_night %}
+<!-- Sticky planet pill (mobile) -->
+<div class="sticky-pill sm:hidden" id="planet-pill">
+    <span class="text-yellow-400">⭐</span>
+    <span>დღეს ეძებე: <strong class="text-white">{{ best_planet.name_ka }}</strong></span>
+    <span class="text-gray-600 text-[10px]">· {{ best_planet.altitude|round(0)|int }}° · {{ best_planet.azimuth | azimuth_direction }}</span>
+</div>
+{% endif %}
+
 <script>
     // Live Tbilisi clock
     function updateClock() {
@@ -514,5 +546,26 @@
     }
     updateSunsetCountdown();
     setInterval(updateSunsetCountdown, 1000);
+
+    // Expandable planet cards
+    function togglePlanet(header) {
+        const card = header.closest('.glass-card');
+        const detail = card.querySelector('.planet-detail');
+        const chevron = header.querySelector('.expand-chevron');
+        if (!detail) return;
+        const isOpen = detail.classList.contains('open');
+        detail.classList.toggle('open', !isOpen);
+        chevron && chevron.classList.toggle('open', !isOpen);
+    }
+
+    // Sticky pill — hide when hero badge is visible
+    const pill = document.getElementById('planet-pill');
+    if (pill) {
+        const heroBadge = document.querySelector('.inline-flex .text-yellow-400');
+        const observer = new IntersectionObserver(entries => {
+            pill.classList.toggle('hide', entries[0].isIntersecting);
+        }, { threshold: 0.5 });
+        if (heroBadge) observer.observe(heroBadge.closest('.inline-flex'));
+    }
 </script>
 {% endblock %}
