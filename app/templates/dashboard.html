@@ -21,7 +21,7 @@
         </h1>
         <p class="text-gray-600 text-xs uppercase tracking-widest">თბილისის ცის ობსერვატორია</p>
         {% if best_planet and is_night %}
-        <div class="inline-flex items-center gap-2 mt-4 bg-indigo-950/50 border border-indigo-800/30 rounded-full px-4 py-2 text-sm">
+        <div id="hero-badge" class="inline-flex items-center gap-2 mt-4 bg-indigo-950/50 border border-indigo-800/30 rounded-full px-4 py-2 text-sm">
             <span class="text-yellow-400 animate-pulse-slow">⭐</span>
             <span class="text-indigo-200">დღეს ეძებე: <strong class="text-white">{{ best_planet.name_ka }}</strong></span>
         </div>
@@ -383,7 +383,7 @@
 
             <!-- Moon Phase -->
             <div class="glass p-5 sm:p-6 text-center">
-                <div class="text-xs tracking-widest text-indigo-400 uppercase mb-4 section-header inline-block">მთვარის ფაზა</div>
+                <div class="text-xs tracking-widest text-indigo-400 uppercase mb-4 section-header">მთვარის ფაზა</div>
                 <div class="mb-4">
                     <span class="moon-emoji">
                         {% if observation.moon_illumination < 5 %}🌑
@@ -404,7 +404,7 @@
 
             <!-- Observation Quality -->
             <div class="glass p-5 sm:p-6">
-                <div class="text-xs tracking-widest text-indigo-400 uppercase mb-4 section-header inline-block">დაკვირვების ხარისხი</div>
+                <div class="text-xs tracking-widest text-indigo-400 uppercase mb-4 section-header">დაკვირვების ხარისხი</div>
                 {% set q = (100 - observation.cloud_coverage) %}
                 {% if observation.moon_illumination > 60 %}{% set q = q - 15 %}{% endif %}
                 {% if q < 0 %}{% set q = 0 %}{% endif %}
@@ -488,10 +488,40 @@
     </div>
     {% endif %}
 
+    {# ── Planets Explorer Section ── #}
+    <div class="mt-6">
+        <div class="flex items-center justify-between gap-4 mb-4 px-1">
+            <h2 class="text-base sm:text-lg text-gray-100 font-medium section-header whitespace-nowrap">🪐 პლანეტების გზამკვლევი</h2>
+            <a href="/planets" class="text-xs text-indigo-400 hover:text-indigo-300 transition-colors whitespace-nowrap">ყველა →</a>
+        </div>
+        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-9 gap-2 sm:gap-3">
+            {% set planet_list = [
+                ('moon',    '🌕', 'მთვარე',   '#f0e68c'),
+                ('mercury', '⚪', 'მერკური',  '#9ca3af'),
+                ('venus',   '🟡', 'ვენერა',   '#fbbf24'),
+                ('mars',    '🔴', 'მარსი',    '#f87171'),
+                ('jupiter', '🟠', 'იუპიტერი', '#fb923c'),
+                ('saturn',  '🪐', 'სატურნი',  '#eab308'),
+                ('uranus',  '🔵', 'ურანი',    '#22d3ee'),
+                ('neptune', '💙', 'ნეპტუნი',  '#60a5fa'),
+            ] %}
+            {% for slug, emoji, name_ka, color in planet_list %}
+            <a href="/planets/{{ slug }}"
+               class="glass-card p-3 sm:p-4 text-center group hover:scale-105 transition-all duration-200"
+               style="border-top-color: {{ color }}22;">
+                <div class="text-2xl sm:text-3xl mb-1.5" style="filter: drop-shadow(0 0 6px {{ color }}66)">{{ emoji }}</div>
+                <div class="text-[10px] sm:text-xs text-gray-400 group-hover:text-white transition-colors" style="line-height:1.4">{{ name_ka }}</div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
     {# ── Sky Map — always visible in all modes ── #}
-    <div class="glass p-4 sm:p-5 flex items-center justify-between mt-2">
-        <h2 class="text-base sm:text-lg text-gray-100 font-medium section-header">🗺 ცის რუკა</h2>
-        <span class="text-xs text-gray-600">გადაათრიე · კლიკი = დეტალები · სქროლი = zoom</span>
+    <div class="mt-8 mb-2">
+        <div class="flex items-center justify-between gap-4 mb-3 px-1">
+            <h2 class="text-base sm:text-lg text-gray-100 font-medium section-header whitespace-nowrap">🗺 ცის რუკა</h2>
+            <span class="text-xs text-gray-600 text-right">გადაათრიე · კლიკი = დეტალები · სქროლი = გადიდება</span>
+        </div>
     </div>
     {% include "skymap_widget.html" %}
 
@@ -561,11 +591,13 @@
     // Sticky pill — hide when hero badge is visible
     const pill = document.getElementById('planet-pill');
     if (pill) {
-        const heroBadge = document.querySelector('.inline-flex .text-yellow-400');
-        const observer = new IntersectionObserver(entries => {
-            pill.classList.toggle('hide', entries[0].isIntersecting);
-        }, { threshold: 0.5 });
-        if (heroBadge) observer.observe(heroBadge.closest('.inline-flex'));
+        const heroBadge = document.getElementById('hero-badge');
+        if (heroBadge) {
+            const observer = new IntersectionObserver(entries => {
+                pill.classList.toggle('hide', entries[0].isIntersecting);
+            }, { threshold: 0.5 });
+            observer.observe(heroBadge);
+        }
     }
 </script>
 {% endblock %}
