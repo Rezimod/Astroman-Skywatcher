@@ -8,16 +8,18 @@
     <!-- Hero Header -->
     <div class="text-center pt-4 pb-2">
         <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs tracking-widest text-indigo-400/70 uppercase mb-3">
-            <span>{{ observation.date }}</span>
+            <span>{{ observation.date | datetimeformat }}</span>
             <span class="text-gray-800">·</span>
             <span>თბილისი</span>
             <span class="text-gray-800">·</span>
             <span id="tbilisi-clock" class="font-mono text-indigo-300/80"></span>
+            <span class="text-gray-800">·</span>
+            <span class="text-gray-700 text-[10px] normal-case tracking-normal">განახლდა {{ last_updated }}</span>
         </div>
         <h1 class="text-2xl sm:text-3xl lg:text-4xl font-light mb-1 text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-white to-violet-300 leading-tight">
             ღამის ცის გზამკვლევი
         </h1>
-        <p class="text-gray-600 text-xs uppercase tracking-widest">Tbilisi Sky Observatory</p>
+        <p class="text-gray-600 text-xs uppercase tracking-widest">თბილისის ცის ობსერვატორია</p>
         {% if best_planet and is_night %}
         <div class="inline-flex items-center gap-2 mt-4 bg-indigo-950/50 border border-indigo-800/30 rounded-full px-4 py-2 text-sm">
             <span class="text-yellow-400 animate-pulse-slow">⭐</span>
@@ -184,7 +186,10 @@
             <div class="glass p-4 sm:p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-base sm:text-lg text-gray-200">🪐 ხილული პლანეტები</h2>
-                    <span class="text-xs text-gray-600 font-mono bg-white/5 px-2.5 py-1 rounded-full">{{ visible_planets|length }}/7</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-600 font-mono bg-white/5 px-2.5 py-1 rounded-full">{{ visible_planets|length }}/7</span>
+                        <span class="text-xs text-gray-700 font-mono bg-white/5 px-2.5 py-1 rounded-full" title="შეუიარაღებელი თვალით ხილული">👁 {{ visible_planets | selectattr('visibility_type', 'eq', 'naked_eye') | list | length }}</span>
+                    </div>
                 </div>
 
                 {% if visible_planets %}
@@ -200,7 +205,11 @@
                                 <span class="text-xs text-gray-600">({{ planet.name }})</span>
                             </div>
                             {% if planet == best_planet %}
-                            <span class="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30">TOP</span>
+                            <span class="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30">საუკეთესო</span>
+                            {% elif planet.visibility_type == 'binoculars' %}
+                            <span class="text-[10px] bg-yellow-500/10 text-yellow-600 px-2 py-0.5 rounded-full border border-yellow-500/20" title="ბინოკლი საჭიროა">🔭 ბინოკლი</span>
+                            {% elif planet.visibility_type == 'telescope' %}
+                            <span class="text-[10px] bg-gray-500/10 text-gray-500 px-2 py-0.5 rounded-full border border-gray-500/20" title="ტელესკოპი საჭიროა">🔭 ტელესკოპი</span>
                             {% endif %}
                         </div>
                         <div class="grid grid-cols-2 gap-y-2 gap-x-4 text-sm">
@@ -210,7 +219,7 @@
                             </div>
                             <div>
                                 <span class="text-gray-500 text-xs">სიკაშკაშე</span>
-                                <div class="text-white font-mono">{{ planet.magnitude }}</div>
+                                <div class="text-white font-mono">{{ planet.magnitude }} <span class="text-gray-600 text-xs">mag</span></div>
                             </div>
                             <div>
                                 <span class="text-gray-500 text-xs">თანავარსკვლავედი</span>
@@ -229,12 +238,14 @@
 
                 <!-- Desktop: table layout -->
                 <div class="hidden lg:block">
+                    <p class="text-xs text-gray-700 mb-3">სიკაშკაშე: რაც დაბალია (უარყოფითი) — მით კაშკაშაა. 👁 = შეუიარაღებელი თვალი, 🔭 = ბინოკლი/ტელესკოპი</p>
                     <table class="w-full">
                         <thead>
                             <tr class="border-b border-white/5">
                                 <th class="pb-3 text-left text-xs text-indigo-400 uppercase tracking-wider font-medium">პლანეტა</th>
                                 <th class="pb-3 text-left text-xs text-indigo-400 uppercase tracking-wider font-medium">სიმაღლე</th>
                                 <th class="pb-3 text-left text-xs text-indigo-400 uppercase tracking-wider font-medium">სიკაშკაშე</th>
+                                <th class="pb-3 text-left text-xs text-indigo-400 uppercase tracking-wider font-medium">მიმართულება</th>
                                 <th class="pb-3 text-left text-xs text-indigo-400 uppercase tracking-wider font-medium">თანავარსკვლავედი</th>
                             </tr>
                         </thead>
@@ -246,10 +257,14 @@
                                         {% if planet == best_planet %}<span class="text-yellow-400">⭐</span>{% endif %}
                                         <span class="text-white font-medium" style="line-height:1.6">{{ planet.name_ka }}</span>
                                         <span class="text-xs text-gray-600">{{ planet.name }}</span>
+                                        {% if planet.visibility_type == 'binoculars' %}<span class="text-[10px] text-yellow-600" title="ბინოკლი">🔭</span>
+                                        {% elif planet.visibility_type == 'telescope' %}<span class="text-[10px] text-gray-500" title="ტელესკოპი">🔭</span>
+                                        {% else %}<span class="text-[10px] text-gray-500" title="შეუიარაღებელი თვალი">👁</span>{% endif %}
                                     </div>
                                 </td>
                                 <td class="py-3 font-mono text-sm text-gray-300">{{ planet.altitude|round(1) }}°</td>
                                 <td class="py-3 font-mono text-sm text-gray-300">{{ planet.magnitude }}</td>
+                                <td class="py-3 text-sm text-gray-400">{{ planet.azimuth | azimuth_direction }}</td>
                                 <td class="py-3 text-sm text-gray-400" style="line-height:1.6">{{ planet.constellation }}</td>
                             </tr>
                             {% endfor %}
@@ -301,7 +316,24 @@
                     <div class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse flex-shrink-0"></div>
                     <h2 class="text-base sm:text-lg text-gray-200">დაკვირვების გზამკვლევი</h2>
                 </div>
-                <pre class="whitespace-pre-wrap text-sm text-gray-300 font-sans" style="line-height:1.7">{{ observation.observation_text }}</pre>
+                <div class="space-y-3 text-sm text-gray-300" style="line-height:1.8">
+                    {% for line in observation.observation_text.split('\n') %}
+                        {% set stripped = line.strip() %}
+                        {% if stripped.startswith('═') or stripped == '' %}
+                            {# skip decorative lines and empty lines between sections #}
+                        {% elif stripped.startswith('─') %}
+                            <hr class="border-white/5 my-2">
+                        {% elif stripped.startswith('⭐') or stripped.startswith('🪐') or stripped.startswith('🌙') or stripped.startswith('💡') %}
+                            <p class="text-indigo-300 font-medium">{{ stripped }}</p>
+                        {% elif stripped.startswith('⚠️') %}
+                            <p class="text-yellow-500/80 text-xs">{{ stripped }}</p>
+                        {% elif stripped.startswith('📍') or stripped.startswith('🔍') or stripped.startswith('📊') %}
+                            <p class="text-gray-300">{{ stripped }}</p>
+                        {% elif stripped %}
+                            <p class="text-gray-400">{{ stripped }}</p>
+                        {% endif %}
+                    {% endfor %}
+                </div>
             </div>
         </div>
 
@@ -421,10 +453,12 @@
             <div class="glass-card p-5 sm:p-6 text-center">
                 <div class="text-2xl mb-2">📬</div>
                 <div class="text-sm text-gray-200 font-medium mb-1">ყოველდღიური გზამკვლევი</div>
-                <div class="text-xs text-gray-500 mb-4" style="line-height:1.6">მიიღე ასტრო-გზამკვლევი ყოველ საღამოს</div>
+                <div class="text-xs text-gray-500 mb-4" style="line-height:1.6">
+                    მიიღე ასტრო-გზამკვლევი ყოველ საღამოს — დღის საუკეთესო ობიექტი, ამინდი და ხილვადობა, პირდაპირ შენს ელ-ფოსტაზე.
+                </div>
                 <a href="/subscribe"
                    class="w-full inline-flex items-center justify-center gap-2 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 px-5 py-3 rounded-xl text-sm font-medium transition-all border border-indigo-500/20 hover:border-indigo-500/40 min-h-[44px]">
-                    გამოწერა
+                    უფასოდ გამოწერა
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                     </svg>
