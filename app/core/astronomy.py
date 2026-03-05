@@ -39,6 +39,20 @@ MOON_PHASES_KA = {
 
 MOON_PHASES_EN = {v: k for k, v in MOON_PHASES_KA.items()}
 
+# Visibility thresholds by magnitude
+NAKED_EYE_MAG_LIMIT = 6.0    # Practical limit for Tbilisi (urban sky)
+BINOCULAR_MAG_LIMIT = 8.5    # Binoculars limit
+
+
+def _get_visibility_type(mag: float) -> str:
+    """Classify planet visibility requirement by magnitude."""
+    if mag <= NAKED_EYE_MAG_LIMIT:
+        return "naked_eye"
+    elif mag <= BINOCULAR_MAG_LIMIT:
+        return "binoculars"
+    return "telescope"
+
+
 CONSTELLATION_MAP = {
     "Ari": "ვერძი", "Tau": "კურო", "Gem": "ტყუპები",
     "Cnc": "კირჩხიბი", "Leo": "ლომი", "Vir": "ქალწული",
@@ -122,7 +136,7 @@ def get_planet_positions(dt: Optional[datetime] = None) -> list[PlanetInfo]:
             constellation_abbr = ephem.constellation(body)[0]
             constellation_ka = CONSTELLATION_MAP.get(constellation_abbr, constellation_abbr)
 
-            is_visible = alt_deg > 5  # Above 5° horizon
+            is_visible = alt_deg > 5  # Above 5° horizon — altitude check only
 
             results.append(PlanetInfo(
                 name=eng_name,
@@ -132,6 +146,7 @@ def get_planet_positions(dt: Optional[datetime] = None) -> list[PlanetInfo]:
                 is_visible=is_visible,
                 magnitude=round(mag, 2),
                 constellation=constellation_ka,
+                visibility_type=_get_visibility_type(mag),
             ))
         except Exception as e:
             logger.warning(f"Error computing {eng_name}: {e}")
@@ -202,6 +217,7 @@ def get_planet_positions_live(
                 is_visible=is_visible,
                 magnitude=round(mag, 2),
                 constellation=constellation_ka,
+                visibility_type=_get_visibility_type(mag),
                 rise_time=rise_time,
                 set_time=set_time,
                 transit_time=transit_time,
