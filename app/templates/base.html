@@ -106,7 +106,7 @@
 <body class="min-h-screen text-gray-200 antialiased overflow-x-hidden">
 
     <!-- Navigation -->
-    <nav class="border-b border-white/5 bg-black/40 backdrop-blur-2xl sticky top-0 z-50">
+    <nav id="main-nav" class="border-b border-white/5 bg-black/40 backdrop-blur-2xl sticky top-0 z-50 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
             <div class="flex items-center justify-between h-14 sm:h-16">
                 <a href="/" class="flex items-center gap-2 sm:gap-3">
@@ -149,10 +149,12 @@
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-white/5 mt-16 py-8">
+    <footer class="border-t border-white/5 mt-16 py-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 text-center">
-            <div class="text-xs sm:text-sm text-gray-700">© Astroman Skywatcher · თბილისი</div>
-            <a href="https://astroman.ge" class="text-xs text-indigo-500/60 hover:text-indigo-400 transition-colors mt-1 inline-block">
+            <div class="text-xl mb-1">🔭</div>
+            <div class="text-xs sm:text-sm text-gray-600 mb-1">© Astroman Skywatcher · თბილისი</div>
+            <div class="text-xs text-gray-800 tracking-widest uppercase mb-2">კოსმოსი ყველასთვის</div>
+            <a href="https://astroman.ge" class="text-xs text-indigo-500/50 hover:text-indigo-400 transition-colors inline-block">
                 astroman.ge
             </a>
         </div>
@@ -177,6 +179,13 @@
 
         // Auto-refresh every 5 minutes
         setTimeout(() => location.reload(), 300000);
+
+        // Nav scroll glow
+        const nav = document.getElementById('main-nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 10) nav.classList.add('nav-scrolled');
+            else nav.classList.remove('nav-scrolled');
+        }, { passive: true });
     </script>
     {% block scripts %}{% endblock %}
 </body>
