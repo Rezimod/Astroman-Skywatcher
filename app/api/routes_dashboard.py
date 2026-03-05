@@ -18,6 +18,29 @@ from app.core.weather import get_current_weather
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
+# Georgian month names
+_GEO_MONTHS = [
+    "", "იანვარი", "თებერვალი", "მარტი", "აპრილი", "მაისი", "ივნისი",
+    "ივლისი", "აგვისტო", "სექტემბერი", "ოქტომბერი", "ნოემბერი", "დეკემბერი"
+]
+
+def _datetimeformat(value: str) -> str:
+    """Format ISO date string (YYYY-MM-DD) to Georgian: '5 მარტი, 2026'."""
+    try:
+        dt = datetime.strptime(str(value), "%Y-%m-%d")
+        return f"{dt.day} {_GEO_MONTHS[dt.month]}, {dt.year}"
+    except Exception:
+        return str(value)
+
+def _azimuth_direction(az: float) -> str:
+    """Convert azimuth degrees to Georgian compass direction."""
+    dirs = ["ჩ", "ჩ-აღ", "აღ", "სამ-აღ", "სამ", "სამ-დ", "დას", "ჩ-დ"]
+    idx = round(az / 45) % 8
+    return dirs[idx]
+
+templates.env.filters["datetimeformat"] = _datetimeformat
+templates.env.filters["azimuth_direction"] = _azimuth_direction
+
 
 @router.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request):
@@ -67,6 +90,7 @@ async def dashboard(request: Request):
         "is_twilight": is_twilight,
         "current_time": current_time,
         "sun": sun,
+        "last_updated": datetime.now(ZoneInfo(settings.timezone)).strftime("%H:%M"),
     })
 
 
