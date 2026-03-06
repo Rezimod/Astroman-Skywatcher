@@ -216,10 +216,10 @@
                             <div class="flex items-center gap-2">
                                 {% if planet == best_planet %}
                                 <span class="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30">საუკეთესო</span>
-                                {% elif planet.visibility_type == 'binocular' %}
+                                {% elif planet.visibility_type == 'binoculars' %}
                                 <span class="text-[10px] bg-yellow-500/10 text-yellow-600 px-2 py-0.5 rounded-full border border-yellow-500/20">🔭 ბინოკლი</span>
-                                {% elif planet.visibility_type == 'telescope_only' %}
-                                <span class="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/20">🔭 ტელ.</span>
+                                {% elif planet.visibility_type == 'telescope' %}
+                                <span class="text-[10px] bg-gray-500/10 text-gray-500 px-2 py-0.5 rounded-full border border-gray-500/20">🔭 ტელ.</span>
                                 {% endif %}
                                 <svg class="expand-chevron w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -284,10 +284,9 @@
                                         {% if planet == best_planet %}<span class="text-yellow-400">⭐</span>{% endif %}
                                         <span class="text-white font-medium" style="line-height:1.6">{{ planet.name_ka }}</span>
                                         <span class="text-xs text-gray-600">{{ planet.name }}</span>
-                                        {% if planet.visibility_type == 'naked_eye' %}<span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-1" title="შეუიარაღებელი თვალით"></span>
-                                        {% elif planet.visibility_type == 'binocular' %}<span class="inline-block w-2 h-2 rounded-full bg-yellow-500 mr-1" title="ბინოკლით"></span>
-                                        {% elif planet.visibility_type == 'telescope_only' %}<span class="inline-block w-2 h-2 rounded-full bg-blue-500 mr-1" title="ტელესკოპით"></span>
-                                        {% else %}<span class="inline-block w-2 h-2 rounded-full bg-gray-600 mr-1" title="არ ჩანს"></span>{% endif %}
+                                        {% if planet.visibility_type == 'binoculars' %}<span class="text-[10px] text-yellow-600" title="ბინოკლი">🔭</span>
+                                        {% elif planet.visibility_type == 'telescope' %}<span class="text-[10px] text-gray-500" title="ტელესკოპი">🔭</span>
+                                        {% else %}<span class="text-[10px] text-gray-500" title="შეუიარაღებელი თვალი">👁</span>{% endif %}
                                     </div>
                                 </td>
                                 <td class="py-3 font-mono text-sm text-gray-300">{{ planet.altitude|round(1) }}°</td>
@@ -339,16 +338,27 @@
             {% endif %}
 
             <!-- Observation Guide -->
-            <div class="glass p-4 sm:p-6 my-6">
-                <div class="flex items-center justify-between mb-4 cursor-pointer"
-                     onclick="document.getElementById('obs-guide-content').classList.toggle('hidden'); this.querySelector('.chevron').classList.toggle('rotate-180')">
-                    <h2 class="text-base sm:text-lg text-gray-200">📋 დაკვირვების გზამკვლევი</h2>
-                    <svg class="chevron w-5 h-5 text-gray-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
+            <div class="glass p-4 sm:p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <h2 class="text-base sm:text-lg text-gray-100 font-medium section-header">დაკვირვების გზამკვლევი</h2>
                 </div>
-                <div id="obs-guide-content" class="text-sm text-gray-400 leading-relaxed space-y-3 hidden">
-                    {{ observation.observation_text | replace('\n\n', '</p><p class="mt-3">') | replace('\n', '<br>') | safe }}
+                <div class="space-y-3 text-sm text-gray-300" style="line-height:1.8">
+                    {% for line in observation.observation_text.split('\n') %}
+                        {% set stripped = line.strip() %}
+                        {% if stripped.startswith('═') or stripped == '' %}
+                            {# skip decorative lines and empty lines between sections #}
+                        {% elif stripped.startswith('─') %}
+                            <hr class="border-white/5 my-2">
+                        {% elif stripped.startswith('⭐') or stripped.startswith('🪐') or stripped.startswith('🌙') or stripped.startswith('💡') %}
+                            <p class="text-indigo-300 font-medium">{{ stripped }}</p>
+                        {% elif stripped.startswith('⚠️') %}
+                            <p class="text-yellow-500/80 text-xs">{{ stripped }}</p>
+                        {% elif stripped.startswith('📍') or stripped.startswith('🔍') or stripped.startswith('📊') %}
+                            <p class="text-gray-300">{{ stripped }}</p>
+                        {% elif stripped %}
+                            <p class="text-gray-400">{{ stripped }}</p>
+                        {% endif %}
+                    {% endfor %}
                 </div>
             </div>
         </div>
