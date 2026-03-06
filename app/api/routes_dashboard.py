@@ -11,7 +11,10 @@ from fastapi.templating import Jinja2Templates
 
 from app.config import settings
 from app.services.daily_pipeline import get_today_observation, collect_daily_data
-from app.core.astronomy import get_best_visible_planet, get_sun_times
+from app.services.ai_recap import generate_daily_recap
+from app.core.astronomy import (
+    get_best_visible_planet, get_sun_times, get_planet_positions_live
+)
 from app.core.telescope import recommend_telescope
 from app.core.weather import get_current_weather, get_evening_forecast
 
@@ -200,6 +203,16 @@ async def dashboard(request: Request):
     except Exception:
         pass
 
+    # ── Live planet positions (real-time) ──
+    try:
+        tz = ZoneInfo(settings.timezone)
+        now = datetime.now(tz)
+        live_planets = get_planet_positions_live(settings.location_lat, settings.location_lon, tz)
+        observation.planets = live_planets
+    except Exception:
+        tz = ZoneInfo(settings.timezone)
+        now = datetime.now(tz)
+
     best_planet = get_best_visible_planet(observation.planets)
     telescope = recommend_telescope(
         best_planet, observation.cloud_coverage, observation.moon_illumination
@@ -207,8 +220,6 @@ async def dashboard(request: Request):
     visible_planets = [p for p in observation.planets if p.is_visible]
 
     try:
-        tz = ZoneInfo(settings.timezone)
-        now = datetime.now(tz)
         sun = get_sun_times(settings.location_lat, settings.location_lon, tz)
         is_night = sun["is_night"]
         is_twilight = sun.get("is_civil_twilight", False)
@@ -218,6 +229,12 @@ async def dashboard(request: Request):
         is_night = True
         is_twilight = False
         current_time = "00:00:00"
+
+    # ── AI Sky Recap (cached daily) ──
+    try:
+        ai_recap = await generate_daily_recap(observation, visible_planets, is_night)
+    except Exception:
+        ai_recap = ""
 
     return templates.TemplateResponse("dashboard.html", {
         "request": request,
@@ -230,6 +247,7 @@ async def dashboard(request: Request):
         "current_time": current_time,
         "sun": sun,
         "last_updated": datetime.now(ZoneInfo(settings.timezone)).strftime("%H:%M"),
+        "ai_recap": ai_recap,
     })
 
 
