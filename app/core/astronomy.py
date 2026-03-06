@@ -44,13 +44,16 @@ NAKED_EYE_MAG_LIMIT = 6.0    # Practical limit for Tbilisi (urban sky)
 BINOCULAR_MAG_LIMIT = 8.5    # Binoculars limit
 
 
-def _get_visibility_type(mag: float) -> str:
-    """Classify planet visibility requirement by magnitude."""
-    if mag <= NAKED_EYE_MAG_LIMIT:
-        return "naked_eye"
-    elif mag <= BINOCULAR_MAG_LIMIT:
-        return "binoculars"
-    return "telescope"
+def _get_visibility_type(alt_deg: float, mag: float) -> tuple[str, bool]:
+    """Return (visibility_type, is_visible) based on altitude and magnitude."""
+    if alt_deg > 5:
+        if mag < 4.5:
+            return "naked_eye", True
+        elif mag < 6.0:
+            return "binocular", True
+        else:
+            return "telescope_only", False
+    return "not_visible", False
 
 
 CONSTELLATION_MAP = {
@@ -136,7 +139,7 @@ def get_planet_positions(dt: Optional[datetime] = None) -> list[PlanetInfo]:
             constellation_abbr = ephem.constellation(body)[0]
             constellation_ka = CONSTELLATION_MAP.get(constellation_abbr, constellation_abbr)
 
-            is_visible = alt_deg > 5  # Above 5° horizon — altitude check only
+            visibility_type, is_visible = _get_visibility_type(alt_deg, mag)
 
             results.append(PlanetInfo(
                 name=eng_name,
@@ -146,7 +149,7 @@ def get_planet_positions(dt: Optional[datetime] = None) -> list[PlanetInfo]:
                 is_visible=is_visible,
                 magnitude=round(mag, 2),
                 constellation=constellation_ka,
-                visibility_type=_get_visibility_type(mag),
+                visibility_type=visibility_type,
             ))
         except Exception as e:
             logger.warning(f"Error computing {eng_name}: {e}")
@@ -180,7 +183,7 @@ def get_planet_positions_live(
             alt_deg = math.degrees(float(body.alt))
             az_deg = math.degrees(float(body.az))
             mag = float(body.mag)
-            is_visible = alt_deg > 5
+            visibility_type, is_visible = _get_visibility_type(alt_deg, mag)
 
             constellation_abbr = ephem.constellation(body)[0]
             constellation_ka = CONSTELLATION_MAP.get(constellation_abbr, constellation_abbr)
@@ -217,7 +220,7 @@ def get_planet_positions_live(
                 is_visible=is_visible,
                 magnitude=round(mag, 2),
                 constellation=constellation_ka,
-                visibility_type=_get_visibility_type(mag),
+                visibility_type=visibility_type,
                 rise_time=rise_time,
                 set_time=set_time,
                 transit_time=transit_time,

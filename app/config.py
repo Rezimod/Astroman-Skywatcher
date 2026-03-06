@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     )
 
     # Application
-    app_name: str = "Astroman Skywatcher"
+    app_name: str = "ASTROMAN Sky Intelligence"
     app_env: str = "development"
     app_debug: bool = False
     app_secret_key: str = "change-me-in-production"
@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     smtp_username: str = ""
     smtp_password: str = ""
     smtp_from_email: str = "sky@astroman.ge"
-    smtp_from_name: str = "Astroman Skywatcher"
+    smtp_from_name: str = "ASTROMAN Sky Intelligence"
     sendgrid_api_key: str = ""
     sendgrid_from_email: str = "sky@astroman.ge"
 
@@ -58,7 +58,7 @@ class Settings(BaseSettings):
 
     # Store
     astroman_store_url: str = "https://astroman.ge"
-    astroman_products_url: str = "https://astroman.ge/products"
+    astroman_products_url: str = "https://astroman.ge/teleskopi"
 
     # WooCommerce API
     woo_api_url: str = ""           # e.g. https://astroman.ge/wp-json/wc/v3

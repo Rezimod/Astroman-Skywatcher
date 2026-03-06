@@ -75,15 +75,12 @@ def _score_moon(moon_illumination: float) -> float:
 
 
 def _grade_from_score(score: int) -> str:
-    """A/B/C/D/F grading."""
-    if score >= 80:
-        return "A"
-    elif score >= 60:
-        return "B"
-    elif score >= 40:
-        return "C"
-    elif score >= 20:
-        return "D"
+    """A/B/C/D/E/F grading."""
+    if score >= 80: return "A"
+    elif score >= 60: return "B"
+    elif score >= 40: return "C"
+    elif score >= 25: return "D"
+    elif score >= 10: return "E"
     return "F"
 
 
@@ -95,7 +92,9 @@ def _recommendation_from_score(score: int) -> tuple[str, str]:
         return "Good", "კარგი"
     elif score >= 40:
         return "Moderate", "საშუალო"
-    elif score >= 20:
+    elif score >= 25:
+        return "Limited", "შეზღუდული"
+    elif score >= 10:
         return "Poor", "ცუდი"
     return "Not Recommended", "არ არის რეკომენდებული"
 
