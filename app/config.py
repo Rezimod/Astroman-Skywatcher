@@ -60,6 +60,9 @@ class Settings(BaseSettings):
     astroman_store_url: str = "https://astroman.ge"
     astroman_products_url: str = "https://astroman.ge/products"
 
+    # Anthropic AI
+    anthropic_api_key: str = ""
+
     # WooCommerce API
     woo_api_url: str = ""           # e.g. https://astroman.ge/wp-json/wc/v3
     woo_consumer_key: str = ""
