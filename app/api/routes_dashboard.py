@@ -13,7 +13,7 @@ from app.config import settings
 from app.services.daily_pipeline import get_today_observation, collect_daily_data
 from app.core.astronomy import get_best_visible_planet, get_sun_times
 from app.core.telescope import recommend_telescope
-from app.core.weather import get_current_weather
+from app.core.weather import get_current_weather, get_evening_forecast
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -191,7 +191,7 @@ async def dashboard(request: Request):
         observation = await collect_daily_data()
 
     try:
-        live_weather = await get_current_weather()
+        live_weather = await get_evening_forecast()
         if live_weather:
             observation.cloud_coverage = live_weather.cloud_coverage
             observation.temperature = live_weather.temperature
