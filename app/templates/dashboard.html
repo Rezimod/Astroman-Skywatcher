@@ -441,26 +441,29 @@
             </div>
             {% endif %}
 
-            <!-- Observation Guide -->
+            <!-- Observation Guide — concise, first 7 meaningful lines only -->
             <div class="glass p-4 sm:p-6">
-                <div class="flex items-center gap-3 mb-4">
-                    <h2 class="text-base sm:text-lg text-gray-100 font-medium section-header">დაკვირვების გზამკვლევი</h2>
-                </div>
-                <div class="space-y-3 text-sm text-gray-300" style="line-height:1.8">
+                <h2 class="text-sm text-gray-100 font-medium section-header mb-3">💡 დაკვირვების გზამკვლევი</h2>
+                <div class="space-y-2 text-sm" style="line-height:1.7">
+                    {% set ns = namespace(count=0) %}
                     {% for line in observation.observation_text.split('\n') %}
-                        {% set stripped = line.strip() %}
-                        {% if stripped.startswith('═') or stripped == '' %}
-                            {# skip decorative lines and empty lines between sections #}
-                        {% elif stripped.startswith('─') %}
-                            <hr class="border-white/5 my-2">
-                        {% elif stripped.startswith('⭐') or stripped.startswith('🪐') or stripped.startswith('🌙') or stripped.startswith('💡') %}
-                            <p class="text-indigo-300 font-medium">{{ stripped }}</p>
-                        {% elif stripped.startswith('⚠️') %}
-                            <p class="text-yellow-500/80 text-xs">{{ stripped }}</p>
-                        {% elif stripped.startswith('📍') or stripped.startswith('🔍') or stripped.startswith('📊') %}
-                            <p class="text-gray-300">{{ stripped }}</p>
-                        {% elif stripped %}
-                            <p class="text-gray-400">{{ stripped }}</p>
+                        {% if ns.count < 7 %}
+                            {% set stripped = line.strip() %}
+                            {% if stripped and not stripped.startswith('═') and not stripped.startswith('─') and not stripped.startswith('📊') %}
+                                {% if stripped.startswith('⭐') or stripped.startswith('🪐') or stripped.startswith('🌙') or stripped.startswith('💡') %}
+                                    <p class="text-indigo-300 font-medium text-xs">{{ stripped }}</p>
+                                    {% set ns.count = ns.count + 1 %}
+                                {% elif stripped.startswith('⚠️') %}
+                                    <p class="text-yellow-500/70 text-xs">{{ stripped }}</p>
+                                    {% set ns.count = ns.count + 1 %}
+                                {% elif stripped.startswith('📍') or stripped.startswith('🔍') %}
+                                    <p class="text-gray-400 text-xs">{{ stripped }}</p>
+                                    {% set ns.count = ns.count + 1 %}
+                                {% elif stripped %}
+                                    <p class="text-gray-500 text-xs">{{ stripped }}</p>
+                                    {% set ns.count = ns.count + 1 %}
+                                {% endif %}
+                            {% endif %}
                         {% endif %}
                     {% endfor %}
                 </div>
@@ -657,7 +660,7 @@
                 <div class="text-2xl flex-shrink-0 ml-4">📡</div>
             </div>
             <!-- Image -->
-            <div id="apod-img-wrap" style="position:relative;aspect-ratio:16/9;overflow:hidden;background:#03050d;">
+            <div id="apod-img-wrap" style="position:relative;height:220px;overflow:hidden;background:#03050d;">
                 <img id="apod-img" src="" alt="NASA APOD"
                      style="width:100%;height:100%;object-fit:cover;display:none;animation:apodFadeIn .8s ease;"
                      onerror="document.getElementById('apod-img-err').style.display='flex';this.style.display='none';" />
@@ -689,43 +692,8 @@
             <h2 class="text-base sm:text-lg text-gray-100 font-medium section-header whitespace-nowrap">🪐 პლანეტების გზამკვლევი</h2>
             <span class="text-xs text-gray-600">დააჭირე — ნახე 70mm ტელესკოპით</span>
         </div>
-        <div class="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3">
-            {% set planet_cards = [
-                ('moon',    'მთვარე',   '#f0e68c', 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Full_Moon_Luc_Viatour.jpg/300px-Full_Moon_Luc_Viatour.jpg'),
-                ('mercury', 'მერკური',  '#9ca3af', 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Mercury_in_true_color.jpg/300px-Mercury_in_true_color.jpg'),
-                ('venus',   'ვენერა',   '#fbbf24', 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/PIA23791.jpg/300px-PIA23791.jpg'),
-                ('mars',    'მარსი',    '#f87171', 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/300px-OSIRIS_Mars_true_color.jpg'),
-                ('jupiter', 'იუპიტერი', '#fb923c', 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Jupiter_and_its_shrunken_Great_Red_Spot.jpg/300px-Jupiter_and_its_shrunken_Great_Red_Spot.jpg'),
-                ('saturn',  'სატურნი',  '#eab308', 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Saturn_during_Equinox.jpg/300px-Saturn_during_Equinox.jpg'),
-                ('uranus',  'ურანი',    '#22d3ee', 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Uranus_as_seen_by_NASA%27s_Voyager_2_%28remastered%29_-_JPEG_converted.jpg/300px-Uranus_as_seen_by_NASA%27s_Voyager_2_%28remastered%29_-_JPEG_converted.jpg'),
-                ('neptune', 'ნეპტუნი',  '#60a5fa', 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg/300px-Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg'),
-            ] %}
-            {% for slug, name_ka, color, img_url in planet_cards %}
-            <button onclick="openPlanetModal('{{ slug }}')"
-               class="planet-img-card group"
-               style="border-color:{{ color }}22;--pcolor:{{ color }};">
-                <!-- Real telescope photo -->
-                <div class="planet-img-wrap">
-                    <img src="{{ img_url }}"
-                         alt="{{ name_ka }} — 70mm ტელესკოპი"
-                         loading="lazy"
-                         class="planet-img-photo"
-                         onerror="this.style.display='none';this.nextSibling.style.display='flex';" />
-                    <!-- Emoji fallback -->
-                    <div class="planet-img-fallback" style="display:none;color:{{ color }};">
-                        {% if slug=='moon' %}🌕{% elif slug=='mercury' %}⚫{% elif slug=='venus' %}🟡
-                        {% elif slug=='mars' %}🔴{% elif slug=='jupiter' %}🟠{% elif slug=='saturn' %}🪐
-                        {% elif slug=='uranus' %}🔵{% else %}💙{% endif %}
-                    </div>
-                    <!-- Scope label overlay -->
-                    <div class="planet-img-badge" style="border-color:{{ color }}44;color:{{ color }}cc;">🔭 70mm</div>
-                    <!-- Hover glow ring -->
-                    <div class="planet-img-ring" style="box-shadow:0 0 0 2px {{ color }}55;"></div>
-                </div>
-                <div class="planet-img-name group-hover:text-white transition-colors">{{ name_ka }}</div>
-            </button>
-            {% endfor %}
-        </div>
+        <!-- JS populates this grid using PLANETS.views[1] images (70mm) -->
+        <div id="planet-grid" class="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3"></div>
     </div>
 
     <style>
@@ -948,19 +916,19 @@
                 <div class="flex-1 h-px bg-white/5"></div>
             </div>
 
-            <!-- Single beginner telescope view image -->
+            <!-- 70mm telescope view image -->
             <div class="rounded-2xl overflow-hidden mb-5" style="border: 1px solid ${p.color}22; background:#03050d;">
-                <div class="relative" style="aspect-ratio:16/9; overflow:hidden; background:#03050d;">
-                    <img src="${p.views[0].img}" alt="${p.name}"
+                <div class="relative" style="height:200px; overflow:hidden; background:#03050d;">
+                    <img src="${p.views[1].img}" alt="${p.name} 70mm"
                          style="width:100%;height:100%;object-fit:cover;display:block;"
                          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-                         loading="lazy"/>
-                    <div style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;font-size:3rem;background:radial-gradient(circle,${p.color}22,#03050d);">${p.emoji}</div>
-                    <div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.78);border:1px solid ${p.color}44;color:${p.color};font-size:0.7rem;font-family:monospace;padding:4px 10px;border-radius:20px;backdrop-filter:blur(8px);">🔭 დამწყები · ${p.views[0].ap}</div>
+                         loading="eager"/>
+                    <div style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;font-size:4rem;background:radial-gradient(circle,${p.color}22,#03050d);">${p.emoji}</div>
+                    <div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.8);border:1px solid ${p.color}44;color:${p.color};font-size:0.65rem;font-family:monospace;padding:4px 10px;border-radius:20px;backdrop-filter:blur(8px);">🔭 70mm · ${p.views[1].mag}</div>
                 </div>
-                <div class="p-4">
-                    <div class="text-sm font-medium text-white mb-1" style="line-height:1.4">${p.views[0].label}</div>
-                    <div class="text-xs text-gray-500" style="line-height:1.6">${p.views[0].desc}</div>
+                <div class="p-3">
+                    <div class="text-sm font-medium text-white mb-1">${p.views[1].label}</div>
+                    <div class="text-xs text-gray-500" style="line-height:1.6">${p.views[1].desc}</div>
                 </div>
             </div>
 
@@ -968,15 +936,15 @@
             <div class="grid grid-cols-3 gap-2 mb-5">
                 <div class="glass text-center p-3 rounded-xl">
                     <div class="text-xs text-gray-600 mb-1">გადიდება</div>
-                    <div class="text-xs font-mono text-white">${p.views[0].mag}</div>
+                    <div class="text-xs font-mono text-white">${p.views[1].mag}</div>
                 </div>
                 <div class="glass text-center p-3 rounded-xl">
                     <div class="text-xs text-gray-600 mb-1">აპერტურა</div>
-                    <div class="text-xs font-mono text-white">${p.views[0].ap}+</div>
+                    <div class="text-xs font-mono text-white">70mm+</div>
                 </div>
                 <div class="glass text-center p-3 rounded-xl">
                     <div class="text-xs text-gray-600 mb-1">სირთულე</div>
-                    <div class="text-xs font-mono text-white">${p.views[0].ap === '50mm' ? 'ადვილი' : 'საშუალო'}</div>
+                    <div class="text-xs font-mono text-white">საშუალო</div>
                 </div>
             </div>
 
@@ -1020,6 +988,37 @@
 
     // Close on Escape key
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlanetModal(); });
+
+    // ─────────────────────────────────────────────
+    // Planet Grid — populate with 70mm views[1] images
+    // ─────────────────────────────────────────────
+    (function renderPlanetGrid() {
+        const grid = document.getElementById('planet-grid');
+        if (!grid) return;
+        const order = ['moon','mercury','venus','mars','jupiter','saturn','uranus','neptune'];
+        order.forEach(slug => {
+            const p = PLANETS[slug];
+            if (!p) return;
+            const v = p.views[1]; // 70mm view
+            const btn = document.createElement('button');
+            btn.className = 'planet-img-card';
+            btn.style.cssText = `border-color:${p.color}22;--pcolor:${p.color};`;
+            btn.setAttribute('aria-label', p.name);
+            btn.onclick = () => openPlanetModal(slug);
+            btn.innerHTML = `
+                <div class="planet-img-wrap">
+                    <img src="${v.img}" alt="${p.name}"
+                         loading="lazy" class="planet-img-photo"
+                         onerror="this.style.display='none';document.getElementById('pfb-${slug}').style.display='flex';" />
+                    <div id="pfb-${slug}" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;font-size:28px;background:radial-gradient(circle,${p.color}22,#03050d);">${p.emoji}</div>
+                    <div class="planet-img-badge" style="border-color:${p.color}44;color:${p.color}cc;">🔭 70mm</div>
+                    <div class="planet-img-ring" style="box-shadow:0 0 0 2px ${p.color}55;"></div>
+                </div>
+                <div class="planet-img-name">${p.name}</div>
+            `;
+            grid.appendChild(btn);
+        });
+    })();
 
     // ─────────────────────────────────────────────
     // NASA APOD — Astronomy Picture of the Day
