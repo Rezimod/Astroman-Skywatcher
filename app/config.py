@@ -1,148 +1,98 @@
 """
-Astroman Skywatcher — Sky Recap Service
-Generates a daily Georgian-language sky summary from live observation data.
-No external API required. Cached per day.
+Astroman Skywatcher — Configuration
 """
-import logging
-from datetime import date
-
-logger = logging.getLogger("astroman.services.ai_recap")
-
-# In-memory daily cache: {date_str: recap_text}
-_recap_cache: dict[str, str] = {}
+from pathlib import Path
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-def _sky_condition_text(clouds: int) -> tuple[str, str]:
-    if clouds <= 15:
-        return "🌟", "ცა სრულიად წმინდაა — ტელესკოპისთვის იდეალური საღამო"
-    elif clouds <= 35:
-        return "✨", "ცა თითქმის წმინდაა — შესანიშნავი პირობები დაკვირვებისთვის"
-    elif clouds <= 55:
-        return "⛅", "ნაწილობრივ ღრუბლიანი — ღრუბლებს შორის კარგი ხედვა"
-    elif clouds <= 75:
-        return "🌥", "მეტწილად ღრუბლიანი — დაკვირვება შეზღუდულია"
-    else:
-        return "☁️", "ძლიერ ღრუბლიანი — ღამე არახელსაყრელია დასაკვირვებლად"
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-def _moon_text(illumination: float, phase: str) -> str:
-    if illumination < 10:
-        return f"მთვარე პრაქტიკულად უხილავია ({round(illumination)}%) — ღრმა კოსმოსის ობიექტებისთვის სრულყოფილი პირობები 🌑"
-    elif illumination < 35:
-        return f"მთვარე {round(illumination)}%-ით განათებულია ({phase}) — ბნელი ცა ღრმა კოსმოსისთვის კარგია"
-    elif illumination < 65:
-        return f"მთვარე {round(illumination)}%-ით განათებულია ({phase}) — პლანეტები კარგად ჩანს, ნისლეულები ნაკლებად"
-    elif illumination < 85:
-        return f"მთვარე {round(illumination)}%-ით კაშკაშაა ({phase}) — ფილტრის გამოყენება რეკომენდებულია"
-    else:
-        return f"სავსე მთვარე ({round(illumination)}%) ცას ანათებს — პლანეტები და ორმაგი ვარსკვლავები კარგი სამიზნეებია 🌕"
-
-
-def _best_planet_text(best, visible_planets: list) -> str:
-    if not best:
-        return "ამ მომენტში ნათელი პლანეტები ჰორიზონტზე არ ჩანს."
-
-    direction_map = {
-        "ჩ": "ჩრდილოეთით", "ჩ-აღ": "ჩრდილო-აღმოსავლეთით",
-        "აღ": "აღმოსავლეთით", "სამ-აღ": "სამხრეთ-აღმოსავლეთით",
-        "სამ": "სამხრეთით", "სამ-დ": "სამხრეთ-დასავლეთით",
-        "დას": "დასავლეთით", "ჩ-დ": "ჩრდილო-დასავლეთით",
-    }
-    dirs = ["ჩ", "ჩ-აღ", "აღ", "სამ-აღ", "სამ", "სამ-დ", "დას", "ჩ-დ"]
-
-    az = getattr(best, "azimuth", 180)
-    dir_short = dirs[round(az / 45) % 8]
-    dir_long = direction_map.get(dir_short, dir_short)
-    alt = round(getattr(best, "altitude", 0))
-    mag = getattr(best, "magnitude", "?")
-    name_ka = getattr(best, "name_ka", "")
-    constellation = getattr(best, "constellation", "")
-
-    planet_str = (
-        f"დღეს საღამოს ყველაზე კაშკაშა სანახაობაა "
-        f"⭐ {name_ka} — {dir_long}, ჰორიზონტიდან {alt}°-ზე, "
-        f"{constellation} თანავარსკვლავედში (სიკაშკაშე {mag} mag)."
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=str(BASE_DIR / ".env"),
+        env_file_encoding="utf-8",
+        extra="ignore",
     )
 
-    others = [p for p in visible_planets if p != best]
-    if others:
-        other_names = ", ".join(p.name_ka for p in others[:4])
-        planet_str += f" ასევე ჩანს: {other_names}."
+    # Application
+    app_name: str = "Astroman Skywatcher"
+    app_env: str = "development"
+    app_debug: bool = False
+    app_secret_key: str = "change-me-in-production"
+    app_host: str = "0.0.0.0"
+    app_port: int = 8000
 
-    return planet_str
+    # Admin
+    admin_username: str = "admin"
+    admin_password: str = "admin"
+
+    # Location (Tbilisi defaults)
+    location_lat: float = 41.7151
+    location_lon: float = 44.8271
+    location_name: str = "თბილისი"
+    timezone: str = "Asia/Tbilisi"
+
+    # OpenWeather
+    openweather_api_key: str = ""
+
+    # Email
+    email_provider: str = "smtp"
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    smtp_from_email: str = "sky@astroman.ge"
+    smtp_from_name: str = "Astroman Skywatcher"
+    sendgrid_api_key: str = ""
+    sendgrid_from_email: str = "sky@astroman.ge"
+
+    # Telegram
+    telegram_bot_token: str = ""
+    telegram_enabled: bool = False
+
+    # Scheduler
+    daily_send_hour: int = 17
+    daily_send_minute: int = 0
+    weekly_summary_day: int = 0
+
+    # Store
+    astroman_store_url: str = "https://astroman.ge"
+    astroman_products_url: str = "https://astroman.ge/products"
+
+    # Anthropic AI
+    anthropic_api_key: str = ""
+
+    # WooCommerce API
+    woo_api_url: str = ""           # e.g. https://astroman.ge/wp-json/wc/v3
+    woo_consumer_key: str = ""
+    woo_consumer_secret: str = ""
+    woo_cache_ttl_seconds: int = 600  # 10 minutes
+
+    # Store Physical Location
+    store_name: str = "ASTROMAN"
+    store_address: str = "თბილისი, საქართველო"
+    store_city: str = "თბილისი"
+    store_country: str = "საქართველო"
+    store_google_maps_url: str = "https://maps.google.com/?q=ASTROMAN+Tbilisi"
+    store_phone: str = ""
+    store_email: str = "info@astroman.ge"
+    store_working_hours_weekday: str = "10:00–20:00"
+    store_working_hours_weekend: str = "11:00–18:00"
+    store_instagram: str = "https://instagram.com/astroman.ge"
+    store_facebook: str = "https://facebook.com/astroman.ge"
+
+    # Notifications (future architecture)
+    notifications_enabled: bool = False
+    clear_sky_alert_threshold: int = 15   # cloud % below which to alert
+    planet_rise_alert_enabled: bool = False
+
+    # Database
+    database_url: str = f"sqlite:///{BASE_DIR / 'astroman.db'}"
+
+    @property
+    def db_path(self) -> str:
+        return str(BASE_DIR / "astroman.db")
 
 
-def _observation_tip(best, clouds: int, moon: float, temp: float) -> str:
-    tips = []
-
-    if best:
-        name = getattr(best, "name", "")
-        if name == "Saturn":
-            tips.append("სატურნის რგოლები 50mm ტელესკოპითაც შთამბეჭდავად ჩანს")
-        elif name == "Jupiter":
-            tips.append("იუპიტერის ოთხი გალილეური თანამგზავრი 40x გადიდებაზე ჩანს")
-        elif name == "Venus":
-            tips.append("ვენერა იმდენად კაშკაშაა, რომ შეუიარაღებელი თვალითაც ნათლად ჩანს")
-        elif name == "Mars":
-            tips.append("მარსის პოლარული ყინვის ქუდი 70mm ტელესკოპით ჩანს")
-        elif name == "Moon":
-            tips.append("ტერმინატორის ხაზზე კრატერების ჩრდილები 3D ეფექტს ქმნის")
-
-    if moon > 80 and tips:
-        tips.append("მთვარის ფილტრი კონტრასტს გაუმჯობესებს")
-
-    if clouds > 40:
-        tips.append("ღრუბლების გარდინის გაქრობის მოლოდინში მოემზადე ტელესკოპი")
-
-    if temp < 5:
-        tips.append(f"ცივა ({round(temp)}°C) — თბილი ტანსაცმელი სავალდებულოა")
-
-    if not tips:
-        return "🔭 ტელესკოპი გაასხვა, ამ ღამეს ცა გელის!"
-
-    return "💡 " + "; ".join(tips[:2]) + "."
-
-
-async def generate_daily_recap(observation, visible_planets: list, is_night: bool) -> str:
-    """
-    Returns a rich Georgian sky recap built from live observation data.
-    Cached once per calendar day. No external API required.
-    """
-    today = str(date.today())
-
-    if today in _recap_cache:
-        return _recap_cache[today]
-
-    try:
-        clouds = observation.cloud_coverage
-        moon = observation.moon_illumination
-        temp = observation.temperature
-        phase = observation.moon_phase
-
-        sky_emoji, sky_text = _sky_condition_text(clouds)
-        moon_text = _moon_text(moon, phase)
-
-        sorted_planets = sorted(
-            visible_planets,
-            key=lambda p: float(str(getattr(p, "magnitude", 99)).replace("−", "-"))
-        )
-        best = sorted_planets[0] if sorted_planets else None
-
-        planet_text = _best_planet_text(best, sorted_planets)
-        tip = _observation_tip(best, clouds, moon, temp)
-
-        recap = f"{sky_emoji} {sky_text}. {planet_text} {moon_text}. {tip}"
-
-        _recap_cache[today] = recap
-        logger.info("Recap generated for %s", today)
-        return recap
-
-    except Exception as exc:
-        logger.warning("Recap generation failed: %s", exc)
-        fallback = (
-            f"🔭 დღეს {len(visible_planets)} პლანეტა ჩანს ცაზე. "
-            f"მთვარე {round(observation.moon_illumination)}%-ით განათებულია. "
-            f"ამინდი: {observation.cloud_coverage}% ღრუბლიანობა, {round(observation.temperature)}°C."
-        )
-        _recap_cache[today] = fallback
-        return fallback
+settings = Settings()
