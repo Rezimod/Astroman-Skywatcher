@@ -5,60 +5,154 @@
 {% block content %}
 <div class="space-y-5">
 
-    <!-- Hero Header -->
-    <div class="text-center pt-4 pb-2">
-        <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs tracking-widest text-indigo-400/70 uppercase mb-3">
-            <span>{{ observation.date | datetimeformat }}</span>
-            <span class="text-gray-800">·</span>
-            <span>თბილისი</span>
-            <span class="text-gray-800">·</span>
-            <span id="tbilisi-clock" class="font-mono text-indigo-300/80"></span>
-            <span class="text-gray-800">·</span>
-            <span class="text-gray-700 text-[10px] normal-case tracking-normal">განახლდა {{ last_updated }}</span>
+    <!-- Hero Header — Cosmic redesign -->
+    <div class="relative text-center pt-8 pb-6 overflow-hidden" style="min-height:220px;">
+        <!-- Radial glow backdrop -->
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(99,102,241,0.18) 0%,transparent 70%);pointer-events:none;"></div>
+        <!-- Animated star dots -->
+        <div class="hero-stars" aria-hidden="true"></div>
+
+        <!-- Meta row -->
+        <div class="relative flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[11px] tracking-widest text-indigo-400/60 uppercase mb-5">
+            <span class="font-mono text-indigo-300/70">{{ observation.date | datetimeformat }}</span>
+            <span class="text-indigo-900">·</span>
+            <span>📍 თბილისი</span>
+            <span class="text-indigo-900">·</span>
+            <span id="tbilisi-clock" class="font-mono text-indigo-300/80 tabular-nums"></span>
+            <span class="text-indigo-900">·</span>
+            <span class="text-indigo-900/50 text-[10px] normal-case tracking-normal">განახლდა {{ last_updated }}</span>
         </div>
-        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-light mb-1 text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-white to-violet-300 leading-tight">
-            ღამის ცის გზამკვლევი
-        </h1>
-        <p class="text-gray-600 text-xs uppercase tracking-widest">თბილისის ცის ობსერვატორია</p>
-        {% if best_planet and is_night %}
-        <div id="hero-badge" class="inline-flex items-center gap-2 mt-4 bg-indigo-950/50 border border-indigo-800/30 rounded-full px-4 py-2 text-sm">
-            <span class="text-yellow-400 animate-pulse-slow">⭐</span>
-            <span class="text-indigo-200">დღეს ეძებე: <strong class="text-white">{{ best_planet.name_ka }}</strong></span>
+
+        <!-- Main title -->
+        <div class="relative">
+            <div class="text-xs tracking-[0.35em] uppercase text-indigo-500/60 mb-3">🔭 ASTROMAN · ცის ობსერვატორია</div>
+            <h1 style="font-size:clamp(26px,5vw,48px);font-weight:300;line-height:1.15;letter-spacing:-0.5px;background:linear-gradient(135deg,#c7d2fe 0%,#ffffff 45%,#a5b4fc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;">
+                ღამის ცის გზამკვლევი
+            </h1>
+            <!-- Gold underline accent -->
+            <div style="display:inline-block;height:2px;width:60px;background:linear-gradient(90deg,transparent,#f5c842,transparent);margin-bottom:16px;border-radius:2px;"></div>
         </div>
-        {% endif %}
+
+        <!-- Live sky status -->
+        <div class="relative flex items-center justify-center gap-3 flex-wrap">
+            {% if is_night %}
+            <div class="hero-status-pill" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.35);color:#a5b4fc;">
+                <span class="hero-status-dot" style="background:#818cf8;box-shadow:0 0 6px #818cf8;"></span>
+                ვარსკვლავები ჩანს
+            </div>
+            {% elif is_twilight %}
+            <div class="hero-status-pill" style="background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.35);color:#c4b5fd;">
+                <span class="hero-status-dot" style="background:#a78bfa;box-shadow:0 0 6px #a78bfa;"></span>
+                შებინდება
+            </div>
+            {% else %}
+            <div class="hero-status-pill" style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);color:#fbbf24;">
+                <span class="hero-status-dot" style="background:#fbbf24;box-shadow:0 0 6px #fbbf24;"></span>
+                დღეა · მზე ჩადის {{ observation.sunset_time }}
+            </div>
+            {% endif %}
+
+            {% if best_planet and is_night %}
+            <div class="hero-status-pill" style="background:rgba(245,200,66,0.1);border:1px solid rgba(245,200,66,0.25);color:#f5c842;">
+                <span style="font-size:14px;">⭐</span>
+                <span>დღეს ეძებე: <strong>{{ best_planet.name_ka }}</strong></span>
+            </div>
+            {% endif %}
+        </div>
     </div>
 
-    <!-- Stat Cards — always shown in all modes -->
+    <style>
+    .hero-status-pill{display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border-radius:100px;font-size:13px;font-weight:500;}
+    .hero-status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+    .hero-stars{position:absolute;inset:0;pointer-events:none;}
+    .hero-stars::before,.hero-stars::after{content:'';position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;box-shadow:
+      80px 40px 0 0 rgba(255,255,255,.4),150px 20px 0 0 rgba(255,255,255,.3),
+      220px 70px 0 0 rgba(255,255,255,.5),310px 30px 0 0 rgba(255,255,255,.3),
+      400px 55px 0 0 rgba(255,255,255,.4),480px 15px 0 0 rgba(255,255,255,.2),
+      560px 80px 0 0 rgba(255,255,255,.5),630px 35px 0 0 rgba(255,255,255,.3),
+      700px 10px 0 0 rgba(255,255,255,.4),780px 60px 0 0 rgba(255,255,255,.2),
+      850px 25px 0 0 rgba(255,255,255,.5),920px 75px 0 0 rgba(255,255,255,.3),
+      990px 45px 0 0 rgba(255,255,255,.4),1060px 18px 0 0 rgba(255,255,255,.2),
+      1130px 65px 0 0 rgba(255,255,255,.5),1200px 38px 0 0 rgba(255,255,255,.3);}
+    .hero-stars::after{box-shadow:
+      50px 90px 0 0 rgba(200,210,255,.3),130px 110px 0 0 rgba(200,210,255,.2),
+      200px 100px 0 0 rgba(200,210,255,.4),280px 120px 0 0 rgba(200,210,255,.3),
+      360px 95px 0 0 rgba(200,210,255,.2),440px 130px 0 0 rgba(200,210,255,.4),
+      530px 105px 0 0 rgba(200,210,255,.3),610px 115px 0 0 rgba(200,210,255,.2),
+      690px 95px 0 0 rgba(200,210,255,.4),770px 125px 0 0 rgba(200,210,255,.3);}
+    </style>
+
+    <!-- Stat Cards — redesigned with glow borders -->
     <div class="grid grid-cols-2 gap-3 lg:grid-cols-4 stagger">
-        <div class="glass-card p-5 sm:p-6 text-center">
-            <div class="text-3xl mb-3">🌅</div>
-            <div class="text-[10px] text-indigo-400 uppercase tracking-widest mb-2">მზის ჩასვლა</div>
-            <div class="stat-value">{{ observation.sunset_time }}</div>
+
+        <!-- Sunset -->
+        <div class="stat-glow-card" style="--glow:#f97316;">
+            <div class="stat-glow-icon" style="color:#f97316;background:rgba(249,115,22,0.12);border-color:rgba(249,115,22,0.25);">🌅</div>
+            <div class="stat-glow-label">მზის ჩასვლა</div>
+            <div class="stat-glow-value" style="color:#fff;">{{ observation.sunset_time }}</div>
+            <div class="stat-glow-bar" style="background:linear-gradient(90deg,#f97316,#fb923c);width:70%;"></div>
         </div>
-        <div class="glass-card p-5 sm:p-6 text-center">
-            <div class="text-3xl mb-3">
-                {% if observation.moon_illumination < 5 %}🌑
-                {% elif observation.moon_illumination < 25 %}🌒
-                {% elif observation.moon_illumination < 50 %}🌓
-                {% elif observation.moon_illumination < 75 %}🌔
-                {% elif observation.moon_illumination < 95 %}🌖
-                {% else %}🌕{% endif %}
+
+        <!-- Moon -->
+        <div class="stat-glow-card" style="--glow:#a78bfa;">
+            <div class="stat-glow-icon" style="color:#a78bfa;background:rgba(167,139,250,0.12);border-color:rgba(167,139,250,0.25);">
+                {% if observation.moon_illumination < 5 %}🌑{% elif observation.moon_illumination < 25 %}🌒
+                {% elif observation.moon_illumination < 50 %}🌓{% elif observation.moon_illumination < 75 %}🌔
+                {% elif observation.moon_illumination < 95 %}🌖{% else %}🌕{% endif %}
             </div>
-            <div class="text-[10px] text-indigo-400 uppercase tracking-widest mb-2">მთვარე</div>
-            <div class="stat-value">{{ observation.moon_illumination|round(0)|int }}%</div>
-            <div class="text-[10px] text-gray-600 mt-1.5" style="line-height:1.6">{{ observation.moon_phase }}</div>
+            <div class="stat-glow-label">მთვარე</div>
+            <div class="stat-glow-value" style="color:#fff;">{{ observation.moon_illumination|round(0)|int }}%</div>
+            <div class="text-[10px] text-gray-600 mt-0.5 truncate" style="line-height:1.4">{{ observation.moon_phase }}</div>
+            <div class="stat-glow-bar" style="background:linear-gradient(90deg,#818cf8,#a78bfa,#fbbf24);width:{{ observation.moon_illumination }}%;"></div>
         </div>
-        <div class="glass-card p-5 sm:p-6 text-center">
-            <div class="text-3xl mb-3">☁️</div>
-            <div class="text-[10px] text-indigo-400 uppercase tracking-widest mb-2">ღრუბლები</div>
-            <div class="stat-value">{{ observation.cloud_coverage }}%</div>
+
+        <!-- Clouds -->
+        {% set cloud_color = '#22d3ee' if observation.cloud_coverage < 30 else ('#fbbf24' if observation.cloud_coverage < 60 else '#f87171') %}
+        <div class="stat-glow-card" style="--glow:{{ cloud_color }};">
+            <div class="stat-glow-icon" style="color:{{ cloud_color }};background:rgba(255,255,255,0.07);border-color:{{ cloud_color }}33;">☁️</div>
+            <div class="stat-glow-label">ღრუბლები</div>
+            <div class="stat-glow-value" style="color:{{ cloud_color }};">{{ observation.cloud_coverage }}%</div>
+            <div class="text-[10px] mt-0.5" style="color:{{ cloud_color }}88;">
+                {% if observation.cloud_coverage < 30 %}წმინდა ცა{% elif observation.cloud_coverage < 60 %}ნაწილობრივ{% else %}ძლიერ ღრუბლ.{% endif %}
+            </div>
+            <div class="stat-glow-bar" style="background:linear-gradient(90deg,{{ cloud_color }},{{ cloud_color }}88);width:{{ observation.cloud_coverage }}%;"></div>
         </div>
-        <div class="glass-card p-5 sm:p-6 text-center">
-            <div class="text-3xl mb-3">🌡</div>
-            <div class="text-[10px] text-indigo-400 uppercase tracking-widest mb-2">ტემპერატურა</div>
-            <div class="stat-value">{{ observation.temperature|round(0)|int }}°C</div>
+
+        <!-- Temperature -->
+        {% set temp_val = observation.temperature|round(0)|int %}
+        {% set temp_color = '#60a5fa' if temp_val < 5 else ('#4ade80' if temp_val < 18 else '#f97316') %}
+        <div class="stat-glow-card" style="--glow:{{ temp_color }};">
+            <div class="stat-glow-icon" style="color:{{ temp_color }};background:rgba(255,255,255,0.07);border-color:{{ temp_color }}33;">🌡</div>
+            <div class="stat-glow-label">ტემპერატურა</div>
+            <div class="stat-glow-value" style="color:#fff;">{{ temp_val }}°C</div>
+            <div class="text-[10px] text-gray-600 mt-0.5">💨 {{ observation.wind_speed }} m/s</div>
+            <div class="stat-glow-bar" style="background:linear-gradient(90deg,{{ temp_color }},{{ temp_color }}88);width:{{ [(temp_val+20)*1.5,100]|min|round }}%;"></div>
         </div>
+
     </div>
+
+    <style>
+    .stat-glow-card{
+        background:rgba(255,255,255,0.04);
+        border:1px solid rgba(255,255,255,0.08);
+        border-top:1px solid var(--glow,#818cf8);
+        border-radius:16px;
+        padding:18px 16px 14px;
+        display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;
+        position:relative;overflow:hidden;
+        transition:transform .2s,box-shadow .2s;
+    }
+    .stat-glow-card::before{
+        content:'';position:absolute;top:0;left:0;right:0;height:60px;
+        background:linear-gradient(180deg,var(--glow,#818cf8)10 0%,transparent 100%);
+        opacity:.06;pointer-events:none;
+    }
+    .stat-glow-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.3);}
+    .stat-glow-icon{font-size:22px;width:44px;height:44px;border-radius:12px;border:1px solid;display:flex;align-items:center;justify-content:center;margin-bottom:4px;flex-shrink:0;}
+    .stat-glow-label{font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.12em;}
+    .stat-glow-value{font-size:22px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums;}
+    .stat-glow-bar{height:2px;border-radius:2px;margin-top:8px;align-self:stretch;max-width:100%;transition:width .8s;}
+    </style>
 
     {# ══════════════════════════════════════════════════ #}
     {# DAYTIME MODE                                       #}
@@ -551,33 +645,115 @@
         </div>
     </a>
 
+    {# ── NASA APOD — Astronomy Picture of the Day ── #}
+    <div id="apod-section" class="mt-2 animate-in" style="display:none;">
+        <div style="border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.09);background:rgba(255,255,255,0.04);">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-5 pt-4 pb-2">
+                <div>
+                    <div class="text-[10px] tracking-widest uppercase text-indigo-400 mb-0.5">NASA · Astronomy Picture of the Day</div>
+                    <div class="text-sm font-semibold text-white" id="apod-title">იტვირთება…</div>
+                </div>
+                <div class="text-2xl flex-shrink-0 ml-4">📡</div>
+            </div>
+            <!-- Image -->
+            <div id="apod-img-wrap" style="position:relative;aspect-ratio:16/9;overflow:hidden;background:#03050d;">
+                <img id="apod-img" src="" alt="NASA APOD"
+                     style="width:100%;height:100%;object-fit:cover;display:none;animation:apodFadeIn .8s ease;"
+                     onerror="document.getElementById('apod-img-err').style.display='flex';this.style.display='none';" />
+                <div id="apod-img-err" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:radial-gradient(ellipse,#1a0a2e,#03050d);">
+                    <span style="font-size:48px;">🌌</span>
+                    <span style="font-size:12px;color:rgba(255,255,255,0.4);">სურათი ვერ ჩაიტვირთა</span>
+                </div>
+                <div id="apod-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#03050d;">
+                    <div style="width:32px;height:32px;border:2px solid rgba(99,102,241,0.2);border-top-color:#818cf8;border-radius:50%;animation:apodSpin 1s linear infinite;"></div>
+                </div>
+            </div>
+            <!-- Caption -->
+            <div class="px-5 py-4">
+                <p id="apod-desc" class="text-xs text-gray-500 mb-3" style="line-height:1.7;"></p>
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                    <span id="apod-date" class="text-[10px] text-gray-700 font-mono"></span>
+                    <a id="apod-link" href="#" target="_blank" rel="noopener"
+                       style="display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:100px;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.3);color:#a5b4fc;font-size:12px;text-decoration:none;">
+                        ↗ NASA-ზე სრული სურათი
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {# ── Planets Explorer Section ── #}
     <div class="mt-6">
         <div class="flex items-center justify-between gap-4 mb-4 px-1">
             <h2 class="text-base sm:text-lg text-gray-100 font-medium section-header whitespace-nowrap">🪐 პლანეტების გზამკვლევი</h2>
-            <span class="text-xs text-gray-600">დააჭირე — ნახე ტელესკოპით</span>
+            <span class="text-xs text-gray-600">დააჭირე — ნახე 70mm ტელესკოპით</span>
         </div>
         <div class="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3">
             {% set planet_cards = [
-                ('moon',    '🌕', 'მთვარე',   '#f0e68c'),
-                ('mercury', '⚫', 'მერკური',  '#9ca3af'),
-                ('venus',   '🟡', 'ვენერა',   '#fbbf24'),
-                ('mars',    '🔴', 'მარსი',    '#f87171'),
-                ('jupiter', '🟠', 'იუპიტერი', '#fb923c'),
-                ('saturn',  '🪐', 'სატურნი',  '#eab308'),
-                ('uranus',  '🔵', 'ურანი',    '#22d3ee'),
-                ('neptune', '💙', 'ნეპტუნი',  '#60a5fa'),
+                ('moon',    'მთვარე',   '#f0e68c', 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Full_Moon_Luc_Viatour.jpg/300px-Full_Moon_Luc_Viatour.jpg'),
+                ('mercury', 'მერკური',  '#9ca3af', 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Mercury_in_true_color.jpg/300px-Mercury_in_true_color.jpg'),
+                ('venus',   'ვენერა',   '#fbbf24', 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/PIA23791.jpg/300px-PIA23791.jpg'),
+                ('mars',    'მარსი',    '#f87171', 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/300px-OSIRIS_Mars_true_color.jpg'),
+                ('jupiter', 'იუპიტერი', '#fb923c', 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Jupiter_and_its_shrunken_Great_Red_Spot.jpg/300px-Jupiter_and_its_shrunken_Great_Red_Spot.jpg'),
+                ('saturn',  'სატურნი',  '#eab308', 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Saturn_during_Equinox.jpg/300px-Saturn_during_Equinox.jpg'),
+                ('uranus',  'ურანი',    '#22d3ee', 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Uranus_as_seen_by_NASA%27s_Voyager_2_%28remastered%29_-_JPEG_converted.jpg/300px-Uranus_as_seen_by_NASA%27s_Voyager_2_%28remastered%29_-_JPEG_converted.jpg'),
+                ('neptune', 'ნეპტუნი',  '#60a5fa', 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg/300px-Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg'),
             ] %}
-            {% for slug, emoji, name_ka, color in planet_cards %}
+            {% for slug, name_ka, color, img_url in planet_cards %}
             <button onclick="openPlanetModal('{{ slug }}')"
-               class="glass-card p-3 text-center group hover:scale-105 transition-all duration-200 cursor-pointer"
-               style="border-top-color: {{ color }}33;">
-                <div class="text-2xl sm:text-3xl mb-1" style="filter: drop-shadow(0 0 6px {{ color }}66)">{{ emoji }}</div>
-                <div class="text-[10px] text-gray-500 group-hover:text-white transition-colors truncate">{{ name_ka }}</div>
+               class="planet-img-card group"
+               style="border-color:{{ color }}22;--pcolor:{{ color }};">
+                <!-- Real telescope photo -->
+                <div class="planet-img-wrap">
+                    <img src="{{ img_url }}"
+                         alt="{{ name_ka }} — 70mm ტელესკოპი"
+                         loading="lazy"
+                         class="planet-img-photo"
+                         onerror="this.style.display='none';this.nextSibling.style.display='flex';" />
+                    <!-- Emoji fallback -->
+                    <div class="planet-img-fallback" style="display:none;color:{{ color }};">
+                        {% if slug=='moon' %}🌕{% elif slug=='mercury' %}⚫{% elif slug=='venus' %}🟡
+                        {% elif slug=='mars' %}🔴{% elif slug=='jupiter' %}🟠{% elif slug=='saturn' %}🪐
+                        {% elif slug=='uranus' %}🔵{% else %}💙{% endif %}
+                    </div>
+                    <!-- Scope label overlay -->
+                    <div class="planet-img-badge" style="border-color:{{ color }}44;color:{{ color }}cc;">🔭 70mm</div>
+                    <!-- Hover glow ring -->
+                    <div class="planet-img-ring" style="box-shadow:0 0 0 2px {{ color }}55;"></div>
+                </div>
+                <div class="planet-img-name group-hover:text-white transition-colors">{{ name_ka }}</div>
             </button>
             {% endfor %}
         </div>
     </div>
+
+    <style>
+    .planet-img-card{
+        background:rgba(255,255,255,0.04);
+        border:1px solid rgba(255,255,255,0.07);
+        border-radius:14px;
+        padding:8px 6px 8px;
+        display:flex;flex-direction:column;align-items:center;gap:6px;
+        cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s;
+        position:relative;overflow:hidden;
+    }
+    .planet-img-card:hover{
+        transform:translateY(-3px) scale(1.04);
+        border-color:var(--pcolor,#818cf8)55;
+        box-shadow:0 8px 24px rgba(0,0,0,.4), 0 0 16px var(--pcolor,#818cf8)22;
+    }
+    .planet-img-wrap{position:relative;width:100%;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:#03050d;}
+    .planet-img-photo{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;}
+    .planet-img-card:hover .planet-img-photo{transform:scale(1.08);}
+    .planet-img-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;background:radial-gradient(circle,var(--pcolor,#818cf8)22,#03050d);}
+    .planet-img-badge{position:absolute;bottom:4px;left:4px;font-size:9px;font-family:monospace;background:rgba(0,0,0,0.72);border:1px solid;border-radius:20px;padding:2px 6px;backdrop-filter:blur(6px);}
+    .planet-img-ring{position:absolute;inset:0;border-radius:10px;opacity:0;transition:opacity .2s;}
+    .planet-img-card:hover .planet-img-ring{opacity:1;}
+    .planet-img-name{font-size:10px;color:rgba(255,255,255,0.45);letter-spacing:0.03em;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    @keyframes apodFadeIn{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:scale(1)}}
+    @keyframes apodSpin{to{transform:rotate(360deg)}}
+    </style>
 
     <!-- Planet Modal Overlay -->
     <div id="planet-modal" class="fixed inset-0 z-[70] hidden" role="dialog" aria-modal="true">
@@ -844,5 +1020,56 @@
 
     // Close on Escape key
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlanetModal(); });
+
+    // ─────────────────────────────────────────────
+    // NASA APOD — Astronomy Picture of the Day
+    // ─────────────────────────────────────────────
+    (async function loadAPOD() {
+        const COSMOS_DATES = [
+            '2024-04-24','2024-03-11','2024-01-09','2024-06-12','2023-11-01',
+            '2024-02-19','2023-09-12','2024-05-03','2023-07-12','2024-08-06',
+            '2023-10-22','2024-03-25','2023-12-14','2024-01-29','2023-08-16',
+            '2024-07-04','2024-09-10','2023-05-22','2024-10-01','2023-04-10',
+            '2024-11-05','2023-03-15','2024-12-03','2023-02-20','2024-02-05',
+            '2023-01-18','2024-10-29','2023-08-30','2024-06-28','2023-06-01',
+        ];
+        const dayIdx = Math.floor(Date.now() / 86400000) % COSMOS_DATES.length;
+
+        // Try today first, then rotate through deep-space archive
+        const urls = [
+            'https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY',
+            ...COSMOS_DATES.map((d, i) => `https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${COSMOS_DATES[(dayIdx+i)%COSMOS_DATES.length]}`)
+        ];
+
+        for (const url of urls) {
+            try {
+                const res = await fetch(url);
+                if (!res.ok) continue;
+                const d = await res.json();
+                if (d.media_type !== 'image') continue;
+
+                const imgSrc = d.hdurl || d.url;
+                const titleEl = document.getElementById('apod-title');
+                const imgEl   = document.getElementById('apod-img');
+                const descEl  = document.getElementById('apod-desc');
+                const dateEl  = document.getElementById('apod-date');
+                const linkEl  = document.getElementById('apod-link');
+                const loadEl  = document.getElementById('apod-loading');
+                const section = document.getElementById('apod-section');
+
+                if (titleEl) titleEl.textContent = d.title || '';
+                if (descEl)  descEl.textContent  = (d.explanation || '').slice(0, 220) + '…';
+                if (dateEl)  dateEl.textContent  = '📅 ' + (d.date || '');
+                if (linkEl)  linkEl.href         = d.url;
+
+                if (imgEl) {
+                    imgEl.onload = () => { if (loadEl) loadEl.style.display='none'; imgEl.style.display='block'; };
+                    imgEl.src = imgSrc;
+                }
+                if (section) section.style.display = 'block';
+                break;
+            } catch(_) {}
+        }
+    })();
 </script>
 {% endblock %}
