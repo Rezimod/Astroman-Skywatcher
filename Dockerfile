@@ -18,11 +18,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application
 COPY . .
 
-# Initialize database
-RUN python scripts/init_db.py
-
 # Expose port (Railway overrides with $PORT)
 EXPOSE 8000
 
-# Run — uses $PORT from Railway, falls back to 8000 locally
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Initialize DB at startup (needs env vars available at runtime), then launch
+CMD ["sh", "-c", "python scripts/init_db.py && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
