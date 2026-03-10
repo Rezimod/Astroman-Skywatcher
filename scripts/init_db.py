@@ -1,27 +1,115 @@
 """
 Astroman Skywatcher — Database Initialization Script
-Run: python scripts/init_db.py
+Uses only stdlib — no app imports, works during Docker build and at runtime.
 """
-import asyncio
-import sys
+import sqlite3
 import os
+import sys
 
-# Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# DB path: use DATABASE_URL env var or default to project root
+_db_url = os.environ.get("DATABASE_URL", "")
+if _db_url.startswith("sqlite:///"):
+    DB_PATH = _db_url[len("sqlite:///"):]
+else:
+    DB_PATH = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "astroman.db"
+    )
 
-from app.database import init_db, seed_telescopes
 
+def init_db():
+    print(f"🔧 Initializing database at: {DB_PATH}")
+    conn = sqlite3.connect(DB_PATH)
+    conn.executescript("""
+        CREATE TABLE IF NOT EXISTS subscribers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            name TEXT DEFAULT '',
+            telegram_chat_id TEXT DEFAULT '',
+            is_active INTEGER DEFAULT 1,
+            level TEXT DEFAULT 'beginner',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
 
-async def main():
-    print("🔧 Initializing ASTROMAN database...")
-    await init_db()
+        CREATE TABLE IF NOT EXISTS observations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date TEXT NOT NULL UNIQUE,
+            planets_data TEXT DEFAULT '{}',
+            moon_phase TEXT DEFAULT '',
+            moon_illumination REAL DEFAULT 0,
+            sunset_time TEXT DEFAULT '',
+            cloud_coverage INTEGER DEFAULT 0,
+            temperature REAL DEFAULT 0,
+            humidity INTEGER DEFAULT 0,
+            wind_speed REAL DEFAULT 0,
+            observation_text TEXT DEFAULT '',
+            recommended_telescope TEXT DEFAULT '',
+            product_link TEXT DEFAULT '',
+            is_override INTEGER DEFAULT 0,
+            override_text TEXT DEFAULT '',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS email_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            subscriber_id INTEGER,
+            observation_id INTEGER,
+            subject TEXT DEFAULT '',
+            status TEXT DEFAULT 'pending',
+            sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (subscriber_id) REFERENCES subscribers(id),
+            FOREIGN KEY (observation_id) REFERENCES observations(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS telescope_promotions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            slug TEXT NOT NULL,
+            category TEXT DEFAULT 'beginner',
+            min_aperture INTEGER DEFAULT 0,
+            description TEXT DEFAULT '',
+            is_active INTEGER DEFAULT 1,
+            priority INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS admin_settings (
+            key TEXT PRIMARY KEY,
+            value TEXT DEFAULT ''
+        );
+    """)
+    conn.commit()
     print("✅ Tables created")
 
-    await seed_telescopes()
+    telescopes = [
+        ("ASTROMAN Voyager 70mm", "voyager-70mm", "beginner", 70,
+         "დამწყებთათვის იდეალური რეფრაქტორი"),
+        ("ASTROMAN Explorer 90mm", "explorer-90mm", "intermediate", 90,
+         "საშუალო დონის რეფრაქტორი პლანეტების დასაკვირვებლად"),
+        ("ASTROMAN DeepSky 130mm", "deepsky-130mm", "advanced", 130,
+         "ღრმა კოსმოსის ობიექტებისთვის რეფლექტორი"),
+        ("ASTROMAN ProStar 200mm", "prostar-200mm", "professional", 200,
+         "პროფესიონალური დობსონის ტელესკოპი"),
+        ("ASTROMAN Galaxy Projector", "galaxy-projector", "accessory", 0,
+         "გალაქტიკის პროექტორი ღრუბლიანი ღამეებისთვის"),
+        ("ASTROMAN Luna Binoculars", "luna-binoculars", "beginner", 50,
+         "ასტრონომიული ბინოკლი მთვარის დასაკვირვებლად"),
+    ]
+    for t in telescopes:
+        try:
+            conn.execute(
+                """INSERT OR IGNORE INTO telescope_promotions
+                   (name, slug, category, min_aperture, description, is_active, priority)
+                   VALUES (?, ?, ?, ?, ?, 1, 0)""",
+                t
+            )
+        except Exception:
+            pass
+    conn.commit()
+    conn.close()
     print("✅ Telescope products seeded")
-
     print("🔭 Database ready!")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    init_db()

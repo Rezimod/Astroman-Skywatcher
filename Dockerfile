@@ -3,6 +3,8 @@ FROM python:3.11-slim
 # Set environment
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
+# Cache bust — increment to force full rebuild: v4
+ENV BUILD_VERSION=4
 
 WORKDIR /app
 
@@ -21,5 +23,5 @@ COPY . .
 # Expose port (Railway overrides with $PORT)
 EXPOSE 8000
 
-# Initialize DB at startup (needs env vars available at runtime), then launch
+# Initialize DB (stdlib only, no app imports) then start server
 CMD ["sh", "-c", "python scripts/init_db.py && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

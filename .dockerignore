@@ -1,0 +1,15 @@
+.git
+.gitignore
+.env
+*.db
+__pycache__
+**/__pycache__
+*.py[cod]
+.mypy_cache
+.pytest_cache
+planets/
+sky-frontend/
+*.log
+.DS_Store
+venv/
+.venv/
