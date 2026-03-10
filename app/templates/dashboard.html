@@ -670,23 +670,24 @@
             <h2 class="text-base sm:text-lg text-gray-100 font-medium section-header whitespace-nowrap">🪐 პლანეტების გზამკვლევი</h2>
             <span class="text-xs text-gray-600">დააჭირე — ნახე დეტალები</span>
         </div>
-        <div class="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3">
+        <div class="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3">
             {% set planet_cards = [
-                ('moon',    '🌕', 'მთვარე',   '#f0e68c'),
-                ('mercury', '⚫', 'მერკური',  '#9ca3af'),
-                ('venus',   '🟡', 'ვენერა',   '#fbbf24'),
-                ('mars',    '🔴', 'მარსი',    '#f87171'),
-                ('jupiter', '🟠', 'იუპიტერი', '#fb923c'),
-                ('saturn',  '🪐', 'სატურნი',  '#eab308'),
-                ('uranus',  '🔵', 'ურანი',    '#22d3ee'),
-                ('neptune', '💙', 'ნეპტუნი',  '#60a5fa'),
+                ('moon',    'მთვარე',   '#f0e68c'),
+                ('venus',   'ვენერა',   '#fbbf24'),
+                ('mars',    'მარსი',    '#f87171'),
+                ('jupiter', 'იუპიტერი', '#fb923c'),
+                ('saturn',  'სატურნი',  '#eab308'),
+                ('uranus',  'ურანი',    '#22d3ee'),
+                ('neptune', 'ნეპტუნი',  '#60a5fa'),
             ] %}
-            {% for slug, emoji, name_ka, color in planet_cards %}
+            {% for slug, name_ka, color in planet_cards %}
             <button onclick="openPlanetModal('{{ slug }}')"
                class="glass-card p-3 text-center group hover:scale-105 transition-all duration-200 cursor-pointer">
-                <div class="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-2 rounded-full flex items-center justify-center text-2xl sm:text-3xl"
-                     style="background: radial-gradient(circle at 35% 35%, {{ color }}40, {{ color }}15); box-shadow: 0 0 20px {{ color }}20;">
-                    {{ emoji }}
+                <div class="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-2 rounded-full overflow-hidden"
+                     style="box-shadow: 0 0 20px {{ color }}40;">
+                    <img src="/static/planets/{{ slug }}.png" alt="{{ name_ka }}"
+                         class="w-full h-full object-cover rounded-full"
+                         style="filter: brightness(1.05);">
                 </div>
                 <div class="text-[10px] text-gray-500 group-hover:text-white transition-colors" style="line-height:1.6">{{ name_ka }}</div>
             </button>
@@ -790,14 +791,6 @@
                 { ap: '70mm', mag: '80x–120x', label: '70mm ტელესკოპი — რეალური ხედი', desc: 'კრატერების კიდეები, მთის ჯაჭვები, ტიხო და კოპერნიკი ნათლად ჩანს. ასეთი სურათი გელოდებათ Foreseen 80mm-ით.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Full_Moon_Luc_Viatour.jpg/400px-Full_Moon_Luc_Viatour.jpg' },
             ]
         },
-        mercury: {
-            emoji: '⚫', name: 'მერკური', nameEn: 'Mercury', color: '#9ca3af', type: 'კლდოვანი პლანეტა',
-            dist: '~77 მლნ კმ მზიდან',
-            desc: 'მზის ყველაზე ახლო პლანეტა — ჩანს მხოლოდ ჰორიზონტთან ახლოს, მზის ამოსვლის ან ჩასვლის მახლობლად. 70mm ტელესკოპით ფაზა ჩანს — ვენერის მსგავსი ნამგალი.',
-            views: [
-                { ap: '70mm', mag: '70x–100x', label: '70mm ტელესკოპი — რეალური ხედი', desc: 'მცირე კაშკაშა დისკი ჩანს, ფაზა შესამჩნევია. ყოველთვის ჰორიზონტთან ახლოს — ატმოსფერული ცინცხა ამახინჯებს სურათს.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Mercury_in_true_color.jpg/400px-Mercury_in_true_color.jpg' },
-            ]
-        },
         venus: {
             emoji: '🟡', name: 'ვენერა', nameEn: 'Venus', color: '#fbbf24', type: 'კლდოვანი პლანეტა',
             dist: '~38–261 მლნ კმ დედამიწიდან',
@@ -859,7 +852,11 @@
 
             <!-- Hero row -->
             <div class="flex items-center gap-4 mb-5">
-                <div class="text-5xl flex-shrink-0" style="filter: drop-shadow(0 0 16px ${p.color}88)">${p.emoji}</div>
+                <div class="w-14 h-14 rounded-full overflow-hidden flex-shrink-0" style="box-shadow:0 0 20px ${p.color}55;">
+                    <img src="/static/planets/${slug}.png" alt="${p.name}"
+                         class="w-full h-full object-cover"
+                         onerror="this.parentElement.innerHTML='<span style=\'font-size:2.5rem;filter:drop-shadow(0 0 16px ${p.color}88)\'>${p.emoji}</span>';">
+                </div>
                 <div>
                     <div class="text-[10px] uppercase tracking-widest mb-1" style="color:${p.color}88">${p.type}</div>
                     <div class="text-xl font-semibold text-white">${p.name}</div>
@@ -877,10 +874,13 @@
                 <div class="flex-1 h-px bg-white/5"></div>
             </div>
 
-            <!-- 70mm telescope view — emoji gradient -->
-            <div class="rounded-2xl overflow-hidden mb-5" style="border:1px solid ${p.color}22;background:#03050d;">
-                <div class="flex items-center justify-center" style="height:200px;background:radial-gradient(ellipse at center,${p.color}25,transparent 70%),radial-gradient(circle at 40% 40%,${p.color}15,#03050d);">
-                    <span style="font-size:5rem;filter:drop-shadow(0 0 30px ${p.color}66);">${p.emoji}</span>
+            <!-- 70mm telescope view — real planet image -->
+            <div class="rounded-2xl overflow-hidden mb-5" style="border:1px solid ${p.color}30;background:#03050d;">
+                <div class="relative flex items-center justify-center" style="height:220px;background:radial-gradient(ellipse at center,${p.color}18,#03050d 70%);">
+                    <img src="/static/planets/${slug}.png" alt="${p.name}"
+                         style="max-height:200px;max-width:100%;object-fit:contain;filter:drop-shadow(0 0 24px ${p.color}66);"
+                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                    <div style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;font-size:5rem;filter:drop-shadow(0 0 30px ${p.color}66);">${p.emoji}</div>
                 </div>
                 <div class="p-4" style="border-top:1px solid ${p.color}15;">
                     <div class="flex items-center gap-2 mb-1">
