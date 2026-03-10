@@ -136,7 +136,8 @@ def get_planet_positions(dt: Optional[datetime] = None) -> list[PlanetInfo]:
             constellation_abbr = ephem.constellation(body)[0]
             constellation_ka = CONSTELLATION_MAP.get(constellation_abbr, constellation_abbr)
 
-            is_visible = alt_deg > 5  # Above 5° horizon — altitude check only
+            # Visible = above 5° AND brighter than naked-eye limit (mag < 6.0)
+            is_visible = alt_deg > 5 and mag < 6.0
 
             results.append(PlanetInfo(
                 name=eng_name,
@@ -180,7 +181,8 @@ def get_planet_positions_live(
             alt_deg = math.degrees(float(body.alt))
             az_deg = math.degrees(float(body.az))
             mag = float(body.mag)
-            is_visible = alt_deg > 5
+            # Visible = above 5° AND brighter than naked-eye limit (mag < 6.0)
+            is_visible = alt_deg > 5 and mag < 6.0
 
             constellation_abbr = ephem.constellation(body)[0]
             constellation_ka = CONSTELLATION_MAP.get(constellation_abbr, constellation_abbr)

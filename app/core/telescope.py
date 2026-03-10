@@ -1,6 +1,7 @@
 """
-Astroman Skywatcher — Telescope Smart Linking
+ASTROMAN — Telescope Smart Linking
 Dynamic product recommendation based on observation conditions.
+All recommendations link to the Foreseen 80mm — ASTROMAN's primary product.
 """
 import logging
 from typing import Optional
@@ -10,6 +11,9 @@ from app.config import settings
 from app.models import PlanetInfo
 
 logger = logging.getLogger("astroman.telescope")
+
+FORESEEN_NAME = "Foreseen 80mm"
+FORESEEN_SLUG = "telescope-foreseen-80mm"
 
 
 @dataclass
@@ -21,41 +25,6 @@ class TelescopeRecommendation:
     product_url: str
 
 
-# Product catalog
-TELESCOPE_CATALOG = {
-    "voyager-70mm": {
-        "name": "ASTROMAN Voyager 70mm",
-        "category": "beginner",
-        "aperture": 70,
-    },
-    "explorer-90mm": {
-        "name": "ASTROMAN Explorer 90mm",
-        "category": "intermediate",
-        "aperture": 90,
-    },
-    "deepsky-130mm": {
-        "name": "ASTROMAN DeepSky 130mm",
-        "category": "advanced",
-        "aperture": 130,
-    },
-    "prostar-200mm": {
-        "name": "ASTROMAN ProStar 200mm",
-        "category": "professional",
-        "aperture": 200,
-    },
-    "galaxy-projector": {
-        "name": "ASTROMAN Galaxy Projector",
-        "category": "accessory",
-        "aperture": 0,
-    },
-    "luna-binoculars": {
-        "name": "ASTROMAN Luna Binoculars",
-        "category": "beginner",
-        "aperture": 50,
-    },
-}
-
-
 def recommend_telescope(
     best_planet: Optional[PlanetInfo],
     cloud_coverage: int,
@@ -63,108 +32,101 @@ def recommend_telescope(
 ) -> TelescopeRecommendation:
     """
     Smart telescope recommendation based on:
-    - Which planet is brightest
+    - Which planet is brightest / most visible
     - Cloud coverage
     - Moon phase
+    All recommendations link to the Foreseen 80mm.
     """
-
     base_url = settings.astroman_products_url
+    product_url = f"{base_url}/{FORESEEN_SLUG}"
 
-    # HIGH CLOUDS → Galaxy Projector
+    # HIGH CLOUDS — still recommend the scope
     if cloud_coverage > 75:
         return TelescopeRecommendation(
-            name="ASTROMAN Galaxy Projector",
-            slug="galaxy-projector",
-            category="accessory",
-            reason_ka="ღრუბლიანი ღამეა — Galaxy Projector-ით კოსმოსი სახლში შემოიტანეთ",
-            product_url=f"{base_url}/galaxy-projector",
+            name=FORESEEN_NAME,
+            slug=FORESEEN_SLUG,
+            category="beginner",
+            reason_ka="ღამე ღრუბლიანია — მაგრამ Foreseen 80mm ყოველ მოწმენდილ ღამეს მზადაა!",
+            product_url=product_url,
         )
 
     if not best_planet:
-        # Moon is the main target
         if moon_illumination > 20:
             return TelescopeRecommendation(
-                name="ASTROMAN Luna Binoculars",
-                slug="luna-binoculars",
+                name=FORESEEN_NAME,
+                slug=FORESEEN_SLUG,
                 category="beginner",
-                reason_ka="მთვარის შესანიშნავი ხედი ასტრონომიული ბინოკლით",
-                product_url=f"{base_url}/luna-binoculars",
+                reason_ka="მთვარის კრატერები Foreseen 80mm-ით შთამბეჭდავად ჩანს",
+                product_url=product_url,
             )
         return TelescopeRecommendation(
-            name="ASTROMAN Voyager 70mm",
-            slug="voyager-70mm",
+            name=FORESEEN_NAME,
+            slug=FORESEEN_SLUG,
             category="beginner",
-            reason_ka="უნივერსალური ტელესკოპი ყოველღამის დაკვირვებისთვის",
-            product_url=f"{base_url}/voyager-70mm",
+            reason_ka="საუკეთესო არჩევანი ყოველღამის ასტრონომიული დაკვირვებისთვის",
+            product_url=product_url,
         )
 
     planet = best_planet.name
 
-    # BRIGHT PLANETS (Venus, Jupiter) → Beginner scope
-    if planet in ("Venus",) and best_planet.magnitude < -3:
+    if planet == "Venus":
         return TelescopeRecommendation(
-            name="ASTROMAN Voyager 70mm",
-            slug="voyager-70mm",
+            name=FORESEEN_NAME,
+            slug=FORESEEN_SLUG,
             category="beginner",
-            reason_ka=f"{best_planet.name_ka} ისეთი კაშკაშია, რომ 70mm ტელესკოპითაც ბრწყინვალედ ჩანს",
-            product_url=f"{base_url}/voyager-70mm",
+            reason_ka=f"ვენერას ფაზები Foreseen 80mm-ით ნათლად ჩანს — კაშკაშა სამიზნე",
+            product_url=product_url,
         )
 
-    # JUPITER → 70mm+ recommended
     if planet == "Jupiter":
         return TelescopeRecommendation(
-            name="ASTROMAN Explorer 90mm",
-            slug="explorer-90mm",
-            category="intermediate",
-            reason_ka="იუპიტერის ზოლები და გალილეოს თანამგზავრები 90mm-ზე შესანიშნავად ჩანს",
-            product_url=f"{base_url}/explorer-90mm",
+            name=FORESEEN_NAME,
+            slug=FORESEEN_SLUG,
+            category="beginner",
+            reason_ka="იუპიტერის ზოლები და გალილეოს 4 თანამგზავრი Foreseen 80mm-ით კარგად ჩანს",
+            product_url=product_url,
         )
 
-    # SATURN → 70mm+ for rings
     if planet == "Saturn":
         return TelescopeRecommendation(
-            name="ASTROMAN Explorer 90mm",
-            slug="explorer-90mm",
-            category="intermediate",
-            reason_ka="სატურნის რგოლები 90mm ტელესკოპით განსაკუთრებით ლამაზად გამოჩნდება",
-            product_url=f"{base_url}/explorer-90mm",
+            name=FORESEEN_NAME,
+            slug=FORESEEN_SLUG,
+            category="beginner",
+            reason_ka="სატურნის რგოლები Foreseen 80mm-ით განსაკუთრებით ლამაზად გამოჩნდება",
+            product_url=product_url,
         )
 
-    # MARS → Needs higher aperture for detail
     if planet == "Mars":
         return TelescopeRecommendation(
-            name="ASTROMAN DeepSky 130mm",
-            slug="deepsky-130mm",
-            category="advanced",
-            reason_ka="მარსის ზედაპირის დეტალებისთვის 130mm აპერტურა იდეალურია",
-            product_url=f"{base_url}/deepsky-130mm",
+            name=FORESEEN_NAME,
+            slug=FORESEEN_SLUG,
+            category="beginner",
+            reason_ka="მარსის ნარინჯისფერი დისკი Foreseen 80mm-ით კარგად ჩანს ოპოზიციის დროს",
+            product_url=product_url,
         )
 
-    # DISTANT PLANETS (Uranus, Neptune) → Large aperture
     if planet in ("Uranus", "Neptune"):
         return TelescopeRecommendation(
-            name="ASTROMAN DeepSky 130mm",
-            slug="deepsky-130mm",
-            category="advanced",
-            reason_ka=f"{best_planet.name_ka} შორეული პლანეტაა — საჭიროა მინიმუმ 130mm აპერტურა",
-            product_url=f"{base_url}/deepsky-130mm",
+            name=FORESEEN_NAME,
+            slug=FORESEEN_SLUG,
+            category="beginner",
+            reason_ka=f"{best_planet.name_ka} Foreseen 80mm-ით ხელმისაწვდომია — ცისფერი წერტილი ჩანს",
+            product_url=product_url,
         )
 
-    # MERCURY → Beginner, but tricky
     if planet == "Mercury":
         return TelescopeRecommendation(
-            name="ASTROMAN Voyager 70mm",
-            slug="voyager-70mm",
+            name=FORESEEN_NAME,
+            slug=FORESEEN_SLUG,
             category="beginner",
-            reason_ka="მერკური ჰორიზონტთან ახლოს ჩანს — 70mm ტელესკოპი საკმარისია",
-            product_url=f"{base_url}/voyager-70mm",
+            reason_ka="მერკურის ფაზა Foreseen 80mm-ით შესამჩნევია — ჰორიზონტთან ახლოს ეძებეთ",
+            product_url=product_url,
         )
 
-    # Default
     return TelescopeRecommendation(
-        name="ASTROMAN Voyager 70mm",
-        slug="voyager-70mm",
+        name=FORESEEN_NAME,
+        slug=FORESEEN_SLUG,
         category="beginner",
-        reason_ka="საუკეთესო არჩევანი ყოველღამის ასტრონომიული დაკვირვებისთვის",
-        product_url=f"{base_url}/voyager-70mm",
+        reason_ka="Foreseen 80mm — ASTROMAN-ის საუკეთესო არჩევანი დამწყები ასტრონომისთვის",
+        product_url=product_url,
     )
