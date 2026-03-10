@@ -82,77 +82,50 @@
       690px 95px 0 0 rgba(200,210,255,.4),770px 125px 0 0 rgba(200,210,255,.3);}
     </style>
 
-    <!-- Stat Cards — redesigned with glow borders -->
+    <!-- Stat Cards -->
     <div class="grid grid-cols-2 gap-3 lg:grid-cols-4 stagger">
 
         <!-- Sunset -->
-        <div class="stat-glow-card" style="--glow:#f97316;">
-            <div class="stat-glow-icon" style="color:#f97316;background:rgba(249,115,22,0.12);border-color:rgba(249,115,22,0.25);">🌅</div>
-            <div class="stat-glow-label">მზის ჩასვლა</div>
-            <div class="stat-glow-value" style="color:#fff;">{{ observation.sunset_time }}</div>
-            <div class="stat-glow-bar" style="background:linear-gradient(90deg,#f97316,#fb923c);width:70%;"></div>
+        <div class="glass-card p-4 sm:p-5 text-center">
+            <div class="text-2xl mb-2">🌅</div>
+            <div class="text-[10px] text-indigo-400 uppercase tracking-widest mb-1.5">მზის ჩასვლა</div>
+            <div class="text-xl sm:text-2xl font-mono text-white font-semibold">{{ observation.sunset_time }}</div>
         </div>
 
         <!-- Moon -->
-        <div class="stat-glow-card" style="--glow:#a78bfa;">
-            <div class="stat-glow-icon" style="color:#a78bfa;background:rgba(167,139,250,0.12);border-color:rgba(167,139,250,0.25);">
-                {% if observation.moon_illumination < 5 %}🌑{% elif observation.moon_illumination < 25 %}🌒
-                {% elif observation.moon_illumination < 50 %}🌓{% elif observation.moon_illumination < 75 %}🌔
-                {% elif observation.moon_illumination < 95 %}🌖{% else %}🌕{% endif %}
+        <div class="glass-card p-4 sm:p-5 text-center">
+            <div class="text-2xl mb-2">
+                {% if observation.moon_illumination < 5 %}🌑
+                {% elif observation.moon_illumination < 25 %}🌒
+                {% elif observation.moon_illumination < 50 %}🌓
+                {% elif observation.moon_illumination < 75 %}🌔
+                {% elif observation.moon_illumination < 95 %}🌖
+                {% else %}🌕{% endif %}
             </div>
-            <div class="stat-glow-label">მთვარე</div>
-            <div class="stat-glow-value" style="color:#fff;">{{ observation.moon_illumination|round(0)|int }}%</div>
-            <div class="text-[10px] text-gray-600 mt-0.5 truncate" style="line-height:1.4">{{ observation.moon_phase }}</div>
-            <div class="stat-glow-bar" style="background:linear-gradient(90deg,#818cf8,#a78bfa,#fbbf24);width:{{ observation.moon_illumination }}%;"></div>
+            <div class="text-[10px] text-indigo-400 uppercase tracking-widest mb-1.5">მთვარე</div>
+            <div class="text-xl sm:text-2xl font-mono text-white font-semibold">{{ observation.moon_illumination|round(0)|int }}%</div>
+            <div class="text-[10px] text-gray-600 mt-1" style="line-height:1.4">{{ observation.moon_phase }}</div>
         </div>
 
         <!-- Clouds -->
-        {% set cloud_color = '#22d3ee' if observation.cloud_coverage < 30 else ('#fbbf24' if observation.cloud_coverage < 60 else '#f87171') %}
-        <div class="stat-glow-card" style="--glow:{{ cloud_color }};">
-            <div class="stat-glow-icon" style="color:{{ cloud_color }};background:rgba(255,255,255,0.07);border-color:{{ cloud_color }}33;">☁️</div>
-            <div class="stat-glow-label">ღრუბლები</div>
-            <div class="stat-glow-value" style="color:{{ cloud_color }};">{{ observation.cloud_coverage }}%</div>
-            <div class="text-[10px] mt-0.5" style="color:{{ cloud_color }}88;">
-                {% if observation.cloud_coverage < 30 %}წმინდა ცა{% elif observation.cloud_coverage < 60 %}ნაწილობრივ{% else %}ძლიერ ღრუბლ.{% endif %}
+        <div class="glass-card p-4 sm:p-5 text-center">
+            <div class="text-2xl mb-2">☁️</div>
+            <div class="text-[10px] text-indigo-400 uppercase tracking-widest mb-1.5">ღრუბლები</div>
+            <div class="text-xl sm:text-2xl font-mono text-white font-semibold">{{ observation.cloud_coverage }}%</div>
+            <div class="text-[10px] text-gray-600 mt-1">
+                {% if observation.cloud_coverage < 30 %}წმინდა ცა{% elif observation.cloud_coverage < 60 %}ნაწილობრივ{% else %}ძლიერი{% endif %}
             </div>
-            <div class="stat-glow-bar" style="background:linear-gradient(90deg,{{ cloud_color }},{{ cloud_color }}88);width:{{ observation.cloud_coverage }}%;"></div>
         </div>
 
         <!-- Temperature -->
-        {% set temp_val = observation.temperature|round(0)|int %}
-        {% set temp_color = '#60a5fa' if temp_val < 5 else ('#4ade80' if temp_val < 18 else '#f97316') %}
-        <div class="stat-glow-card" style="--glow:{{ temp_color }};">
-            <div class="stat-glow-icon" style="color:{{ temp_color }};background:rgba(255,255,255,0.07);border-color:{{ temp_color }}33;">🌡</div>
-            <div class="stat-glow-label">ტემპერატურა</div>
-            <div class="stat-glow-value" style="color:#fff;">{{ temp_val }}°C</div>
-            <div class="text-[10px] text-gray-600 mt-0.5">💨 {{ observation.wind_speed }} m/s</div>
-            <div class="stat-glow-bar" style="background:linear-gradient(90deg,{{ temp_color }},{{ temp_color }}88);width:{{ [(temp_val+20)*1.5,100]|min|round }}%;"></div>
+        <div class="glass-card p-4 sm:p-5 text-center">
+            <div class="text-2xl mb-2">🌡</div>
+            <div class="text-[10px] text-indigo-400 uppercase tracking-widest mb-1.5">ტემპერატურა</div>
+            <div class="text-xl sm:text-2xl font-mono text-white font-semibold">{{ observation.temperature|round(0)|int }}°C</div>
+            <div class="text-[10px] text-gray-600 mt-1">💨 {{ observation.wind_speed }} m/s</div>
         </div>
 
     </div>
-
-    <style>
-    .stat-glow-card{
-        background:rgba(255,255,255,0.04);
-        border:1px solid rgba(255,255,255,0.08);
-        border-top:1px solid var(--glow,#818cf8);
-        border-radius:16px;
-        padding:18px 16px 14px;
-        display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;
-        position:relative;overflow:hidden;
-        transition:transform .2s,box-shadow .2s;
-    }
-    .stat-glow-card::before{
-        content:'';position:absolute;top:0;left:0;right:0;height:60px;
-        background:linear-gradient(180deg,var(--glow,#818cf8)10 0%,transparent 100%);
-        opacity:.06;pointer-events:none;
-    }
-    .stat-glow-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.3);}
-    .stat-glow-icon{font-size:22px;width:44px;height:44px;border-radius:12px;border:1px solid;display:flex;align-items:center;justify-content:center;margin-bottom:4px;flex-shrink:0;}
-    .stat-glow-label{font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.12em;}
-    .stat-glow-value{font-size:22px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums;}
-    .stat-glow-bar{height:2px;border-radius:2px;margin-top:8px;align-self:stretch;max-width:100%;transition:width .8s;}
-    </style>
 
     {# ══════════════════════════════════════════════════ #}
     {# DAYTIME MODE                                       #}
@@ -586,7 +559,7 @@
             </div>
 
             <!-- Loyalty Club CTA -->
-            <div class="glass-card p-5 sm:p-6 text-center" style="border-top: 1px solid rgba(234,179,8,0.2);">
+            <div class="glass-card p-5 sm:p-6 text-center">
                 <div class="text-2xl mb-2">⭐</div>
                 <div class="text-sm text-gray-200 font-medium mb-1" style="line-height:1.6">ASTROMAN ლოიალობის კლუბი</div>
                 <div class="text-xs text-gray-500 mb-3" style="line-height:1.6">
@@ -668,7 +641,7 @@
             <div id="apod-img-wrap" style="position:relative;height:220px;overflow:hidden;background:#03050d;">
                 <img id="apod-img" src="" alt="NASA APOD"
                      style="width:100%;height:100%;object-fit:cover;display:none;animation:apodFadeIn .8s ease;"
-                     onerror="document.getElementById('apod-img-err').style.display='flex';this.style.display='none';" />
+                     onerror="document.getElementById('apod-section').style.display='none';" />
                 <div id="apod-img-err" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:radial-gradient(ellipse,#1a0a2e,#03050d);">
                     <span style="font-size:48px;">🌌</span>
                     <span style="font-size:12px;color:rgba(255,255,255,0.4);">სურათი ვერ ჩაიტვირთა</span>
@@ -695,26 +668,25 @@
     <div class="mt-6">
         <div class="flex items-center justify-between gap-4 mb-4 px-1">
             <h2 class="text-base sm:text-lg text-gray-100 font-medium section-header whitespace-nowrap">🪐 პლანეტების გზამკვლევი</h2>
-            <span class="text-xs text-gray-600">დააჭირე — ნახე 70mm ტელესკოპით</span>
+            <span class="text-xs text-gray-600">დააჭირე — ნახე დეტალები</span>
         </div>
         <div class="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3">
             {% set planet_cards = [
-                ('moon',    'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Phase-088.jpg/100px-Phase-088.jpg',    'მთვარე',   '#f0e68c'),
-                ('mercury', 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Mercury_in_color_-_Prockter07_centered.jpg/100px-Mercury_in_color_-_Prockter07_centered.jpg', 'მერკური', '#9ca3af'),
-                ('venus',   'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Venus_globe_-_transparent_background.png/100px-Venus_globe_-_transparent_background.png', 'ვენერა', '#fbbf24'),
-                ('mars',    'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/100px-OSIRIS_Mars_true_color.jpg',    'მარსი',    '#f87171'),
-                ('jupiter', 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Jupiter.jpg/100px-Jupiter.jpg',  'იუპიტერი', '#fb923c'),
-                ('saturn',  'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Saturn_during_Equinox.jpg/100px-Saturn_during_Equinox.jpg',  'სატურნი',  '#eab308'),
-                ('uranus',  'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Uranus2.jpg/100px-Uranus2.jpg',  'ურანი',    '#22d3ee'),
-                ('neptune', 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg/100px-Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg', 'ნეპტუნი', '#60a5fa'),
+                ('moon',    '🌕', 'მთვარე',   '#f0e68c'),
+                ('mercury', '⚫', 'მერკური',  '#9ca3af'),
+                ('venus',   '🟡', 'ვენერა',   '#fbbf24'),
+                ('mars',    '🔴', 'მარსი',    '#f87171'),
+                ('jupiter', '🟠', 'იუპიტერი', '#fb923c'),
+                ('saturn',  '🪐', 'სატურნი',  '#eab308'),
+                ('uranus',  '🔵', 'ურანი',    '#22d3ee'),
+                ('neptune', '💙', 'ნეპტუნი',  '#60a5fa'),
             ] %}
-            {% for slug, img, name_ka, color in planet_cards %}
+            {% for slug, emoji, name_ka, color in planet_cards %}
             <button onclick="openPlanetModal('{{ slug }}')"
-               class="glass-card p-3 text-center group hover:scale-105 transition-all duration-200 cursor-pointer"
-               style="border-top-color: {{ color }}33;">
-                <div class="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-2 rounded-full overflow-hidden" style="background:#0a0a1a;box-shadow:0 0 12px {{ color }}33;">
-                    <img src="{{ img }}" alt="{{ name_ka }}" class="w-full h-full object-cover" loading="lazy"
-                         onerror="this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;font-size:1.5rem;\'>🪐</div>';">
+               class="glass-card p-3 text-center group hover:scale-105 transition-all duration-200 cursor-pointer">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-2 rounded-full flex items-center justify-center text-2xl sm:text-3xl"
+                     style="background: radial-gradient(circle at 35% 35%, {{ color }}40, {{ color }}15); box-shadow: 0 0 20px {{ color }}20;">
+                    {{ emoji }}
                 </div>
                 <div class="text-[10px] text-gray-500 group-hover:text-white transition-colors" style="line-height:1.6">{{ name_ka }}</div>
             </button>
@@ -905,17 +877,15 @@
                 <div class="flex-1 h-px bg-white/5"></div>
             </div>
 
-            <!-- 70mm telescope view image -->
-            <div class="rounded-2xl overflow-hidden mb-5" style="border: 1px solid ${p.color}22; background:#03050d;">
-                <div class="relative" style="height:200px; overflow:hidden; background:#03050d;">
-                    <img src="${p.views[0].img}" alt="${p.name} 70mm"
-                         style="width:100%;height:100%;object-fit:cover;display:block;"
-                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-                         loading="eager"/>
-                    <div style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;font-size:4rem;background:radial-gradient(circle,${p.color}22,#03050d);">${p.emoji}</div>
-                    <div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.8);border:1px solid ${p.color}44;color:${p.color};font-size:0.65rem;font-family:monospace;padding:4px 10px;border-radius:20px;backdrop-filter:blur(8px);">🔭 70mm · ${p.views[0].mag}</div>
+            <!-- 70mm telescope view — emoji gradient -->
+            <div class="rounded-2xl overflow-hidden mb-5" style="border:1px solid ${p.color}22;background:#03050d;">
+                <div class="flex items-center justify-center" style="height:200px;background:radial-gradient(ellipse at center,${p.color}25,transparent 70%),radial-gradient(circle at 40% 40%,${p.color}15,#03050d);">
+                    <span style="font-size:5rem;filter:drop-shadow(0 0 30px ${p.color}66);">${p.emoji}</span>
                 </div>
-                <div class="p-3">
+                <div class="p-4" style="border-top:1px solid ${p.color}15;">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span style="background:rgba(0,0,0,0.6);border:1px solid ${p.color}44;color:${p.color};font-size:0.65rem;font-family:monospace;padding:3px 9px;border-radius:20px;">🔭 70mm · ${p.views[0].mag}</span>
+                    </div>
                     <div class="text-sm font-medium text-white mb-1">${p.views[0].label}</div>
                     <div class="text-xs text-gray-500" style="line-height:1.6">${p.views[0].desc}</div>
                 </div>
