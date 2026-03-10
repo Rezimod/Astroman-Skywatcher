@@ -1,13 +1,17 @@
 """
 Astroman Skywatcher — Database Layer (SQLite)
 """
+import os
 import aiosqlite
 import logging
-from app.config import settings
 
 logger = logging.getLogger("astroman.db")
 
-DB_PATH = settings.db_path
+# Resolve DB path without importing settings (avoids pydantic-settings at import time)
+DB_PATH = os.environ.get(
+    "DATABASE_URL",
+    f"sqlite:///{os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'astroman.db')}"
+).replace("sqlite:///", "")
 
 
 async def get_db() -> aiosqlite.Connection:
