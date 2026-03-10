@@ -5,56 +5,68 @@
 {% block content %}
 <div class="space-y-5">
 
-    <!-- Hero Header — Cosmic redesign -->
-    <div class="relative text-center pt-8 pb-6 overflow-hidden" style="min-height:220px;">
+    <!-- Hero Header -->
+    <div class="relative text-center pt-5 pb-4 overflow-hidden">
         <!-- Radial glow backdrop -->
-        <div style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(99,102,241,0.18) 0%,transparent 70%);pointer-events:none;"></div>
-        <!-- Animated star dots -->
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(99,102,241,0.16) 0%,transparent 70%);pointer-events:none;"></div>
+        <!-- Star dots -->
         <div class="hero-stars" aria-hidden="true"></div>
 
-        <!-- Meta row -->
-        <div class="relative flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[11px] tracking-widest text-indigo-400/60 uppercase mb-5">
-            <span class="font-mono text-indigo-300/70">{{ observation.date | datetimeformat }}</span>
-            <span class="text-indigo-900">·</span>
-            <span>📍 თბილისი</span>
-            <span class="text-indigo-900">·</span>
-            <span id="tbilisi-clock" class="font-mono text-indigo-300/80 tabular-nums"></span>
-            <span class="text-indigo-900">·</span>
-            <span class="text-indigo-900/50 text-[10px] normal-case tracking-normal">განახლდა {{ last_updated }}</span>
+        <!-- Meta row: date · location · clock -->
+        <div class="relative flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[11px] tracking-widest text-indigo-400/50 uppercase mb-4">
+            <span class="font-mono text-indigo-300/60">{{ observation.date | datetimeformat }}</span>
+            <span class="text-indigo-900/60">·</span>
+            <span class="text-indigo-400/60">📍 თბილისი</span>
+            <span class="text-indigo-900/60">·</span>
+            <span id="tbilisi-clock" class="font-mono text-indigo-300/70 tabular-nums"></span>
+            <span class="text-indigo-900/40 text-[10px] normal-case tracking-normal ml-1">· განახლდა {{ last_updated }}</span>
         </div>
 
-        <!-- Main title -->
-        <div class="relative">
-            <div class="text-xs tracking-[0.35em] uppercase text-indigo-500/60 mb-3">🔭 ASTROMAN · ცის ობსერვატორია</div>
-            <h1 style="font-size:clamp(26px,5vw,48px);font-weight:300;line-height:1.15;letter-spacing:-0.5px;background:linear-gradient(135deg,#c7d2fe 0%,#ffffff 45%,#a5b4fc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;">
-                ღამის ცის გზამკვლევი
-            </h1>
-            <!-- Gold underline accent -->
-            <div style="display:inline-block;height:2px;width:60px;background:linear-gradient(90deg,transparent,#f5c842,transparent);margin-bottom:16px;border-radius:2px;"></div>
+        <!-- Main title block -->
+        <div class="relative mb-4">
+            <!-- Label above -->
+            <div class="flex items-center justify-center gap-2 mb-3">
+                <div style="height:1px;width:32px;background:linear-gradient(90deg,transparent,rgba(165,180,252,0.3));"></div>
+                <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:rgba(165,180,252,0.45);">ცის ობსერვატორია</span>
+                <div style="height:1px;width:32px;background:linear-gradient(90deg,rgba(165,180,252,0.3),transparent);"></div>
+            </div>
+
+            <!-- Two-line title: light top + bold bottom -->
+            <div style="line-height:1.1;margin-bottom:10px;">
+                <div style="font-size:clamp(13px,2.8vw,18px);font-weight:300;letter-spacing:0.18em;color:rgba(165,180,252,0.55);text-transform:uppercase;margin-bottom:4px;">ღამის ცის</div>
+                <div style="font-size:clamp(30px,6.5vw,56px);font-weight:700;letter-spacing:-1px;background:linear-gradient(135deg,#e0e7ff 0%,#ffffff 40%,#c7d2fe 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">გზამკვლევი</div>
+            </div>
+
+            <!-- Gold accent line -->
+            <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <div style="height:1px;width:24px;background:linear-gradient(90deg,transparent,#f5c842);border-radius:2px;"></div>
+                <span style="font-size:10px;color:#f5c84255;letter-spacing:0.2em;">✦</span>
+                <div style="height:1px;width:24px;background:linear-gradient(90deg,#f5c842,transparent);border-radius:2px;"></div>
+            </div>
         </div>
 
         <!-- Live sky status -->
-        <div class="relative flex items-center justify-center gap-3 flex-wrap">
+        <div class="relative flex items-center justify-center gap-2 flex-wrap">
             {% if is_night %}
-            <div class="hero-status-pill" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.35);color:#a5b4fc;">
+            <div class="hero-status-pill" style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.3);color:#a5b4fc;">
                 <span class="hero-status-dot" style="background:#818cf8;box-shadow:0 0 6px #818cf8;"></span>
-                ვარსკვლავები ჩანს
+                ვარსკვლავები ხილულია
             </div>
             {% elif is_twilight %}
-            <div class="hero-status-pill" style="background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.35);color:#c4b5fd;">
+            <div class="hero-status-pill" style="background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.3);color:#c4b5fd;">
                 <span class="hero-status-dot" style="background:#a78bfa;box-shadow:0 0 6px #a78bfa;"></span>
                 შებინდება
             </div>
             {% else %}
-            <div class="hero-status-pill" style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);color:#fbbf24;">
+            <div class="hero-status-pill" style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);color:#fbbf24;">
                 <span class="hero-status-dot" style="background:#fbbf24;box-shadow:0 0 6px #fbbf24;"></span>
                 დღეა · მზე ჩადის {{ observation.sunset_time }}
             </div>
             {% endif %}
 
             {% if best_planet and is_night %}
-            <div class="hero-status-pill" style="background:rgba(245,200,66,0.1);border:1px solid rgba(245,200,66,0.25);color:#f5c842;">
-                <span style="font-size:14px;">⭐</span>
+            <div class="hero-status-pill" style="background:rgba(245,200,66,0.08);border:1px solid rgba(245,200,66,0.2);color:#f5c842;">
+                <span style="font-size:13px;">⭐</span>
                 <span>დღეს ეძებე: <strong>{{ best_planet.name_ka }}</strong></span>
             </div>
             {% endif %}
@@ -62,8 +74,8 @@
     </div>
 
     <style>
-    .hero-status-pill{display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border-radius:100px;font-size:13px;font-weight:500;}
-    .hero-status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+    .hero-status-pill{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:100px;font-size:12px;font-weight:500;}
+    .hero-status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;flex-shrink:0;}
     .hero-stars{position:absolute;inset:0;pointer-events:none;}
     .hero-stars::before,.hero-stars::after{content:'';position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;box-shadow:
       80px 40px 0 0 rgba(255,255,255,.4),150px 20px 0 0 rgba(255,255,255,.3),
@@ -71,15 +83,11 @@
       400px 55px 0 0 rgba(255,255,255,.4),480px 15px 0 0 rgba(255,255,255,.2),
       560px 80px 0 0 rgba(255,255,255,.5),630px 35px 0 0 rgba(255,255,255,.3),
       700px 10px 0 0 rgba(255,255,255,.4),780px 60px 0 0 rgba(255,255,255,.2),
-      850px 25px 0 0 rgba(255,255,255,.5),920px 75px 0 0 rgba(255,255,255,.3),
-      990px 45px 0 0 rgba(255,255,255,.4),1060px 18px 0 0 rgba(255,255,255,.2),
-      1130px 65px 0 0 rgba(255,255,255,.5),1200px 38px 0 0 rgba(255,255,255,.3);}
+      850px 25px 0 0 rgba(255,255,255,.5),920px 75px 0 0 rgba(255,255,255,.3);}
     .hero-stars::after{box-shadow:
-      50px 90px 0 0 rgba(200,210,255,.3),130px 110px 0 0 rgba(200,210,255,.2),
-      200px 100px 0 0 rgba(200,210,255,.4),280px 120px 0 0 rgba(200,210,255,.3),
-      360px 95px 0 0 rgba(200,210,255,.2),440px 130px 0 0 rgba(200,210,255,.4),
-      530px 105px 0 0 rgba(200,210,255,.3),610px 115px 0 0 rgba(200,210,255,.2),
-      690px 95px 0 0 rgba(200,210,255,.4),770px 125px 0 0 rgba(200,210,255,.3);}
+      50px 90px 0 0 rgba(200,210,255,.25),130px 110px 0 0 rgba(200,210,255,.2),
+      200px 100px 0 0 rgba(200,210,255,.35),280px 120px 0 0 rgba(200,210,255,.25),
+      360px 95px 0 0 rgba(200,210,255,.2),440px 130px 0 0 rgba(200,210,255,.35);}
     </style>
 
     <!-- Stat Cards -->
