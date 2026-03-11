@@ -19,6 +19,7 @@ from app.api.routes_subscribers import router as subscriber_router
 from app.api.routes_api import router as api_router
 from app.api.routes_sky import router as sky_router
 from app.api.routes_store import router as store_router
+from app.api.routes_chatbot import router as chatbot_router
 
 # --- Logging ---
 logging.basicConfig(
@@ -83,6 +84,7 @@ app.include_router(subscriber_router)
 app.include_router(api_router)
 app.include_router(sky_router)
 app.include_router(store_router)
+app.include_router(chatbot_router)
 
 
 if __name__ == "__main__":
