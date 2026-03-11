@@ -16,7 +16,7 @@
         <div class="relative flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[11px] tracking-widest text-indigo-400/50 uppercase mb-4">
             <span class="font-mono text-indigo-300/60">{{ observation.date | datetimeformat }}</span>
             <span class="text-indigo-900/60">·</span>
-            <span class="text-indigo-400/60">📍 თბილისი</span>
+            <span class="text-indigo-400/60" style="display:inline-flex;align-items:center;gap:3px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>თბილისი</span>
             <span class="text-indigo-900/60">·</span>
             <span id="tbilisi-clock" class="font-mono text-indigo-300/70 tabular-nums"></span>
             <span class="text-indigo-900/40 text-[10px] normal-case tracking-normal ml-1">· განახლდა {{ last_updated }}</span>
@@ -66,7 +66,7 @@
 
             {% if best_planet and is_night %}
             <div class="hero-status-pill" style="background:rgba(245,200,66,0.08);border:1px solid rgba(245,200,66,0.2);color:#f5c842;">
-                <span style="font-size:13px;">⭐</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="rgba(245,200,66,0.8)" stroke="rgba(245,200,66,0.4)" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                 <span>დღეს ეძებე: <strong>{{ best_planet.name_ka }}</strong></span>
             </div>
             {% endif %}
@@ -95,20 +95,35 @@
 
         <!-- Sunset -->
         <div class="glass-card p-4 sm:p-5 text-center">
-            <div class="text-2xl mb-2">🌅</div>
+            <div class="flex justify-center mb-2">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(251,191,36,0.7)" stroke-width="1.4" stroke-linecap="round">
+                    <path d="M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z" fill="rgba(251,191,36,0.12)"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    <!-- horizon line -->
+                    <line x1="2" y1="20" x2="22" y2="20" stroke="rgba(251,191,36,0.3)" stroke-width="1"/>
+                </svg>
+            </div>
             <div class="text-[10px] text-indigo-400 uppercase tracking-widest mb-1.5">მზის ჩასვლა</div>
             <div class="text-xl sm:text-2xl font-mono text-white font-semibold">{{ observation.sunset_time }}</div>
         </div>
 
         <!-- Moon -->
         <div class="glass-card p-4 sm:p-5 text-center">
-            <div class="text-2xl mb-2">
-                {% if observation.moon_illumination < 5 %}🌑
-                {% elif observation.moon_illumination < 25 %}🌒
-                {% elif observation.moon_illumination < 50 %}🌓
-                {% elif observation.moon_illumination < 75 %}🌔
-                {% elif observation.moon_illumination < 95 %}🌖
-                {% else %}🌕{% endif %}
+            <div class="flex justify-center mb-2">
+                {% set moon_pct = observation.moon_illumination %}
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.7)" stroke-width="1.4">
+                    {% if moon_pct < 5 %}
+                    <circle cx="12" cy="12" r="9" fill="rgba(20,20,40,0.8)"/>
+                    {% elif moon_pct > 95 %}
+                    <circle cx="12" cy="12" r="9" fill="rgba(165,180,252,0.2)"/>
+                    {% else %}
+                    <circle cx="12" cy="12" r="9" fill="rgba(165,180,252,0.08)"/>
+                    <path d="M12 3a9 9 0 0 1 0 18 6 6 0 0 1 0-12 4 4 0 0 0 0-6z" fill="rgba(165,180,252,0.18)"/>
+                    {% endif %}
+                </svg>
             </div>
             <div class="text-[10px] text-indigo-400 uppercase tracking-widest mb-1.5">მთვარე</div>
             <div class="text-xl sm:text-2xl font-mono text-white font-semibold">{{ observation.moon_illumination|round(0)|int }}%</div>
@@ -117,7 +132,11 @@
 
         <!-- Clouds -->
         <div class="glass-card p-4 sm:p-5 text-center">
-            <div class="text-2xl mb-2">☁️</div>
+            <div class="flex justify-center mb-2">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(148,163,184,0.6)" stroke-width="1.4" stroke-linecap="round">
+                    <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" fill="rgba(148,163,184,0.08)"/>
+                </svg>
+            </div>
             <div class="text-[10px] text-indigo-400 uppercase tracking-widest mb-1.5">ღრუბლები</div>
             <div class="text-xl sm:text-2xl font-mono text-white font-semibold">{{ observation.cloud_coverage }}%</div>
             <div class="text-[10px] text-gray-600 mt-1">
@@ -127,7 +146,11 @@
 
         <!-- Temperature -->
         <div class="glass-card p-4 sm:p-5 text-center">
-            <div class="text-2xl mb-2">🌡</div>
+            <div class="flex justify-center mb-2">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(129,140,248,0.65)" stroke-width="1.4" stroke-linecap="round">
+                    <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" fill="rgba(129,140,248,0.08)"/>
+                </svg>
+            </div>
             <div class="text-[10px] text-indigo-400 uppercase tracking-widest mb-1.5">ტემპერატურა</div>
             <div class="text-xl sm:text-2xl font-mono text-white font-semibold">{{ observation.temperature|round(0)|int }}°C</div>
             <div class="text-[10px] text-gray-600 mt-1">💨 {{ observation.wind_speed }} m/s</div>
@@ -608,61 +631,59 @@
     {% endif %}
 
     {# ── ASTROMAN Astronomy Chatbot ── #}
-    <div class="animate-in" style="background:linear-gradient(135deg,rgba(8,8,24,0.97) 0%,rgba(15,12,40,0.97) 100%);border:1px solid rgba(129,140,248,0.2);border-top:2px solid rgba(99,102,241,0.5);border-radius:1.25rem;overflow:hidden;">
-        <!-- Header -->
-        <div class="flex items-center gap-3 px-4 pt-4 pb-3" style="border-bottom:1px solid rgba(255,255,255,0.05);">
-            <div style="width:34px;height:34px;flex-shrink:0;background:linear-gradient(135deg,rgba(99,102,241,0.4),rgba(139,92,246,0.3));border:1px solid rgba(129,140,248,0.3);border-radius:10px;display:flex;align-items:center;justify-content:center;">
-                <!-- Robot SVG icon -->
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.9)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="8" width="18" height="13" rx="2"/>
-                    <path d="M9 8V6a3 3 0 016 0v2"/>
-                    <circle cx="9" cy="14" r="1.5" fill="rgba(165,180,252,0.9)" stroke="none"/>
-                    <circle cx="15" cy="14" r="1.5" fill="rgba(165,180,252,0.9)" stroke="none"/>
-                    <line x1="8" y1="18" x2="16" y2="18"/>
+    <div class="animate-in" style="background:rgba(6,6,18,0.98);border:1px solid rgba(129,140,248,0.15);border-radius:1.25rem;overflow:hidden;">
+        <!-- Minimal header -->
+        <div class="flex items-center justify-between px-4 pt-3 pb-2.5" style="border-bottom:1px solid rgba(255,255,255,0.04);">
+            <div class="flex items-center gap-2">
+                <!-- Crosshair/scope icon -->
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(129,140,248,0.7)" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="8"/>
+                    <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
+                    <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
+                    <circle cx="12" cy="12" r="2" fill="rgba(129,140,248,0.5)" stroke="none"/>
                 </svg>
+                <span style="font-size:11px;color:rgba(165,180,252,0.6);letter-spacing:0.08em;">ასტრო-ასისტენტი</span>
             </div>
-            <div>
-                <div class="text-[10px] text-indigo-400 uppercase tracking-widest">ASTROMAN · ასტრო-ასისტენტი</div>
-                <div class="text-sm font-semibold text-white" style="line-height:1.3">კითხვები ტელესკოპებზე, პლანეტებზე, ღრმა ცაზე</div>
-            </div>
-            <div class="ml-auto flex items-center gap-1.5 flex-shrink-0">
-                <div style="width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;"></div>
-                <span style="font-size:10px;color:rgba(100,200,100,0.7);">ონლაინ</span>
+            <div class="flex items-center gap-1.5">
+                <div style="width:5px;height:5px;border-radius:50%;background:#22c55e;box-shadow:0 0 5px #22c55e;"></div>
+                <span style="font-size:9px;color:rgba(100,200,100,0.5);">ონლაინ</span>
             </div>
         </div>
 
         <!-- Messages -->
-        <div id="chat-messages" style="height:280px;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth;">
+        <div id="chat-messages" style="height:260px;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth;">
             <!-- Welcome message -->
-            <div class="chat-msg-bot" style="display:flex;gap:8px;align-items:flex-start;">
-                <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,rgba(99,102,241,0.5),rgba(139,92,246,0.4));flex-shrink:0;display:flex;align-items:center;justify-content:center;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.9)" stroke-width="2"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M9 8V6a3 3 0 016 0v2"/><circle cx="9" cy="14" r="1.5" fill="rgba(165,180,252,0.9)" stroke="none"/><circle cx="15" cy="14" r="1.5" fill="rgba(165,180,252,0.9)" stroke="none"/></svg>
+            <div style="display:flex;gap:7px;align-items:flex-start;">
+                <div style="width:20px;height:20px;border-radius:50%;background:rgba(99,102,241,0.2);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.8)" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="2" fill="rgba(129,140,248,0.5)" stroke="none"/></svg>
                 </div>
-                <div style="background:rgba(99,102,241,0.1);border:1px solid rgba(129,140,248,0.15);border-radius:0 12px 12px 12px;padding:8px 12px;max-width:85%;">
-                    <p style="font-size:12px;color:rgba(220,225,255,0.85);line-height:1.6;margin:0;">გამარჯობა! 🔭 მე ვარ ASTROMAN-ის ასტრო-ასისტენტი. დამიბარე კითხვებით ტელესკოპებზე, პლანეტებზე, ვარსკვლავებზე ან ღრმა ცაზე — დაგეხმარები!</p>
+                <div style="background:rgba(99,102,241,0.08);border:1px solid rgba(129,140,248,0.12);border-radius:0 10px 10px 10px;padding:7px 11px;max-width:90%;">
+                    <p style="font-size:12px;color:rgba(200,210,255,0.75);line-height:1.6;margin:0;">გამარჯობა — დამიბარე კითხვებით ტელესკოპებზე, პლანეტებზე ან ღრმა ცაზე.</p>
                 </div>
             </div>
         </div>
 
         <!-- Suggested questions -->
-        <div id="chat-suggestions" style="padding:0 14px 10px;display:flex;flex-wrap:wrap;gap:6px;">
-            <button onclick="askSuggestion('რომელი ტელესკოპი გამოდგება დამწყებისთვის?')" style="font-size:10px;padding:5px 10px;border-radius:20px;background:rgba(99,102,241,0.1);border:1px solid rgba(129,140,248,0.2);color:rgba(165,180,252,0.8);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(99,102,241,0.2)'" onmouseout="this.style.background='rgba(99,102,241,0.1)'">🔭 დამწყებთათვის ტელესკოპი</button>
-            <button onclick="askSuggestion('როგორ ჩანს სატურნი 70mm ტელესკოპში?')" style="font-size:10px;padding:5px 10px;border-radius:20px;background:rgba(99,102,241,0.1);border:1px solid rgba(129,140,248,0.2);color:rgba(165,180,252,0.8);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(99,102,241,0.2)'" onmouseout="this.style.background='rgba(99,102,241,0.1)'">🪐 სატურნის ხედი</button>
-            <button onclick="askSuggestion('რა განსხვავებაა რეფრაქტორსა და რეფლექტორს შორის?')" style="font-size:10px;padding:5px 10px;border-radius:20px;background:rgba(99,102,241,0.1);border:1px solid rgba(129,140,248,0.2);color:rgba(165,180,252,0.8);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(99,102,241,0.2)'" onmouseout="this.style.background='rgba(99,102,241,0.1)'">❓ რეფრაქტორი vs რეფლექტორი</button>
+        <div id="chat-suggestions" style="padding:0 12px 8px;display:flex;flex-wrap:wrap;gap:5px;">
+            <button onclick="askSuggestion('რომელი ტელესკოპი გამოდგება დამწყებისთვის?')" style="font-size:10px;padding:4px 10px;border-radius:20px;background:rgba(99,102,241,0.08);border:1px solid rgba(129,140,248,0.15);color:rgba(165,180,252,0.65);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(129,140,248,0.35)';this.style.color='rgba(165,180,252,0.9)'" onmouseout="this.style.borderColor='rgba(129,140,248,0.15)';this.style.color='rgba(165,180,252,0.65)'">დამწყებთათვის ტელესკოპი</button>
+            <button onclick="askSuggestion('როგორ ჩანს სატურნი 70mm ტელესკოპში?')" style="font-size:10px;padding:4px 10px;border-radius:20px;background:rgba(99,102,241,0.08);border:1px solid rgba(129,140,248,0.15);color:rgba(165,180,252,0.65);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(129,140,248,0.35)';this.style.color='rgba(165,180,252,0.9)'" onmouseout="this.style.borderColor='rgba(129,140,248,0.15)';this.style.color='rgba(165,180,252,0.65)'">სატურნი ტელესკოპში</button>
+            <button onclick="askSuggestion('რა განსხვავებაა რეფრაქტორსა და რეფლექტორს შორის?')" style="font-size:10px;padding:4px 10px;border-radius:20px;background:rgba(99,102,241,0.08);border:1px solid rgba(129,140,248,0.15);color:rgba(165,180,252,0.65);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(129,140,248,0.35)';this.style.color='rgba(165,180,252,0.9)'" onmouseout="this.style.borderColor='rgba(129,140,248,0.15)';this.style.color='rgba(165,180,252,0.65)'">რეფრაქტორი vs რეფლექტორი</button>
         </div>
 
         <!-- Input -->
-        <div style="padding:10px 12px;border-top:1px solid rgba(255,255,255,0.05);display:flex;gap:8px;align-items:flex-end;">
-            <textarea id="chat-input" placeholder="დაუსვი კითხვა ასტრონომიაზე..." rows="1"
-                style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(129,140,248,0.2);border-radius:12px;padding:9px 12px;font-size:12px;color:#e2e8ff;resize:none;outline:none;font-family:inherit;line-height:1.5;max-height:80px;"
+        <div style="padding:8px 10px;border-top:1px solid rgba(255,255,255,0.04);display:flex;gap:7px;align-items:flex-end;">
+            <textarea id="chat-input" placeholder="დამისვი კითხვა ასტრონომიაზე..." rows="1"
+                style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(129,140,248,0.15);border-radius:10px;padding:8px 11px;font-size:12px;color:#c7d2fe;resize:none;outline:none;font-family:inherit;line-height:1.5;max-height:80px;"
                 onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"
                 oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';"
-                onfocus="this.style.borderColor='rgba(129,140,248,0.4)'"
-                onblur="this.style.borderColor='rgba(129,140,248,0.2)'"></textarea>
+                onfocus="this.style.borderColor='rgba(129,140,248,0.35)'"
+                onblur="this.style.borderColor='rgba(129,140,248,0.15)'"></textarea>
             <button onclick="sendChat()" id="chat-send-btn"
-                style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity 0.2s;"
-                title="გაგზავნა">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                style="width:34px;height:34px;border-radius:9px;background:rgba(99,102,241,0.3);border:1px solid rgba(129,140,248,0.3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;"
+                title="გაგზავნა"
+                onmouseover="this.style.background='rgba(99,102,241,0.5)'"
+                onmouseout="this.style.background='rgba(99,102,241,0.3)'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="22" y1="2" x2="11" y2="13"/>
                     <polygon points="22 2 15 22 11 13 2 9 22 2"/>
                 </svg>
@@ -710,14 +731,8 @@
 
     {# ── Planets Explorer Section ── #}
     <div class="mt-6">
-        <div class="mb-5 px-1">
-            <div class="flex items-center gap-3 mb-1">
-                <div style="width:3px;height:30px;background:linear-gradient(180deg,#818cf8,#6366f155);border-radius:2px;flex-shrink:0;"></div>
-                <div>
-                    <h2 style="font-size:clamp(17px,4vw,23px);font-weight:700;letter-spacing:-0.3px;background:linear-gradient(135deg,#e0e7ff 0%,#a5b4fc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2;">პლანეტების გზამკვლევი</h2>
-                    <div style="font-size:10px;color:rgba(165,180,252,0.4);letter-spacing:0.2em;text-transform:uppercase;margin-top:3px;">70mm ტელესკოპის ხედი · დააჭირე პლანეტას</div>
-                </div>
-            </div>
+        <div class="mb-4 px-1">
+            <h2 style="font-size:clamp(16px,4vw,21px);font-weight:600;background:linear-gradient(135deg,#e0e7ff 0%,#a5b4fc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">პლანეტები ტელესკოპიდან</h2>
         </div>
         <div class="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3">
             {% set planet_cards = [
