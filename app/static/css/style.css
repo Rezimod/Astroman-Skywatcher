@@ -2,12 +2,14 @@
 
 /* ─── CSS Variables ─── */
 :root {
-  --bg-deep:          #060610;
+  --bg-deep:          #050509;
+  --bg-darker:        #0a0a15;
   --accent:           #818cf8;
   --accent-v:         #a78bfa;
-  --glass-bg:         rgba(80, 100, 255, 0.04);
-  --glass-border:     rgba(255, 255, 255, 0.08);
-  --glass-highlight:  rgba(255, 255, 255, 0.12);
+  --accent-gold:      #f5c842;
+  --glass-bg:         rgba(80, 100, 255, 0.045);
+  --glass-border:     rgba(255, 255, 255, 0.085);
+  --glass-highlight:  rgba(255, 255, 255, 0.14);
   --c-mercury: #9ca3af;
   --c-venus:   #fbbf24;
   --c-mars:    #f87171;
@@ -34,10 +36,10 @@ html, body {
 
 body {
   background:
-    radial-gradient(ellipse at 15% 40%, rgba(99,60,180,0.12) 0%, transparent 55%),
-    radial-gradient(ellipse at 85% 15%, rgba(30,27,90,0.18) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 95%, rgba(20,30,80,0.25) 0%, transparent 50%),
-    linear-gradient(180deg, #060610 0%, #08081a 35%, #0a0c20 65%, #060610 100%) !important;
+    radial-gradient(ellipse 800px 600px at 15% 35%, rgba(139,92,246,0.15) 0%, transparent 55%),
+    radial-gradient(ellipse 900px 700px at 85% 10%, rgba(59,130,246,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse 700px 500px at 50% 100%, rgba(79,70,229,0.1) 0%, transparent 60%),
+    linear-gradient(180deg, #050509 0%, #0a081f 25%, #0f0a25 50%, #0a0815 75%, #050509 100%) !important;
   background-attachment: fixed !important;
   font-feature-settings: 'liga' 1;
   letter-spacing: 0.01em;
@@ -67,45 +69,47 @@ body::before {
 
 body > * { position: relative; z-index: 1; }
 
-/* ─── GLASSMORPHISM — iPhone-style ─── */
+/* ─── GLASSMORPHISM — Premium Edition ─── */
 .glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  background: rgba(15,15,40,0.35);
+  backdrop-filter: blur(45px) saturate(190%);
+  -webkit-backdrop-filter: blur(45px) saturate(190%);
   border: 1px solid var(--glass-border);
-  border-top-color: var(--glass-highlight);
-  border-left-color: rgba(255,255,255,0.10);
+  border-top-color: rgba(255,255,255,0.15);
+  border-left-color: rgba(255,255,255,0.12);
   border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(79,70,229,0.08), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 
 .glass-strong {
-  background: rgba(90,110,255,0.06);
-  backdrop-filter: blur(60px) saturate(200%);
-  -webkit-backdrop-filter: blur(60px) saturate(200%);
-  border: 1px solid rgba(255,255,255,0.10);
-  border-top-color: rgba(255,255,255,0.16);
-  border-left-color: rgba(255,255,255,0.12);
+  background: rgba(25,20,70,0.4);
+  backdrop-filter: blur(60px) saturate(210%);
+  -webkit-backdrop-filter: blur(60px) saturate(210%);
+  border: 1px solid rgba(129,140,248,0.25);
+  border-top-color: rgba(255,255,255,0.18);
+  border-left-color: rgba(255,255,255,0.14);
   border-radius: 24px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+  box-shadow: 0 12px 48px rgba(79,70,229,0.15), inset 0 1px 0 rgba(255,255,255,0.1);
 }
 
 .glass-card {
-  background: rgba(80,100,255,0.03);
-  backdrop-filter: blur(40px) saturate(160%);
-  -webkit-backdrop-filter: blur(40px) saturate(160%);
+  background: rgba(20,18,60,0.3);
+  backdrop-filter: blur(42px) saturate(170%);
+  -webkit-backdrop-filter: blur(42px) saturate(170%);
   border: 1px solid var(--glass-border);
   border-top-color: var(--glass-highlight);
-  border-left-color: rgba(255,255,255,0.09);
+  border-left-color: rgba(255,255,255,0.11);
   border-radius: 16px;
-  transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+  transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow: 0 4px 16px rgba(79,70,229,0.06);
 }
 
 .glass-card:hover {
-  background: rgba(100,120,255,0.07);
-  border-color: rgba(129,140,248,0.2);
-  border-top-color: rgba(255,255,255,0.18);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3), 0 0 0 1px rgba(129,140,248,0.08);
+  background: rgba(30,28,80,0.45);
+  border-color: rgba(165,180,252,0.35);
+  border-top-color: rgba(255,255,255,0.22);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(129,140,248,0.15), 0 0 0 1px rgba(129,140,248,0.12);
 }
 
 /* ─── Section Header Left Accent ─── */
@@ -242,3 +246,83 @@ body > * { position: relative; z-index: 1; }
 
 /* ─── Text Safety ─── */
 * { overflow-wrap: break-word; word-break: normal; }
+
+/* ─── ASTROMAN Logo & Header ─── */
+.astroman-logo {
+  max-width: 140px;
+  height: auto;
+  margin: 0 auto 20px;
+  filter: drop-shadow(0 4px 12px rgba(245,200,66,0.15));
+  animation: logo-glow 4s ease-in-out infinite;
+}
+
+@keyframes logo-glow {
+  0%, 100% { filter: drop-shadow(0 4px 12px rgba(245,200,66,0.15)); }
+  50% { filter: drop-shadow(0 8px 20px rgba(245,200,66,0.25)); }
+}
+
+.dashboard-hero {
+  text-align: center;
+  margin-bottom: 36px;
+  padding: 30px 20px;
+  background: rgba(79,70,229,0.06);
+  border: 1px solid rgba(129,140,248,0.15);
+  border-radius: 24px;
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+}
+
+.dashboard-hero h1 {
+  font-size: clamp(28px, 5vw, 44px);
+  font-weight: 700;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #e0e7ff 0%, #a78bfa 50%, #f5c842 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+
+.dashboard-hero p {
+  color: rgba(165,180,252,0.7);
+  font-size: 14px;
+}
+
+/* ─── Premium Animations ─── */
+@keyframes cosmic-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.cosmic-spin {
+  animation: cosmic-spin 20s linear infinite;
+}
+
+/* ─── Hover Glow Effects ─── */
+.hover-glow {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.hover-glow:hover {
+  text-shadow: 0 0 12px rgba(129,140,248,0.6);
+}
+
+/* ─── Premium Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15,15,40,0.3);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(129,140,248,0.5), rgba(167,139,250,0.5));
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(129,140,248,0.8), rgba(167,139,250,0.8));
+}
