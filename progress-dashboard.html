@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Sam - Live Progress Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 50%, #0f0f1e 100%);
+            color: #e0e7ff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Star background effect */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.2), rgba(255,255,255,0)),
+                radial-gradient(2px 2px at 60px 70px, rgba(255,255,255,0.15), rgba(255,255,255,0)),
+                radial-gradient(1px 1px at 50px 50px, rgba(255,255,255,0.1), rgba(255,255,255,0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            z-index: 0;
+        }
+
+        body > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(129, 140, 248, 0.3);
+            border-radius: 20px;
+            backdrop-filter: blur(40px);
+        }
+
+        .header-left h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-left p {
+            font-size: 13px;
+            color: rgba(165, 180, 252, 0.7);
+            font-family: 'Courier New', monospace;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            border-radius: 100px;
+            color: #86efac;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 8px #22c55e;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(80, 100, 255, 0.05);
+            border: 1px solid rgba(129, 140, 248, 0.2);
+            border-top-color: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(40px);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            background: rgba(80, 100, 255, 0.08);
+            border-color: rgba(129, 140, 248, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #e2e8f0;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .metric:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            font-size: 13px;
+            color: rgba(165, 180, 252, 0.7);
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #818cf8;
+            font-family: 'Courier New', monospace;
+        }
+
+        .progress-section {
+            margin-top: 30px;
+        }
+
+        .progress-section h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #e2e8f0;
+        }
+
+        .task-card {
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(129, 140, 248, 0.25);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(30px);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .task-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .task-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .task-status.in-progress {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .task-status.queued {
+            background: rgba(156, 163, 175, 0.1);
+            color: #d1d5db;
+            border: 1px solid rgba(156, 163, 175, 0.25);
+        }
+
+        .task-status.completed {
+            background: rgba(34, 197, 94, 0.15);
+            color: #86efac;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #818cf8 0%, #a78bfa 100%);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: rgba(165, 180, 252, 0.6);
+            font-family: 'Courier New', monospace;
+        }
+
+        .subtasks {
+            display: grid;
+            gap: 10px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .subtask {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            padding: 8px 0;
+        }
+
+        .subtask-label {
+            color: rgba(165, 180, 252, 0.6);
+            flex: 1;
+        }
+
+        .subtask-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .subtask-status.in-progress {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+        }
+
+        .subtask-status.queued {
+            background: rgba(156, 163, 175, 0.1);
+            color: #d1d5db;
+        }
+
+        .subtask-status.completed {
+            background: rgba(34, 197, 94, 0.15);
+            color: #86efac;
+        }
+
+        .eta {
+            font-size: 11px;
+            color: rgba(165, 180, 252, 0.5);
+            font-family: 'Courier New', monospace;
+        }
+
+        .timeline {
+            display: flex;
+            gap: 4px;
+            margin-top: 20px;
+        }
+
+        .timeline-item {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timeline-item.completed {
+            background: rgba(34, 197, 94, 0.4);
+        }
+
+        .timeline-item.in-progress {
+            background: rgba(59, 130, 246, 0.4);
+        }
+
+        .timeline-item.in-progress::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0), rgba(59, 130, 246, 0.8), rgba(59, 130, 246, 0));
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: rgba(165, 180, 252, 0.5);
+            font-size: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 40px;
+        }
+
+        .footer-time {
+            font-family: 'Courier New', monospace;
+            color: rgba(165, 180, 252, 0.7);
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .header-left h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <h1>🚀 Sam - Live Progress</h1>
+                <p id="session-time">Session started: 2026-03-12 19:56 UTC</p>
+            </div>
+            <div class="status-badge" id="status-badge">ACTIVE</div>
+        </header>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-title">📊 Session Overview</div>
+                <div class="metric">
+                    <span class="metric-label">Status</span>
+                    <span class="metric-value" id="total-progress">5%</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Completed</span>
+                    <span class="metric-value" id="completed-count">0</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">In Progress</span>
+                    <span class="metric-value" id="active-count">1</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Queued</span>
+                    <span class="metric-value" id="queued-count">6</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">⏱️ Timeline</div>
+                <div class="metric">
+                    <span class="metric-label">Start Time</span>
+                    <span class="metric-value eta" id="start-time">19:56</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">ETA Completion</span>
+                    <span class="metric-value eta" id="eta-time">23:30</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Elapsed</span>
+                    <span class="metric-value eta" id="elapsed-time">--</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🎯 Current Task</div>
+                <div class="metric">
+                    <span class="metric-label">Task</span>
+                    <span class="metric-value" style="font-size: 14px; color: #a78bfa;">Dashboard Redesign</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Progress</span>
+                    <span class="metric-value" id="current-progress">5%</span>
+                </div>
+                <div style="margin-top: 12px;">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar" id="current-bar" style="width: 5%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-section">
+            <h2>📋 Active Projects</h2>
+            <div id="projects-container"></div>
+        </div>
+
+        <div class="progress-section">
+            <h2>✅ Completed</h2>
+            <div id="completed-container">
+                <p style="color: rgba(165, 180, 252, 0.5); font-size: 14px;">No tasks completed yet...</p>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>Last updated: <span class="footer-time" id="last-updated">2026-03-12 19:56:00 UTC</span></p>
+            <p style="margin-top: 8px; font-size: 11px;">Dashboard auto-refreshes every 5 minutes</p>
+        </footer>
+    </div>
+
+    <script>
+        // Auto-refresh every 5 minutes
+        setInterval(loadProgress, 5 * 60 * 1000);
+
+        // Initial load
+        loadProgress();
+
+        async function loadProgress() {
+            try {
+                const response = await fetch('/LIVE_PROGRESS.json');
+                const data = await response.json();
+                updateDashboard(data);
+            } catch (error) {
+                console.log('Dashboard loaded. Awaiting progress updates...');
+            }
+        }
+
+        function updateDashboard(data) {
+            // Update metrics
+            document.getElementById('total-progress').textContent = data.total_progress + '%';
+            document.getElementById('completed-count').textContent = data.completed_tasks.length;
+            document.getElementById('active-count').textContent = data.active_projects.filter(p => p.status === 'IN_PROGRESS').length;
+            document.getElementById('queued-count').textContent = data.active_projects.filter(p => p.status === 'QUEUED').length;
+
+            // Update current task
+            document.getElementById('current-progress').textContent = data.current_progress + '%';
+            document.getElementById('current-bar').style.width = data.current_progress + '%';
+
+            // Update times
+            const startTime = new Date(data.session_start);
+            document.getElementById('start-time').textContent = startTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
+
+            const etaTime = new Date(data.key_metrics.estimated_completion);
+            document.getElementById('eta-time').textContent = etaTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
+
+            // Calculate elapsed
+            const now = new Date();
+            const elapsed = Math.floor((now - startTime) / 60000);
+            const hours = Math.floor(elapsed / 60);
+            const mins = elapsed % 60;
+            document.getElementById('elapsed-time').textContent = (hours > 0 ? hours + 'h ' : '') + mins + 'm';
+
+            // Update last updated
+            document.getElementById('last-updated').textContent = new Date(data.last_updated).toLocaleString('en-GB', { timeZone: 'UTC' });
+
+            // Render projects
+            const projectsContainer = document.getElementById('projects-container');
+            projectsContainer.innerHTML = '';
+
+            data.active_projects.forEach(project => {
+                const projectHTML = `
+                    <div class="task-card">
+                        <div class="task-header">
+                            <div>
+                                <div class="task-title">${project.name}</div>
+                                <div style="font-size: 12px; color: rgba(165, 180, 252, 0.5); margin-top: 4px;">Priority: ${project.priority}</div>
+                            </div>
+                            <span class="task-status ${project.status.toLowerCase().replace('_', '-')}">${project.status.replace('_', ' ')}</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar" style="width: ${project.progress}%;"></div>
+                        </div>
+                        <div class="progress-text">${project.progress}% Complete</div>
+                        ${project.subtasks ? `
+                            <div class="subtasks">
+                                ${project.subtasks.map(st => `
+                                    <div class="subtask">
+                                        <span class="subtask-label">• ${st.name}</span>
+                                        <span class="subtask-status ${st.status.toLowerCase().replace('_', '-')}">${st.status.replace('_', ' ')}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                projectsContainer.innerHTML += projectHTML;
+            });
+
+            // Render completed
+            const completedContainer = document.getElementById('completed-container');
+            if (data.completed_tasks.length > 0) {
+                completedContainer.innerHTML = data.completed_tasks.map(task => `
+                    <div class="task-card" style="background: rgba(34, 197, 94, 0.08); border-color: rgba(34, 197, 94, 0.2);">
+                        <div class="task-title">✅ ${task}</div>
+                    </div>
+                `).join('');
+            }
+        }
+    </script>
+</body>
+</html>
