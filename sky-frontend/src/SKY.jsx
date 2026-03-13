@@ -160,7 +160,7 @@ function Navbar({ menuOpen, setMenuOpen }) {
     }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 60 }}>
         <a href="https://astroman.ge" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 28, filter: 'drop-shadow(0 0 8px rgba(201,168,76,0.4))' }}>🔭</span>
+          <img src="/logo.png" alt="Astroman" style={{ height: 36, width: 'auto', filter: 'drop-shadow(0 0 8px rgba(201,168,76,0.4))' }} />
           <span style={{ fontWeight: 700, fontSize: 20, color: S.gold, letterSpacing: 1 }}>ASTROMAN</span>
         </a>
 
@@ -623,7 +623,10 @@ function Footer() {
       fontSize: 13,
     }}>
       <div style={{ maxWidth: 700, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <div style={{ fontSize: 22, color: S.gold }}>🔭 ASTROMAN</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+          <img src="/logo.png" alt="Astroman" style={{ height: 32, width: 'auto', filter: 'drop-shadow(0 0 8px rgba(201,168,76,0.4))' }} />
+          <span style={{ fontSize: 20, fontWeight: 700, color: S.gold }}>ASTROMAN</span>
+        </div>
         <div>სამყაროს ყოველდღიური სახელმძღვანელო</div>
         <div>📍 თბილისი, ქ. ყიფიანის 17 | 📞 599 39 67 21 | ✉️ info@astroman.ge</div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginTop: 4 }}>
