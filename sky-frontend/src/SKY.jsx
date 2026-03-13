@@ -159,9 +159,12 @@ function Navbar({ menuOpen, setMenuOpen }) {
       padding: '0 20px',
     }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 60 }}>
-        <a href="https://astroman.ge" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <img src="/logo.png" alt="Astroman" style={{ height: 36, width: 'auto', filter: 'drop-shadow(0 0 8px rgba(201,168,76,0.4))' }} />
-          <span style={{ fontWeight: 700, fontSize: 20, color: S.gold, letterSpacing: 1 }}>ASTROMAN</span>
+        <a href="https://astroman.ge" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <img src="/logo-icon.png" alt="Astroman" style={{ height: 40, width: 'auto', filter: 'invert(1) drop-shadow(0 0 6px rgba(201,168,76,0.5))' }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <span style={{ fontWeight: 700, fontSize: 18, color: S.gold, letterSpacing: 1, lineHeight: 1 }}>ასტრომანი</span>
+            <span style={{ fontSize: 10, color: S.dim, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: "'Chakra Petch', monospace" }}>Sky Intelligence</span>
+          </div>
         </a>
 
         {/* Desktop nav */}
@@ -623,9 +626,12 @@ function Footer() {
       fontSize: 13,
     }}>
       <div style={{ maxWidth: 700, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-          <img src="/logo.png" alt="Astroman" style={{ height: 32, width: 'auto', filter: 'drop-shadow(0 0 8px rgba(201,168,76,0.4))' }} />
-          <span style={{ fontSize: 20, fontWeight: 700, color: S.gold }}>ASTROMAN</span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+          <img src="/logo-icon.png" alt="Astroman" style={{ height: 44, width: 'auto', filter: 'invert(1) drop-shadow(0 0 6px rgba(201,168,76,0.5))' }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, textAlign: 'left' }}>
+            <span style={{ fontSize: 20, fontWeight: 700, color: S.gold, letterSpacing: 1, lineHeight: 1 }}>ასტრომანი</span>
+            <span style={{ fontSize: 10, color: S.dim, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: "'Chakra Petch', monospace" }}>Sky Intelligence</span>
+          </div>
         </div>
         <div>სამყაროს ყოველდღიური სახელმძღვანელო</div>
         <div>📍 თბილისი, ქ. ყიფიანის 17 | 📞 599 39 67 21 | ✉️ info@astroman.ge</div>
