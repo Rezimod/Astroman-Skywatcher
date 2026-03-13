@@ -124,24 +124,24 @@ function relativeTime(target, now) {
 
 const S = {
   root: {
-    background: '#0a0a0f',
+    background: '#080C14',
     minHeight: '100vh',
-    color: '#fff',
-    fontFamily: "'Sylfaen', system-ui, sans-serif",
+    color: '#E8EDF5',
+    fontFamily: "'Noto Sans Georgian', 'Sylfaen', system-ui, sans-serif",
   },
   glass: {
-    background: 'rgba(255,255,255,0.06)',
-    border: '1px solid rgba(255,255,255,0.10)',
-    borderRadius: 20,
+    background: '#0D1420',
+    border: '1px solid rgba(255,255,255,0.06)',
+    borderRadius: 12,
     backdropFilter: 'blur(40px)',
     WebkitBackdropFilter: 'blur(40px)',
   },
   glassHover: {
-    background: 'rgba(255,255,255,0.10)',
+    background: '#111A2B',
   },
-  gold: '#f5c842',
-  dim: 'rgba(255,255,255,0.55)',
-  blue: '#60a5fa',
+  gold: '#C9A84C',
+  dim: '#5A6A80',
+  blue: '#4FC3C3',
   danger: '#ff6b6b',
   success: '#4ade80',
 };
@@ -150,31 +150,31 @@ const S = {
 
 function Navbar({ menuOpen, setMenuOpen }) {
   return (
-    <nav style={{
+    <nav className="astroman-nav" style={{
       position: 'sticky', top: 0, zIndex: 100,
-      background: 'rgba(10,10,15,0.85)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
-      borderBottom: '1px solid rgba(255,255,255,0.08)',
+      background: 'rgba(8,12,20,0.92)',
+      backdropFilter: 'blur(20px) saturate(180%)',
+      WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+      borderBottom: '1px solid rgba(255,255,255,0.06)',
       padding: '0 20px',
     }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 60 }}>
         <a href="https://astroman.ge" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 28 }}>🔭</span>
+          <span style={{ fontSize: 28, filter: 'drop-shadow(0 0 8px rgba(201,168,76,0.4))' }}>🔭</span>
           <span style={{ fontWeight: 700, fontSize: 20, color: S.gold, letterSpacing: 1 }}>ASTROMAN</span>
         </a>
 
         {/* Desktop nav */}
         <div style={{ display: 'flex', gap: 28, alignItems: 'center' }} className="desktop-nav">
-          <a href="#planets"  style={{ color: S.dim, textDecoration: 'none', fontSize: 15 }}>🪐 პლანეტები</a>
-          <a href="#store"    style={{ color: S.dim, textDecoration: 'none', fontSize: 15 }}>⭐ მაღაზია</a>
-          <a href="https://astroman.ge" style={{ color: S.dim, textDecoration: 'none', fontSize: 15 }}>🏠 მთავარი</a>
+          <a href="#planets"  className="nav-link" style={{ color: S.dim, textDecoration: 'none', fontSize: 15 }}>🪐 პლანეტები</a>
+          <a href="#store"    className="nav-link" style={{ color: S.dim, textDecoration: 'none', fontSize: 15 }}>⭐ მაღაზია</a>
+          <a href="https://astroman.ge" className="nav-link" style={{ color: S.dim, textDecoration: 'none', fontSize: 15 }}>🏠 მთავარი</a>
         </div>
 
         {/* Hamburger */}
         <button
           onClick={() => setMenuOpen(o => !o)}
-          style={{ background: 'none', border: 'none', color: '#fff', fontSize: 24, cursor: 'pointer', padding: 8 }}
+          style={{ background: 'none', border: 'none', color: '#E8EDF5', fontSize: 24, cursor: 'pointer', padding: 8 }}
           aria-label="მენიუ"
           className="hamburger"
         >
@@ -185,20 +185,20 @@ function Navbar({ menuOpen, setMenuOpen }) {
       {/* Mobile menu */}
       {menuOpen && (
         <div style={{
-          background: 'rgba(10,10,15,0.97)',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
+          background: 'rgba(8,12,20,0.97)',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
           padding: '12px 20px 20px',
           display: 'flex', flexDirection: 'column', gap: 16,
         }}>
-          <a href="#planets"  onClick={() => setMenuOpen(false)} style={{ color: S.dim, textDecoration: 'none', fontSize: 16 }}>🪐 პლანეტები</a>
-          <a href="#store"    onClick={() => setMenuOpen(false)} style={{ color: S.dim, textDecoration: 'none', fontSize: 16 }}>⭐ მაღაზია</a>
-          <a href="https://astroman.ge" style={{ color: S.dim, textDecoration: 'none', fontSize: 16 }}>🏠 მთავარი</a>
+          <a href="#planets"  onClick={() => setMenuOpen(false)} className="nav-link" style={{ color: S.dim, textDecoration: 'none', fontSize: 16 }}>🪐 პლანეტები</a>
+          <a href="#store"    onClick={() => setMenuOpen(false)} className="nav-link" style={{ color: S.dim, textDecoration: 'none', fontSize: 16 }}>⭐ მაღაზია</a>
+          <a href="https://astroman.ge" className="nav-link" style={{ color: S.dim, textDecoration: 'none', fontSize: 16 }}>🏠 მთავარი</a>
         </div>
       )}
 
       <style>{`
-        @media (min-width: 768px) { .hamburger { display: none !important; } }
-        @media (max-width: 767px) { .desktop-nav { display: none !important; } }
+        .nav-link { transition: color 0.2s ease !important; }
+        .nav-link:hover { color: #C9A84C !important; }
       `}</style>
     </nav>
   );
@@ -210,17 +210,27 @@ function Hero({ now, skyStatus, sunset }) {
     : '';
 
   return (
-    <section style={{ textAlign: 'center', padding: '60px 20px 40px', maxWidth: 700, margin: '0 auto' }}>
-      <div style={{ fontSize: 13, color: S.dim, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 }}>
+    <section className="hero-section hero-card" style={{ textAlign: 'center', padding: '60px 20px 40px', maxWidth: 700, margin: '0 auto', position: 'relative' }}>
+      {/* Corner bracket decorations */}
+      <span className="corner-tl" />
+      <span className="corner-tr" />
+      <span className="corner-bl" />
+      <span className="corner-br" />
+
+      {/* Live label */}
+      <div className="live-label">ASTROMAN · AI · REAL-TIME</div>
+
+      <div style={{ fontSize: 13, color: S.dim, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12, fontFamily: "'Chakra Petch', monospace" }}>
         {formatGeoDay(now)} · {formatGeoDate(now)}
       </div>
-      <h1 style={{ fontSize: 'clamp(28px, 6vw, 52px)', fontWeight: 700, marginBottom: 16, lineHeight: 1.2 }}>
+      <h1 style={{ fontSize: 'clamp(28px, 6vw, 52px)', fontWeight: 700, marginBottom: 16, lineHeight: 1.2, textShadow: '0 0 40px rgba(201,168,76,0.3)' }}>
         ცოცხალი ცის<br />
-        <span style={{ color: S.gold }}>ინტელიგენცია</span>
+        <span className="gold-word-span" style={{ color: S.gold }}>ინტელიგენცია</span>
       </h1>
 
       {/* Live clock */}
-      <div style={{ fontSize: 'clamp(36px, 8vw, 64px)', fontWeight: 300, letterSpacing: 4, marginBottom: 20, fontVariantNumeric: 'tabular-nums' }}>
+      <div className="hero-time" style={{ fontSize: 'clamp(36px, 8vw, 64px)', fontWeight: 300, letterSpacing: '-0.02em', marginBottom: 20, fontVariantNumeric: 'tabular-nums', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+        <span className="live-dot" />
         {formatTime(now)}
       </div>
 
@@ -228,7 +238,7 @@ function Hero({ now, skyStatus, sunset }) {
       {skyStatus && (
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
-          background: 'rgba(255,255,255,0.08)',
+          background: 'rgba(255,255,255,0.05)',
           border: `1px solid ${skyStatus.color}44`,
           borderRadius: 100, padding: '8px 20px', marginBottom: 16,
           fontSize: 16, color: skyStatus.color,
@@ -278,15 +288,15 @@ function StatsRow({ weather, sunData }) {
     <div style={{ overflowX: 'auto', padding: '0 16px 4px', marginBottom: 32 }}>
       <div style={{ display: 'flex', gap: 12, minWidth: 'max-content', maxWidth: 1100, margin: '0 auto' }}>
         {cards.map((c, i) => (
-          <div key={i} style={{
+          <div key={i} className="stat-card" style={{
             ...S.glass,
             minWidth: 160, padding: '16px 20px',
             display: 'flex', flexDirection: 'column', gap: 4,
             flex: '1 1 160px',
           }}>
-            <div style={{ fontSize: 22 }}>{c.icon}</div>
+            <div className="stat-icon">{c.icon}</div>
             <div style={{ fontSize: 12, color: S.dim }}>{c.label}</div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: '#fff' }}>{c.value}</div>
+            <div className="numeric-value" style={{ fontSize: 22, fontWeight: 700, color: '#E8EDF5' }}>{c.value}</div>
             {c.sub && <div style={{ fontSize: 12, color: S.dim }}>{c.sub}</div>}
           </div>
         ))}
@@ -304,7 +314,7 @@ function PlanetCard({ planet, onClick }) {
         ...S.glass,
         minWidth: 140, padding: '16px 14px',
         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-        cursor: 'pointer', border: 'none', color: '#fff',
+        cursor: 'pointer', border: 'none', color: '#E8EDF5',
         opacity: dim ? 0.4 : 1,
         transition: 'transform 0.15s, opacity 0.15s',
         flexShrink: 0,
@@ -360,7 +370,7 @@ function ISSTracker({ iss }) {
   const alertLevel = dist !== null
     ? (dist < 500 ? 'danger' : dist < 1000 ? 'warn' : 'ok')
     : 'ok';
-  const alertColor = alertLevel === 'danger' ? S.danger : alertLevel === 'warn' ? '#f5c842' : S.dim;
+  const alertColor = alertLevel === 'danger' ? S.danger : alertLevel === 'warn' ? '#C9A84C' : S.dim;
   const alertMsg   = alertLevel === 'danger' ? '🔴 ISS ახლოსაა! ზეცაში ადევნეთ თვალი!' :
                      alertLevel === 'warn'   ? '🟡 ISS ახლოვდება!' : '';
 
@@ -429,7 +439,7 @@ function APODSection({ apod }) {
             <a href={apod.url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', position: 'relative', height: '100%' }}>
               <div style={{
                 width: '100%', height: '100%',
-                background: 'radial-gradient(ellipse, #1a0a2e, #0a0a0f)',
+                background: 'radial-gradient(ellipse, #0a1628, #080C14)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 <span style={{ fontSize: 64 }}>▶️</span>
@@ -438,7 +448,7 @@ function APODSection({ apod }) {
           ) : imgError ? (
             <div style={{
               width: '100%', height: '100%',
-              background: 'radial-gradient(ellipse, #1a0a2e, #0a0a0f)',
+              background: 'radial-gradient(ellipse, #0a1628, #080C14)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12,
             }}>
               <span style={{ fontSize: 48 }}>🌌</span>
@@ -467,7 +477,7 @@ function APODSection({ apod }) {
             href={apod.url} target="_blank" rel="noopener noreferrer"
             style={{
               display: 'inline-block', padding: '8px 18px',
-              background: 'rgba(245,200,66,0.12)', border: '1px solid rgba(245,200,66,0.3)',
+              background: 'rgba(201,168,76,0.12)', border: '1px solid rgba(201,168,76,0.3)',
               borderRadius: 100, color: S.gold, textDecoration: 'none', fontSize: 13,
             }}
           >
@@ -505,7 +515,7 @@ function CosmosGallery({ cosmos }) {
           {imgError ? (
             <div style={{
               width: '100%', height: '100%',
-              background: 'radial-gradient(ellipse, #1a0a2e, #0a0a0f)',
+              background: 'radial-gradient(ellipse, #0a1628, #080C14)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12,
             }}>
               <span style={{ fontSize: 48 }}>🌠</span>
@@ -538,7 +548,7 @@ function CosmosGallery({ cosmos }) {
               href={cosmos.hdurl || cosmos.url} target="_blank" rel="noopener noreferrer"
               style={{
                 padding: '6px 16px',
-                background: 'rgba(96,165,250,0.12)', border: '1px solid rgba(96,165,250,0.3)',
+                background: 'rgba(79,195,195,0.12)', border: '1px solid rgba(79,195,195,0.3)',
                 borderRadius: 100, color: S.blue, textDecoration: 'none', fontSize: 12,
               }}
             >
@@ -583,11 +593,11 @@ function ObservingTips({ cloudCover }) {
 
   return (
     <section style={{ maxWidth: 1100, margin: '0 auto 40px', padding: '0 16px' }}>
-      <div style={{ ...S.glass, padding: '20px 24px' }}>
+      <div className="observing-card" style={{ ...S.glass, padding: '20px 24px' }}>
         <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>💡 დაკვირვების რჩევები</h2>
         {tips ? (
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-            <span style={{ fontSize: 32 }}>{tips.icon}</span>
+            <span className={`tip-icon${tips.icon === '☀️' ? ' sun-rotating' : ''}`} style={{ fontSize: 32 }}>{tips.icon}</span>
             <div>
               <div style={{ fontWeight: 700, color: tips.color, marginBottom: 4 }}>
                 პირობები: {tips.level}
@@ -665,7 +675,7 @@ function PlanetModal({ planet, onClose }) {
           maxHeight: '90vh', overflowY: 'auto',
           borderRadius: '20px 20px 0 0',
           animation: 'slideUp 0.3s ease',
-          background: 'rgba(10,10,20,0.97)',
+          background: 'rgba(8,12,20,0.97)',
         }}
         className="planet-modal-inner"
       >
@@ -680,10 +690,10 @@ function PlanetModal({ planet, onClose }) {
           {imgError ? (
             <div style={{
               width: '100%', height: '100%',
-              background: 'radial-gradient(ellipse, #1a0a2e, #0a0a0f)',
+              background: 'radial-gradient(ellipse, #0a1628, #080C14)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <span style={{ fontSize: 120, filter: 'drop-shadow(0 0 40px rgba(245,200,66,0.4))' }}>{planet.emoji}</span>
+              <span style={{ fontSize: 120, filter: 'drop-shadow(0 0 40px rgba(201,168,76,0.4))' }}>{planet.emoji}</span>
             </div>
           ) : (
             <img
@@ -725,7 +735,7 @@ function PlanetModal({ planet, onClose }) {
             href="https://astroman.ge"
             style={{
               display: 'block', textAlign: 'center', padding: '12px',
-              background: 'rgba(245,200,66,0.1)', border: '1px solid rgba(245,200,66,0.3)',
+              background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.3)',
               borderRadius: 14, color: S.gold, textDecoration: 'none', fontWeight: 600, fontSize: 14,
               marginBottom: 20,
             }}
@@ -864,13 +874,174 @@ export default function SKY() {
       {selPlanet && <PlanetModal planet={selPlanet} onClose={() => setSelPlanet(null)} />}
 
       <style>{`
+        /* ─── Base ─── */
         * { box-sizing: border-box; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
-        @keyframes slideUp   { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        @keyframes fadeIn    { from { opacity: 0; } to { opacity: 1; } }
+        ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.4); border-radius: 2px; }
+
+        /* ─── Keyframes ─── */
+        @keyframes fadeSlideUp {
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulseGlow {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50%       { transform: scale(1.6); opacity: 0.5; }
+        }
+        @keyframes sunRotate {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+        @keyframes slideUp     { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes fadeIn      { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadeScaleIn { from { opacity: 0; transform: scale(1.02); } to { opacity: 1; transform: scale(1); } }
+
+        /* ─── Page load animations ─── */
+        .astroman-nav  { animation: fadeSlideUp 0.5s cubic-bezier(0.4,0,0.2,1) both; }
+        .hero-section  { animation: fadeSlideUp 0.5s cubic-bezier(0.4,0,0.2,1) 0.1s both; }
+        .stat-card     { animation: fadeSlideUp 0.5s cubic-bezier(0.4,0,0.2,1) both; }
+        .stat-card:nth-child(1) { animation-delay: 0.2s; }
+        .stat-card:nth-child(2) { animation-delay: 0.25s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.35s; }
+
+        /* ─── Hero card — star field + radial glow ─── */
+        .hero-card {
+          background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 70%);
+        }
+        .hero-card::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0;
+          width: 1px; height: 1px;
+          background: white;
+          border-radius: 50%;
+          pointer-events: none;
+          z-index: 0;
+          box-shadow:
+            45px 23px 0 rgba(255,255,255,0.3),   120px 67px 0 rgba(255,255,255,0.15),
+            230px 34px 0 rgba(255,255,255,0.25),  340px 89px 0 rgba(255,255,255,0.1),
+            450px 15px 0 rgba(255,255,255,0.35),  560px 78px 0 rgba(255,255,255,0.2),
+            640px 45px 0 rgba(255,255,255,0.15),   80px 145px 0 rgba(255,255,255,0.2),
+            190px 112px 0 rgba(255,255,255,0.3),  290px 178px 0 rgba(255,255,255,0.1),
+            410px 134px 0 rgba(255,255,255,0.25), 510px 167px 0 rgba(255,255,255,0.15),
+            620px 123px 0 rgba(255,255,255,0.35),  30px 200px 0 rgba(255,255,255,0.1),
+            160px 234px 0 rgba(255,255,255,0.25), 270px 256px 0 rgba(255,255,255,0.2),
+            380px 278px 0 rgba(255,255,255,0.1),  490px 213px 0 rgba(255,255,255,0.3),
+            590px 245px 0 rgba(255,255,255,0.15), 680px 198px 0 rgba(255,255,255,0.2),
+             70px 312px 0 rgba(255,255,255,0.1),  155px 345px 0 rgba(255,255,255,0.2),
+            245px 323px 0 rgba(255,255,255,0.25), 350px 356px 0 rgba(255,255,255,0.15),
+            460px 334px 0 rgba(255,255,255,0.1),  555px 367px 0 rgba(255,255,255,0.3),
+            645px 345px 0 rgba(255,255,255,0.15),  15px  89px 0 rgba(255,255,255,0.2),
+             95px 178px 0 rgba(255,255,255,0.15), 175px 156px 0 rgba(255,255,255,0.25),
+            265px  89px 0 rgba(255,255,255,0.1),  355px  45px 0 rgba(255,255,255,0.2),
+            435px 234px 0 rgba(255,255,255,0.15), 525px 112px 0 rgba(255,255,255,0.3),
+            615px 267px 0 rgba(255,255,255,0.1),   22px 267px 0 rgba(255,255,255,0.25),
+            112px 289px 0 rgba(255,255,255,0.15), 202px 312px 0 rgba(255,255,255,0.2),
+            302px 134px 0 rgba(255,255,255,0.1),  402px 167px 0 rgba(255,255,255,0.25),
+            502px  89px 0 rgba(255,255,255,0.15), 602px  56px 0 rgba(255,255,255,0.3),
+            692px 278px 0 rgba(255,255,255,0.1),   55px 367px 0 rgba(255,255,255,0.2),
+            148px 378px 0 rgba(255,255,255,0.15), 238px 389px 0 rgba(255,255,255,0.25),
+            328px 345px 0 rgba(255,255,255,0.1),  418px 312px 0 rgba(255,255,255,0.2),
+            518px 289px 0 rgba(255,255,255,0.15), 608px 334px 0 rgba(255,255,255,0.3),
+              8px 145px 0 rgba(255,255,255,0.1),   88px  56px 0 rgba(255,255,255,0.25),
+            188px  23px 0 rgba(255,255,255,0.2),  288px 167px 0 rgba(255,255,255,0.15),
+            388px  56px 0 rgba(255,255,255,0.3),  488px 178px 0 rgba(255,255,255,0.1),
+            578px  23px 0 rgba(255,255,255,0.2),  668px  89px 0 rgba(255,255,255,0.15),
+             38px  56px 0 rgba(255,255,255,0.25), 138px 123px 0 rgba(255,255,255,0.1),
+            218px 200px 0 rgba(255,255,255,0.2),  318px 223px 0 rgba(255,255,255,0.15),
+            418px  56px 0 rgba(255,255,255,0.3),  518px 234px 0 rgba(255,255,255,0.1),
+            618px 178px 0 rgba(255,255,255,0.25), 698px 145px 0 rgba(255,255,255,0.15),
+             62px 289px 0 rgba(255,255,255,0.2),  162px 167px 0 rgba(255,255,255,0.3),
+            252px  45px 0 rgba(255,255,255,0.1),  362px 312px 0 rgba(255,255,255,0.25),
+            472px 256px 0 rgba(255,255,255,0.15), 572px 312px 0 rgba(255,255,255,0.2),
+            662px  23px 0 rgba(255,255,255,0.1),   42px 134px 0 rgba(255,255,255,0.3),
+            142px  78px 0 rgba(255,255,255,0.15), 232px 267px 0 rgba(255,255,255,0.25),
+            332px  56px 0 rgba(255,255,255,0.1),  432px 389px 0 rgba(255,255,255,0.2),
+            532px 145px 0 rgba(255,255,255,0.3),  632px 389px 0 rgba(255,255,255,0.15);
+        }
+        .hero-card > * { position: relative; z-index: 1; }
+
+        /* ─── Corner bracket decorations ─── */
+        .corner-tl, .corner-tr, .corner-bl, .corner-br {
+          position: absolute;
+          width: 16px; height: 16px;
+          pointer-events: none;
+          z-index: 2;
+        }
+        .corner-tl { top: 16px; left: 16px;   border-top:    2px solid #C9A84C; border-left:  2px solid #C9A84C; }
+        .corner-tr { top: 16px; right: 16px;  border-top:    2px solid #C9A84C; border-right: 2px solid #C9A84C; }
+        .corner-bl { bottom: 16px; left: 16px;  border-bottom: 2px solid #C9A84C; border-left:  2px solid #C9A84C; }
+        .corner-br { bottom: 16px; right: 16px; border-bottom: 2px solid #C9A84C; border-right: 2px solid #C9A84C; }
+
+        /* ─── ASTROMAN live label ─── */
+        .live-label {
+          letter-spacing: 0.25em;
+          font-size: 10px;
+          color: #5A6A80;
+          font-family: 'Chakra Petch', monospace;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+        }
+
+        /* ─── Pulsing cyan live dot ─── */
+        .live-dot {
+          display: inline-block;
+          width: 6px; height: 6px;
+          border-radius: 50%;
+          background: #4FC3C3;
+          animation: pulseGlow 2s cubic-bezier(0.4,0,0.2,1) infinite;
+          flex-shrink: 0;
+        }
+
+        /* ─── Hero time — Chakra Petch instrument font ─── */
+        .hero-time { font-family: 'Chakra Petch', monospace !important; }
+
+        /* ─── Gold word: thin HR rules above and below ─── */
+        .gold-word-span { display: block; }
+        .gold-word-span::before,
+        .gold-word-span::after {
+          content: '';
+          display: block;
+          height: 1px;
+          background: rgba(201,168,76,0.3);
+          margin: 8px auto;
+          width: 60%;
+        }
+
+        /* ─── Numeric values — instrument typeface ─── */
+        .numeric-value { font-family: 'Chakra Petch', monospace !important; }
+
+        /* ─── Stat cards ─── */
+        .stat-card {
+          border-top: 2px solid #C9A84C !important;
+          background: linear-gradient(180deg, rgba(201,168,76,0.04) 0%, transparent 40%), #0D1420 !important;
+          border-radius: 12px !important;
+          transition: all 0.25s cubic-bezier(0.4,0,0.2,1) !important;
+        }
+        .stat-card:hover {
+          transform: translateY(-2px) !important;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+          border-top-color: #daba6a !important;
+        }
+        .stat-icon {
+          width: 40px; height: 40px;
+          border-radius: 50%;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.08);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 20px;
+        }
+
+        /* ─── Sun icon rotation (clear sky condition) ─── */
+        .tip-icon { display: inline-block; }
+        .sun-rotating { animation: sunRotate 30s linear infinite; }
+
+        /* ─── Responsive (preserved from components) ─── */
+        @media (min-width: 768px) { .hamburger { display: none !important; } }
+        @media (max-width: 767px) { .desktop-nav { display: none !important; } }
+        @media (min-width: 640px) { .planet-modal-inner { border-radius: 20px !important; margin-bottom: 40px; } }
       `}</style>
     </div>
   );
