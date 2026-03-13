@@ -5,112 +5,165 @@
 {% block content %}
 <div class="space-y-5">
 
-    <!-- ═══ HERO — 3-column Grid: LEFT META | CENTER TITLE | RIGHT META ═══ -->
-    <div class="hero-outer">
-        <div class="hero-nebula"     aria-hidden="true"></div>
-        <div class="hero-stars-css"  aria-hidden="true"></div>
-        <div class="hero-scanline"   aria-hidden="true"></div>
+    <!-- ═══ HERO ═══ -->
+    <div style="position:relative;overflow:hidden;border-radius:20px;background:rgba(8,6,28,0.72);border:1px solid rgba(255,255,255,0.10);border-top-color:rgba(255,255,255,0.18);backdrop-filter:blur(60px);-webkit-backdrop-filter:blur(60px);box-shadow:0 24px 80px rgba(0,0,0,0.65),inset 0 1px 0 rgba(255,255,255,0.07);margin-bottom:4px;">
 
-        <!-- Mobile meta row (shown only on narrow screens) -->
-        <div class="hero-mobile-meta" style="padding:16px 20px 0;">
-            <span class="hero-mobile-chip">📅 {{ observation.date | datetimeformat }}</span>
-            <span class="hero-mobile-chip" style="color:rgba(34,197,94,0.65);">●</span>
-            <span class="hero-mobile-chip" id="tbilisi-clock-mobile">--:--:--</span>
-            <span class="hero-mobile-chip">📍 თბილისი</span>
+        <!-- Nebula glow layers -->
+        <div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 90% 60% at 50% 0%,rgba(88,80,220,0.32) 0%,transparent 65%),radial-gradient(ellipse 35% 90% at 2% 50%,rgba(60,40,180,0.18) 0%,transparent 55%),radial-gradient(ellipse 35% 90% at 98% 50%,rgba(40,60,200,0.16) 0%,transparent 55%),radial-gradient(ellipse 70% 40% at 50% 110%,rgba(99,60,180,0.22) 0%,transparent 60%);"></div>
+
+        <!-- Star dots via box-shadow -->
+        <div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
+            <div style="position:absolute;top:0;left:0;width:2px;height:2px;border-radius:50%;background:rgba(255,255,255,0.8);animation:twkl 4s ease-in-out infinite;box-shadow:80px 24px 0 0 rgba(255,255,255,0.60),188px 14px 0 0 rgba(165,180,252,0.75),296px 42px 0 0 rgba(255,255,255,0.50),404px 10px 0 0 rgba(245,200,66,0.65),512px 34px 0 0 rgba(255,255,255,0.55),620px 52px 0 0 rgba(165,180,252,0.60),728px 18px 0 0 rgba(255,255,255,0.45),836px 44px 0 0 rgba(245,200,66,0.50),944px 12px 0 0 rgba(255,255,255,0.65),1052px 30px 0 0 rgba(165,180,252,0.55),1160px 48px 0 0 rgba(255,255,255,0.45),1268px 16px 0 0 rgba(245,200,66,0.40),140px 76px 0 0 rgba(165,180,252,0.35),360px 86px 0 0 rgba(255,255,255,0.30),580px 68px 0 0 rgba(245,200,66,0.28),800px 84px 0 0 rgba(165,180,252,0.32),1020px 72px 0 0 rgba(255,255,255,0.38);"></div>
         </div>
 
-        <div class="hero-grid">
+        <!-- Subtle scanline texture -->
+        <div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.008) 3px,rgba(255,255,255,0.008) 4px);"></div>
 
-            <!-- ── LEFT META ── -->
-            <div class="hero-meta-col left">
-                <div class="hero-meta-item">
-                    <span class="hero-meta-label">თარიღი</span>
-                    <div class="hero-meta-value">{{ observation.date | datetimeformat }}</div>
+        <!-- 3-COLUMN GRID via display:grid inline -->
+        <div style="position:relative;z-index:1;display:grid;grid-template-columns:200px 1fr 200px;min-height:300px;padding:40px 32px;gap:0 20px;align-items:center;">
+
+            <!-- ══ LEFT META ══ -->
+            <div style="display:flex;flex-direction:column;gap:14px;">
+
+                <div>
+                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;">თარიღი</div>
+                    <div style="font-size:12px;font-weight:500;color:rgba(215,222,255,0.75);">{{ observation.date | datetimeformat }}</div>
                 </div>
-                <div class="hero-meta-sep"></div>
-                <div class="hero-meta-item">
-                    <span class="hero-meta-label">მდებარეობა</span>
-                    <div class="hero-meta-value" style="display:flex;align-items:center;gap:4px;">
+
+                <div style="width:28px;height:1px;background:linear-gradient(90deg,rgba(129,140,248,0.35),transparent);border-radius:2px;"></div>
+
+                <div>
+                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;">მდებარეობა</div>
+                    <div style="font-size:12px;font-weight:500;color:rgba(215,222,255,0.75);display:flex;align-items:center;gap:4px;">
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.5)" stroke-width="2.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                         თბილისი · 41.7°N
                     </div>
                 </div>
-                <div class="hero-meta-sep"></div>
-                <div class="hero-meta-item">
-                    <span class="hero-meta-label">განახლდა</span>
-                    <div class="hero-meta-value">{{ last_updated }}</div>
+
+                <div style="width:28px;height:1px;background:linear-gradient(90deg,rgba(129,140,248,0.35),transparent);border-radius:2px;"></div>
+
+                <div>
+                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;">განახლდა</div>
+                    <div style="font-size:12px;font-weight:500;color:rgba(215,222,255,0.75);">{{ last_updated }}</div>
                 </div>
+
             </div>
 
-            <!-- ── CENTER TITLE ── -->
-            <div class="hero-title-col">
-                <div class="hero-eyebrow">
-                    <div class="hero-eyebrow-line"></div>
-                    <span class="hero-eyebrow-txt">ASTROMAN · AI · REAL&#8209;TIME</span>
-                    <div class="hero-eyebrow-line r"></div>
+            <!-- ══ CENTER TITLE ══ -->
+            <div style="display:flex;flex-direction:column;align-items:center;text-align:center;">
+
+                <!-- Eyebrow -->
+                <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;width:100%;">
+                    <div style="flex:1;max-width:52px;height:1px;border-radius:2px;background:linear-gradient(90deg,transparent,rgba(165,180,252,0.40));"></div>
+                    <span style="font-size:9px;letter-spacing:0.34em;text-transform:uppercase;color:rgba(165,180,252,0.48);white-space:nowrap;">ASTROMAN · AI · REAL&#8209;TIME</span>
+                    <div style="flex:1;max-width:52px;height:1px;border-radius:2px;background:linear-gradient(270deg,transparent,rgba(165,180,252,0.40));"></div>
                 </div>
 
-                <div class="hero-frame">
-                    <div class="hero-frame-glow" aria-hidden="true"></div>
-                    <span class="fc-tr" aria-hidden="true"></span>
-                    <span class="fc-bl" aria-hidden="true"></span>
-                    <div class="hero-sub">ღამის ცის</div>
-                    <div class="hero-main">გზამკვლევი</div>
-                    <div class="hero-divider">
-                        <div class="hero-divider-line" style="background:linear-gradient(90deg,transparent,rgba(245,200,66,0.55));"></div>
-                        <div class="hero-divider-diamond"></div>
-                        <div class="hero-divider-line" style="background:linear-gradient(270deg,transparent,rgba(245,200,66,0.55));"></div>
+                <!-- FRAMED TITLE BOX -->
+                <div style="position:relative;display:inline-flex;flex-direction:column;align-items:center;padding:28px 52px;margin-bottom:22px;">
+
+                    <!-- Frame glow -->
+                    <div aria-hidden="true" style="position:absolute;inset:-14px;border-radius:8px;background:radial-gradient(ellipse 75% 75% at 50% 50%,rgba(80,70,200,0.16) 0%,transparent 70%);pointer-events:none;"></div>
+
+                    <!-- Corner: top-left GOLD -->
+                    <div aria-hidden="true" style="position:absolute;top:0;left:0;width:22px;height:22px;border-top:1.5px solid rgba(245,200,66,0.80);border-left:1.5px solid rgba(245,200,66,0.80);pointer-events:none;"></div>
+                    <!-- Corner: bottom-right GOLD -->
+                    <div aria-hidden="true" style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-bottom:1.5px solid rgba(245,200,66,0.80);border-right:1.5px solid rgba(245,200,66,0.80);pointer-events:none;"></div>
+                    <!-- Corner: top-right INDIGO -->
+                    <div aria-hidden="true" style="position:absolute;top:0;right:0;width:22px;height:22px;border-top:1.5px solid rgba(165,180,252,0.55);border-right:1.5px solid rgba(165,180,252,0.55);pointer-events:none;"></div>
+                    <!-- Corner: bottom-left INDIGO -->
+                    <div aria-hidden="true" style="position:absolute;bottom:0;left:0;width:22px;height:22px;border-bottom:1.5px solid rgba(165,180,252,0.55);border-left:1.5px solid rgba(165,180,252,0.55);pointer-events:none;"></div>
+
+                    <!-- Small label -->
+                    <div style="font-size:clamp(11px,1.8vw,15px);font-weight:300;letter-spacing:0.24em;color:rgba(165,180,252,0.60);text-transform:uppercase;margin-bottom:8px;">ღამის ცის</div>
+
+                    <!-- MAIN TITLE -->
+                    <div style="font-size:clamp(36px,6vw,66px);font-weight:800;letter-spacing:-1.5px;line-height:1;background:linear-gradient(145deg,#ffffff 0%,#e4ecff 30%,#c7d2fe 58%,#f5c842 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 44px rgba(165,180,252,0.30));">გზამკვლევი</div>
+
+                    <!-- Gold diamond divider -->
+                    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:16px;">
+                        <div style="height:1px;width:32px;border-radius:2px;background:linear-gradient(90deg,transparent,rgba(245,200,66,0.60));"></div>
+                        <div style="width:6px;height:6px;border:1px solid rgba(245,200,66,0.65);transform:rotate(45deg);flex-shrink:0;"></div>
+                        <div style="height:1px;width:32px;border-radius:2px;background:linear-gradient(270deg,transparent,rgba(245,200,66,0.60));"></div>
                     </div>
                 </div>
 
-                <div class="hero-pills">
+                <!-- Status pill -->
+                <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;">
                     {% if is_night %}
-                    <div class="hero-status-pill" style="background:rgba(99,102,241,0.14);border:1px solid rgba(99,102,241,0.35);color:#a5b4fc;">
-                        <span class="hero-status-dot" style="background:#818cf8;box-shadow:0 0 8px #818cf8;"></span>
+                    <div style="display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:100px;background:rgba(99,102,241,0.14);border:1px solid rgba(99,102,241,0.38);color:#a5b4fc;font-size:12px;font-weight:500;box-shadow:0 4px 16px rgba(99,102,241,0.15),inset 0 1px 0 rgba(255,255,255,0.08);">
+                        <span style="width:6px;height:6px;border-radius:50%;background:#818cf8;box-shadow:0 0 8px #818cf8;flex-shrink:0;display:inline-block;"></span>
                         🌙 ვარსკვლავები ხილულია
                     </div>
                     {% elif is_twilight %}
-                    <div class="hero-status-pill" style="background:rgba(139,92,246,0.14);border:1px solid rgba(139,92,246,0.35);color:#c4b5fd;">
-                        <span class="hero-status-dot" style="background:#a78bfa;box-shadow:0 0 8px #a78bfa;"></span>
+                    <div style="display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:100px;background:rgba(139,92,246,0.14);border:1px solid rgba(139,92,246,0.38);color:#c4b5fd;font-size:12px;font-weight:500;">
+                        <span style="width:6px;height:6px;border-radius:50%;background:#a78bfa;box-shadow:0 0 8px #a78bfa;flex-shrink:0;display:inline-block;"></span>
                         🌆 შებინდება
                     </div>
                     {% else %}
-                    <div class="hero-status-pill" style="background:rgba(251,191,36,0.10);border:1px solid rgba(251,191,36,0.30);color:#fbbf24;">
-                        <span class="hero-status-dot" style="background:#fbbf24;box-shadow:0 0 8px #fbbf24;"></span>
+                    <div style="display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:100px;background:rgba(251,191,36,0.10);border:1px solid rgba(251,191,36,0.32);color:#fbbf24;font-size:12px;font-weight:500;box-shadow:0 4px 16px rgba(251,191,36,0.10),inset 0 1px 0 rgba(255,255,255,0.06);">
+                        <span style="width:6px;height:6px;border-radius:50%;background:#fbbf24;box-shadow:0 0 8px #fbbf24;flex-shrink:0;display:inline-block;"></span>
                         ☀️ დღეა · მზე ჩადის {{ observation.sunset_time }}
                     </div>
                     {% endif %}
                     {% if best_planet and is_night %}
-                    <div class="hero-status-pill" style="background:rgba(245,200,66,0.09);border:1px solid rgba(245,200,66,0.25);color:#f5c842;">
+                    <div style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:100px;background:rgba(245,200,66,0.09);border:1px solid rgba(245,200,66,0.28);color:#f5c842;font-size:12px;font-weight:500;">
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="rgba(245,200,66,0.85)" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                         <strong>{{ best_planet.name_ka }}</strong>
                     </div>
                     {% endif %}
                 </div>
+
             </div>
 
-            <!-- ── RIGHT META ── -->
-            <div class="hero-meta-col right">
-                <div class="hero-meta-item">
-                    <span class="hero-meta-label">ლაივ საათი</span>
-                    <div class="hero-meta-value mono">
-                        <span class="live-dot"></span><span id="tbilisi-clock" class="tabular-nums">--:--:--</span>
+            <!-- ══ RIGHT META ══ -->
+            <div style="display:flex;flex-direction:column;gap:14px;text-align:right;align-items:flex-end;">
+
+                <div>
+                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;">ლაივ საათი</div>
+                    <div style="font-size:13px;font-weight:600;color:rgba(215,222,255,0.88);font-family:'JetBrains Mono',monospace;letter-spacing:0.06em;display:flex;align-items:center;gap:5px;justify-content:flex-end;">
+                        <span style="width:5px;height:5px;border-radius:50%;background:#22c55e;box-shadow:0 0 7px #22c55e;flex-shrink:0;"></span>
+                        <span id="tbilisi-clock" class="tabular-nums">--:--:--</span>
                     </div>
                 </div>
-                <div class="hero-meta-sep"></div>
-                <div class="hero-meta-item">
-                    <span class="hero-meta-label">ამინდი</span>
-                    <div class="hero-meta-value">{{ observation.cloud_coverage }}% ☁ · {{ observation.temperature|round(0)|int }}°C</div>
+
+                <div style="width:28px;height:1px;background:linear-gradient(270deg,rgba(129,140,248,0.35),transparent);border-radius:2px;"></div>
+
+                <div>
+                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;">ამინდი</div>
+                    <div style="font-size:12px;font-weight:500;color:rgba(215,222,255,0.75);">{{ observation.cloud_coverage }}% ☁ · {{ observation.temperature|round(0)|int }}°C</div>
                 </div>
-                <div class="hero-meta-sep"></div>
-                <div class="hero-meta-item">
-                    <span class="hero-meta-label">მთვარე</span>
-                    <div class="hero-meta-value">{{ observation.moon_illumination|round(0)|int }}% · {{ observation.moon_phase }}</div>
+
+                <div style="width:28px;height:1px;background:linear-gradient(270deg,rgba(129,140,248,0.35),transparent);border-radius:2px;"></div>
+
+                <div>
+                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;">მთვარე</div>
+                    <div style="font-size:12px;font-weight:500;color:rgba(215,222,255,0.75);">{{ observation.moon_illumination|round(0)|int }}% · {{ observation.moon_phase }}</div>
                 </div>
+
             </div>
 
-        </div><!-- /hero-grid -->
-    </div><!-- /hero-outer -->
+        </div><!-- /grid -->
+
+        <!-- Mobile fallback row — only on small screens -->
+        <div id="hero-mobile-bar" style="display:none;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 14px;padding:0 20px 16px;border-top:1px solid rgba(255,255,255,0.05);margin-top:-4px;">
+            <span style="font-size:10px;font-family:'JetBrains Mono',monospace;color:rgba(165,180,252,0.58);">📅 {{ observation.date | datetimeformat }}</span>
+            <span style="font-size:10px;color:rgba(34,197,94,0.65);">●</span>
+            <span style="font-size:10px;font-family:'JetBrains Mono',monospace;color:rgba(165,180,252,0.58);" id="tbilisi-clock-mobile">--:--:--</span>
+            <span style="font-size:10px;font-family:'JetBrains Mono',monospace;color:rgba(165,180,252,0.58);">📍 თბილისი</span>
+        </div>
+
+    </div><!-- /hero -->
+
+    <style>
+    @keyframes twkl { 0%,100%{opacity:1} 35%{opacity:.35} 65%{opacity:.80} }
+    /* Collapse grid to single column on mobile */
+    @media (max-width:680px) {
+        #hero-grid-inner { grid-template-columns:1fr !important; }
+        #hero-left-col, #hero-right-col { display:none !important; }
+        #hero-mobile-bar { display:flex !important; }
+    }
+    </style>
 
     <!-- ═══ STAT CARDS — Premium Redesign ═══ -->
     <div class="grid grid-cols-2 gap-3 lg:grid-cols-4 stagger">
