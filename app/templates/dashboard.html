@@ -5,123 +5,112 @@
 {% block content %}
 <div class="space-y-5">
 
-    <!-- ═══ HERO — Cosmic Observatory ═══ -->
-    <div class="hero-wrap">
+    <!-- ═══ HERO — 3-column Grid: LEFT META | CENTER TITLE | RIGHT META ═══ -->
+    <div class="hero-outer">
+        <div class="hero-nebula"     aria-hidden="true"></div>
+        <div class="hero-stars-css"  aria-hidden="true"></div>
+        <div class="hero-scanline"   aria-hidden="true"></div>
 
-        <!-- Nebula atmosphere -->
-        <div class="hero-nebula" aria-hidden="true"></div>
-        <!-- Twinkling star field -->
-        <div class="hero-stars-field" aria-hidden="true"></div>
-        <!-- Scan-line texture -->
-        <div class="hero-scanline" aria-hidden="true"></div>
-        <!-- Side vignette -->
-        <div class="hero-vignette" aria-hidden="true"></div>
-
-        <!-- ── SIDE META COLUMNS (desktop only) ── -->
-        <div class="hero-sides" aria-hidden="true">
-            <!-- LEFT: date + location -->
-            <div class="hero-side-col left">
-                <div>
-                    <div class="hero-side-label">თარიღი</div>
-                    <div class="hero-side-value">{{ observation.date | datetimeformat }}</div>
-                </div>
-                <div class="hero-side-divider"></div>
-                <div>
-                    <div class="hero-side-label">მდებარეობა</div>
-                    <div class="hero-side-value" style="display:inline-flex;align-items:center;gap:4px;">
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.55)" stroke-width="2.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                        თბილისი · 41.7°N
-                    </div>
-                </div>
-                <div class="hero-side-divider"></div>
-                <div>
-                    <div class="hero-side-label">განახლდა</div>
-                    <div class="hero-side-value">{{ last_updated }}</div>
-                </div>
-            </div>
-
-            <!-- RIGHT: live clock + status -->
-            <div class="hero-side-col right">
-                <div>
-                    <div class="hero-side-label">ლაივ საათი</div>
-                    <div class="hero-side-value mono">
-                        <span class="hero-side-dot"></span><span id="tbilisi-clock" class="tabular-nums">--:--:--</span>
-                    </div>
-                </div>
-                <div class="hero-side-divider"></div>
-                <div>
-                    <div class="hero-side-label">ამინდი</div>
-                    <div class="hero-side-value">{{ observation.cloud_coverage }}% ☁ · {{ observation.temperature|round(0)|int }}°C</div>
-                </div>
-                <div class="hero-side-divider"></div>
-                <div>
-                    <div class="hero-side-label">მთვარე</div>
-                    <div class="hero-side-value">{{ observation.moon_illumination|round(0)|int }}% — {{ observation.moon_phase }}</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ── MOBILE: compact meta row ── -->
-        <div class="hero-mobile-meta">
+        <!-- Mobile meta row (shown only on narrow screens) -->
+        <div class="hero-mobile-meta" style="padding:16px 20px 0;">
             <span class="hero-mobile-chip">📅 {{ observation.date | datetimeformat }}</span>
-            <span class="hero-mobile-chip" style="color:rgba(34,197,94,0.7);">●</span>
+            <span class="hero-mobile-chip" style="color:rgba(34,197,94,0.65);">●</span>
             <span class="hero-mobile-chip" id="tbilisi-clock-mobile">--:--:--</span>
             <span class="hero-mobile-chip">📍 თბილისი</span>
         </div>
 
-        <!-- ── CENTER: Framed Title ── -->
-        <div class="hero-center">
-            <!-- Eyebrow -->
-            <div class="hero-eyebrow-row">
-                <div class="hero-eyebrow-line"></div>
-                <span class="hero-eyebrow-txt">ASTROMAN · AI · REAL&#8209;TIME</span>
-                <div class="hero-eyebrow-line r"></div>
-            </div>
+        <div class="hero-grid">
 
-            <!-- THE FRAME -->
-            <div class="hero-frame">
-                <div class="hero-frame-glow" aria-hidden="true"></div>
-                <span class="hero-corner tr" aria-hidden="true"></span>
-                <span class="hero-corner bl" aria-hidden="true"></span>
-
-                <div class="hero-title-sub">ღამის ცის</div>
-                <div class="hero-title-main">გზამკვლევი</div>
-
-                <!-- Gold divider inside frame -->
-                <div class="hero-divider">
-                    <div class="hero-divider-line" style="background:linear-gradient(90deg,transparent,rgba(245,200,66,0.55));"></div>
-                    <div class="hero-divider-diamond"></div>
-                    <div class="hero-divider-line" style="background:linear-gradient(270deg,transparent,rgba(245,200,66,0.55));"></div>
+            <!-- ── LEFT META ── -->
+            <div class="hero-meta-col left">
+                <div class="hero-meta-item">
+                    <span class="hero-meta-label">თარიღი</span>
+                    <div class="hero-meta-value">{{ observation.date | datetimeformat }}</div>
+                </div>
+                <div class="hero-meta-sep"></div>
+                <div class="hero-meta-item">
+                    <span class="hero-meta-label">მდებარეობა</span>
+                    <div class="hero-meta-value" style="display:flex;align-items:center;gap:4px;">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.5)" stroke-width="2.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        თბილისი · 41.7°N
+                    </div>
+                </div>
+                <div class="hero-meta-sep"></div>
+                <div class="hero-meta-item">
+                    <span class="hero-meta-label">განახლდა</span>
+                    <div class="hero-meta-value">{{ last_updated }}</div>
                 </div>
             </div>
 
-            <!-- Status pill -->
-            <div style="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;">
-                {% if is_night %}
-                <div class="hero-status-pill" style="background:rgba(99,102,241,0.14);border:1px solid rgba(99,102,241,0.35);color:#a5b4fc;">
-                    <span class="hero-status-dot" style="background:#818cf8;box-shadow:0 0 8px #818cf8;"></span>
-                    🌙 ვარსკვლავები ხილულია
+            <!-- ── CENTER TITLE ── -->
+            <div class="hero-title-col">
+                <div class="hero-eyebrow">
+                    <div class="hero-eyebrow-line"></div>
+                    <span class="hero-eyebrow-txt">ASTROMAN · AI · REAL&#8209;TIME</span>
+                    <div class="hero-eyebrow-line r"></div>
                 </div>
-                {% elif is_twilight %}
-                <div class="hero-status-pill" style="background:rgba(139,92,246,0.14);border:1px solid rgba(139,92,246,0.35);color:#c4b5fd;">
-                    <span class="hero-status-dot" style="background:#a78bfa;box-shadow:0 0 8px #a78bfa;"></span>
-                    🌆 შებინდება
+
+                <div class="hero-frame">
+                    <div class="hero-frame-glow" aria-hidden="true"></div>
+                    <span class="fc-tr" aria-hidden="true"></span>
+                    <span class="fc-bl" aria-hidden="true"></span>
+                    <div class="hero-sub">ღამის ცის</div>
+                    <div class="hero-main">გზამკვლევი</div>
+                    <div class="hero-divider">
+                        <div class="hero-divider-line" style="background:linear-gradient(90deg,transparent,rgba(245,200,66,0.55));"></div>
+                        <div class="hero-divider-diamond"></div>
+                        <div class="hero-divider-line" style="background:linear-gradient(270deg,transparent,rgba(245,200,66,0.55));"></div>
+                    </div>
                 </div>
-                {% else %}
-                <div class="hero-status-pill" style="background:rgba(251,191,36,0.10);border:1px solid rgba(251,191,36,0.30);color:#fbbf24;">
-                    <span class="hero-status-dot" style="background:#fbbf24;box-shadow:0 0 8px #fbbf24;"></span>
-                    ☀️ დღეა · მზე ჩადის {{ observation.sunset_time }}
+
+                <div class="hero-pills">
+                    {% if is_night %}
+                    <div class="hero-status-pill" style="background:rgba(99,102,241,0.14);border:1px solid rgba(99,102,241,0.35);color:#a5b4fc;">
+                        <span class="hero-status-dot" style="background:#818cf8;box-shadow:0 0 8px #818cf8;"></span>
+                        🌙 ვარსკვლავები ხილულია
+                    </div>
+                    {% elif is_twilight %}
+                    <div class="hero-status-pill" style="background:rgba(139,92,246,0.14);border:1px solid rgba(139,92,246,0.35);color:#c4b5fd;">
+                        <span class="hero-status-dot" style="background:#a78bfa;box-shadow:0 0 8px #a78bfa;"></span>
+                        🌆 შებინდება
+                    </div>
+                    {% else %}
+                    <div class="hero-status-pill" style="background:rgba(251,191,36,0.10);border:1px solid rgba(251,191,36,0.30);color:#fbbf24;">
+                        <span class="hero-status-dot" style="background:#fbbf24;box-shadow:0 0 8px #fbbf24;"></span>
+                        ☀️ დღეა · მზე ჩადის {{ observation.sunset_time }}
+                    </div>
+                    {% endif %}
+                    {% if best_planet and is_night %}
+                    <div class="hero-status-pill" style="background:rgba(245,200,66,0.09);border:1px solid rgba(245,200,66,0.25);color:#f5c842;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="rgba(245,200,66,0.85)" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <strong>{{ best_planet.name_ka }}</strong>
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
-                {% if best_planet and is_night %}
-                <div class="hero-status-pill" style="background:rgba(245,200,66,0.09);border:1px solid rgba(245,200,66,0.25);color:#f5c842;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="rgba(245,200,66,0.85)" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                    <strong>{{ best_planet.name_ka }}</strong>
-                </div>
-                {% endif %}
             </div>
-        </div>
-    </div>
+
+            <!-- ── RIGHT META ── -->
+            <div class="hero-meta-col right">
+                <div class="hero-meta-item">
+                    <span class="hero-meta-label">ლაივ საათი</span>
+                    <div class="hero-meta-value mono">
+                        <span class="live-dot"></span><span id="tbilisi-clock" class="tabular-nums">--:--:--</span>
+                    </div>
+                </div>
+                <div class="hero-meta-sep"></div>
+                <div class="hero-meta-item">
+                    <span class="hero-meta-label">ამინდი</span>
+                    <div class="hero-meta-value">{{ observation.cloud_coverage }}% ☁ · {{ observation.temperature|round(0)|int }}°C</div>
+                </div>
+                <div class="hero-meta-sep"></div>
+                <div class="hero-meta-item">
+                    <span class="hero-meta-label">მთვარე</span>
+                    <div class="hero-meta-value">{{ observation.moon_illumination|round(0)|int }}% · {{ observation.moon_phase }}</div>
+                </div>
+            </div>
+
+        </div><!-- /hero-grid -->
+    </div><!-- /hero-outer -->
 
     <!-- ═══ STAT CARDS — Premium Redesign ═══ -->
     <div class="grid grid-cols-2 gap-3 lg:grid-cols-4 stagger">
