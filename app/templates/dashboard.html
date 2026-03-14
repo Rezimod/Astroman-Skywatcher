@@ -2,980 +2,1288 @@
 
 {% block title %}ცის ობსერვატორია — ASTROMAN{% endblock %}
 
+
+    <style>
+    @keyframes hint-pulse{0%,100%{opacity:.36;transform:translateY(0)}50%{opacity:.65;transform:translateY(3px)}}
+    /* Better mobile spacing */
+    @media(max-width:640px){
+        .space-y-5>*{margin-top:10px!important;}
+        .glass{border-radius:16px!important;}
+        .glass-strong{border-radius:18px!important;}
+    }
+    /* Planet explorer mobile grid */
+    .grid.grid-cols-4{display:grid;grid-template-columns:repeat(4,1fr);}
+    @media(min-width:480px){.sm\:grid-cols-7{grid-template-columns:repeat(7,1fr)!important;}}
+    /* Touch improvements */
+    button,a{-webkit-tap-highlight-color:transparent;}
+    /* Bigger touch targets on mobile */
+    @media(max-width:640px){
+        .hero-status-pill{padding:8px 15px!important;font-size:12px!important;}
+        .stat-card-sunset,.stat-card-moon,.stat-card-clouds,.stat-card-temp{padding:14px!important;}
+    }
+    </style>
 {% block content %}
 <div class="space-y-5">
 
-<!-- ═══════════════════════════════════════
-     HERO
-     ═══════════════════════════════════════ -->
-<div class="hero-outer" style="margin-bottom:4px;">
+    <!-- ═══ HERO ═══ -->
+    <div style="position:relative;overflow:hidden;border-radius:20px;background:rgba(8,6,28,0.72);border:1px solid rgba(255,255,255,0.10);border-top-color:rgba(255,255,255,0.18);backdrop-filter:blur(60px);-webkit-backdrop-filter:blur(60px);box-shadow:0 24px 80px rgba(0,0,0,0.65),inset 0 1px 0 rgba(255,255,255,0.07);margin-bottom:4px;">
 
-  <!-- Nebula glow -->
-  <div class="hero-nebula" aria-hidden="true"></div>
-  <!-- Scanlines -->
-  <div class="hero-scanline" aria-hidden="true"></div>
-  <!-- Star field -->
-  <div class="hero-stars-css" aria-hidden="true"></div>
+        <!-- Nebula glow layers -->
+        <div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 90% 60% at 50% 0%,rgba(88,80,220,0.32) 0%,transparent 65%),radial-gradient(ellipse 35% 90% at 2% 50%,rgba(60,40,180,0.18) 0%,transparent 55%),radial-gradient(ellipse 35% 90% at 98% 50%,rgba(40,60,200,0.16) 0%,transparent 55%),radial-gradient(ellipse 70% 40% at 50% 110%,rgba(99,60,180,0.22) 0%,transparent 60%);"></div>
 
-  <!-- 3-Column Grid -->
-  <div class="hero-grid" id="hero-grid-inner">
-
-    <!-- LEFT META -->
-    <div class="hero-meta-col" id="hero-left-col">
-      <div>
-        <span class="hero-meta-label">თარიღი</span>
-        <span class="hero-meta-value">{{ observation.date | datetimeformat }}</span>
-      </div>
-      <div class="hero-meta-sep"></div>
-      <div>
-        <span class="hero-meta-label">მდებარეობა</span>
-        <span class="hero-meta-value" style="display:flex;align-items:center;gap:4px;">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.5)" stroke-width="2.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          თბილისი · 41.7°N
-        </span>
-      </div>
-      <div class="hero-meta-sep"></div>
-      <div>
-        <span class="hero-meta-label">განახლდა</span>
-        <span class="hero-meta-value">{{ last_updated }}</span>
-      </div>
-    </div>
-
-    <!-- CENTER TITLE -->
-    <div class="hero-title-col">
-
-      <!-- Eyebrow -->
-      <div class="hero-eyebrow">
-        <div class="hero-eyebrow-line"></div>
-        <span class="hero-eyebrow-txt">ASTROMAN · AI · REAL&#8209;TIME</span>
-        <div class="hero-eyebrow-line r"></div>
-      </div>
-
-      <!-- Framed Title -->
-      <div class="hero-frame">
-        <div class="fc-tr" aria-hidden="true"></div>
-        <div class="fc-bl" aria-hidden="true"></div>
-        <!-- Frame glow -->
-        <div aria-hidden="true" style="position:absolute;inset:-14px;border-radius:8px;background:radial-gradient(ellipse 75% 75% at 50% 50%,rgba(80,70,200,0.16) 0%,transparent 70%);pointer-events:none;"></div>
-
-        <div class="hero-sub">ღამის ცის</div>
-        <div class="hero-main">გზამკვლევი</div>
-
-        <!-- Diamond divider -->
-        <div class="hero-divider">
-          <div style="height:1px;width:32px;border-radius:2px;background:linear-gradient(90deg,transparent,rgba(245,200,66,0.62));"></div>
-          <div class="hero-divider-diamond"></div>
-          <div style="height:1px;width:32px;border-radius:2px;background:linear-gradient(270deg,transparent,rgba(245,200,66,0.62));"></div>
+        <!-- Star dots via box-shadow -->
+        <div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
+            <div style="position:absolute;top:0;left:0;width:2px;height:2px;border-radius:50%;background:rgba(255,255,255,0.8);animation:twkl 4s ease-in-out infinite;box-shadow:80px 24px 0 0 rgba(255,255,255,0.60),188px 14px 0 0 rgba(165,180,252,0.75),296px 42px 0 0 rgba(255,255,255,0.50),404px 10px 0 0 rgba(245,200,66,0.65),512px 34px 0 0 rgba(255,255,255,0.55),620px 52px 0 0 rgba(165,180,252,0.60),728px 18px 0 0 rgba(255,255,255,0.45),836px 44px 0 0 rgba(245,200,66,0.50),944px 12px 0 0 rgba(255,255,255,0.65),1052px 30px 0 0 rgba(165,180,252,0.55),1160px 48px 0 0 rgba(255,255,255,0.45),1268px 16px 0 0 rgba(245,200,66,0.40),140px 76px 0 0 rgba(165,180,252,0.35),360px 86px 0 0 rgba(255,255,255,0.30),580px 68px 0 0 rgba(245,200,66,0.28),800px 84px 0 0 rgba(165,180,252,0.32),1020px 72px 0 0 rgba(255,255,255,0.38);"></div>
         </div>
-      </div>
 
-      <!-- Status Pills -->
-      <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;">
-        {% if is_night %}
-        <div class="hero-status-pill" style="background:rgba(99,102,241,0.14);border:1px solid rgba(99,102,241,0.38);color:#a5b4fc;">
-          <span style="width:6px;height:6px;border-radius:50%;background:#818cf8;box-shadow:0 0 8px #818cf8;flex-shrink:0;display:inline-block;animation:blink-dot 2.6s ease-in-out infinite;"></span>
-          🌙 ვარსკვლავები ხილულია
-        </div>
-        {% elif is_twilight %}
-        <div class="hero-status-pill" style="background:rgba(139,92,246,0.14);border:1px solid rgba(139,92,246,0.38);color:#c4b5fd;">
-          <span style="width:6px;height:6px;border-radius:50%;background:#a78bfa;box-shadow:0 0 8px #a78bfa;flex-shrink:0;display:inline-block;animation:blink-dot 2.6s ease-in-out infinite;"></span>
-          🌆 შებინდება
-        </div>
-        {% else %}
-        <div class="hero-status-pill" style="background:rgba(251,191,36,0.11);border:1px solid rgba(251,191,36,0.34);color:#fbbf24;">
-          <span style="width:6px;height:6px;border-radius:50%;background:#fbbf24;box-shadow:0 0 8px #fbbf24;flex-shrink:0;display:inline-block;animation:blink-dot 2.6s ease-in-out infinite;"></span>
-          ☀️ დღეა · მზე ჩადის {{ observation.sunset_time }}
-        </div>
-        {% endif %}
-        {% if best_planet and is_night %}
-        <div class="hero-status-pill" style="background:rgba(245,200,66,0.09);border:1px solid rgba(245,200,66,0.30);color:#f5c842;">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="rgba(245,200,66,0.85)" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <strong>{{ best_planet.name_ka }}</strong>
-        </div>
-        {% endif %}
-      </div>
+        <!-- Subtle scanline texture -->
+        <div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.008) 3px,rgba(255,255,255,0.008) 4px);"></div>
 
-    </div><!-- /center -->
+        <!-- 3-COLUMN GRID via display:grid inline -->
+        <div style="position:relative;z-index:1;display:grid;grid-template-columns:200px 1fr 200px;min-height:300px;padding:40px 32px;gap:0 20px;align-items:center;">
 
-    <!-- RIGHT META -->
-    <div class="hero-meta-col right" id="hero-right-col">
-      <div>
-        <span class="hero-meta-label">ლაივ საათი</span>
-        <span class="hero-meta-value mono" style="display:flex;align-items:center;gap:5px;justify-content:flex-end;">
-          <span class="live-dot"></span>
-          <span id="tbilisi-clock" class="tabular-nums">--:--:--</span>
-        </span>
-      </div>
-      <div class="hero-meta-sep"></div>
-      <div>
-        <span class="hero-meta-label">ამინდი</span>
-        <span class="hero-meta-value">{{ observation.cloud_coverage }}% ☁ · {{ observation.temperature|round(0)|int }}°C</span>
-      </div>
-      <div class="hero-meta-sep"></div>
-      <div>
-        <span class="hero-meta-label">მთვარე</span>
-        <span class="hero-meta-value">{{ observation.moon_illumination|round(0)|int }}% · {{ observation.moon_phase }}</span>
-      </div>
-    </div>
+            <!-- ══ LEFT META ══ -->
+            <div style="display:flex;flex-direction:column;gap:14px;">
 
-  </div><!-- /grid -->
-
-  <!-- Mobile bar -->
-  <div id="hero-mobile-bar" style="display:none;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 14px;padding:0 20px 18px;border-top:1px solid rgba(255,255,255,0.05);margin-top:-4px;">
-    <span class="hero-mobile-chip">📅 {{ observation.date | datetimeformat }}</span>
-    <span style="font-size:10px;color:rgba(34,197,94,0.65);">●</span>
-    <span class="hero-mobile-chip" id="tbilisi-clock-mobile">--:--:--</span>
-    <span class="hero-mobile-chip">📍 თბილისი</span>
-  </div>
-
-</div><!-- /hero -->
-
-<style>
-@keyframes twkl { 0%,100%{opacity:1} 38%{opacity:.30} 68%{opacity:.78} }
-@media (max-width:680px) {
-  #hero-grid-inner { grid-template-columns:1fr !important; }
-  #hero-left-col, #hero-right-col { display:none !important; }
-  #hero-mobile-bar { display:flex !important; }
-}
-</style>
-
-
-<!-- ═══════════════════════════════════════
-     STAT CARDS
-     ═══════════════════════════════════════ -->
-<div class="grid grid-cols-2 gap-3 lg:grid-cols-4 stagger">
-
-  <!-- Sunset -->
-  <div class="glass-card stat-card-sunset p-4 sm:p-5 text-center">
-    <div class="flex justify-center mb-3">
-      <div style="width:44px;height:44px;border-radius:13px;background:rgba(251,191,36,0.13);border:1px solid rgba(251,191,36,0.22);display:flex;align-items:center;justify-content:center;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(251,191,36,0.90)" stroke-width="1.5" stroke-linecap="round">
-          <path d="M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z" fill="rgba(251,191,36,0.12)"/>
-          <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-          <line x1="3" y1="20" x2="21" y2="20" stroke="rgba(251,191,36,0.38)" stroke-width="1"/>
-        </svg>
-      </div>
-    </div>
-    <div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(251,191,36,0.70);margin-bottom:6px;">მზის ჩასვლა</div>
-    <div style="font-size:clamp(22px,4vw,30px);font-family:'JetBrains Mono',monospace;color:#fff;font-weight:700;letter-spacing:-0.5px;">{{ observation.sunset_time }}</div>
-  </div>
-
-  <!-- Moon -->
-  <div class="glass-card stat-card-moon p-4 sm:p-5 text-center">
-    <div class="flex justify-center mb-3">
-      <div style="width:44px;height:44px;border-radius:13px;background:rgba(165,180,252,0.11);border:1px solid rgba(165,180,252,0.20);display:flex;align-items:center;justify-content:center;">
-        <span style="font-size:1.4rem;line-height:1;filter:drop-shadow(0 0 8px rgba(165,180,252,0.5));">
-          {% set mp = observation.moon_illumination %}
-          {% if mp < 5 %}🌑{% elif mp < 25 %}🌒{% elif mp < 50 %}🌓{% elif mp < 75 %}🌔{% elif mp < 95 %}🌖{% else %}🌕{% endif %}
-        </span>
-      </div>
-    </div>
-    <div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(165,180,252,0.70);margin-bottom:6px;">მთვარე</div>
-    <div style="font-size:clamp(22px,4vw,30px);font-family:'JetBrains Mono',monospace;color:#fff;font-weight:700;letter-spacing:-0.5px;">{{ observation.moon_illumination|round(0)|int }}%</div>
-    <div style="font-size:10.5px;margin-top:4px;color:rgba(165,180,252,0.50);">{{ observation.moon_phase }}</div>
-  </div>
-
-  <!-- Clouds -->
-  <div class="glass-card stat-card-clouds p-4 sm:p-5 text-center">
-    <div class="flex justify-center mb-3">
-      <div style="width:44px;height:44px;border-radius:13px;background:rgba(148,163,184,0.10);border:1px solid rgba(148,163,184,0.18);display:flex;align-items:center;justify-content:center;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(148,163,184,0.85)" stroke-width="1.5" stroke-linecap="round">
-          <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" fill="rgba(148,163,184,0.10)"/>
-        </svg>
-      </div>
-    </div>
-    <div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(148,163,184,0.65);margin-bottom:6px;">ღრუბლები</div>
-    <div style="font-size:clamp(22px,4vw,30px);font-family:'JetBrains Mono',monospace;color:#fff;font-weight:700;letter-spacing:-0.5px;">{{ observation.cloud_coverage }}%</div>
-    <div style="font-size:10.5px;margin-top:4px;color:rgba(148,163,184,0.48);">
-      {% if observation.cloud_coverage < 30 %}✨ წმინდა ცა{% elif observation.cloud_coverage < 60 %}⛅ ნაწილობრივ{% else %}☁️ ძლიერი{% endif %}
-    </div>
-  </div>
-
-  <!-- Temperature -->
-  <div class="glass-card stat-card-temp p-4 sm:p-5 text-center">
-    <div class="flex justify-center mb-3">
-      <div style="width:44px;height:44px;border-radius:13px;background:rgba(129,140,248,0.11);border:1px solid rgba(129,140,248,0.20);display:flex;align-items:center;justify-content:center;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(129,140,248,0.85)" stroke-width="1.5" stroke-linecap="round">
-          <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" fill="rgba(129,140,248,0.10)"/>
-        </svg>
-      </div>
-    </div>
-    <div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(129,140,248,0.70);margin-bottom:6px;">ტემპერატურა</div>
-    <div style="font-size:clamp(22px,4vw,30px);font-family:'JetBrains Mono',monospace;color:#fff;font-weight:700;letter-spacing:-0.5px;">{{ observation.temperature|round(0)|int }}°C</div>
-    <div style="font-size:10.5px;margin-top:4px;color:rgba(129,140,248,0.50);">💨 {{ observation.wind_speed }} m/s</div>
-  </div>
-
-</div><!-- /stat cards -->
-
-
-{# ══════════════════════════════════════════════════ #}
-{# DAYTIME MODE                                       #}
-{# ══════════════════════════════════════════════════ #}
-{% if not is_night and not is_twilight %}
-
-<div class="glass-strong p-8 sm:p-12 text-center animate-in">
-  <div style="font-size:4.5rem;margin-bottom:1rem;line-height:1;">☀️</div>
-  <h2 style="font-size:clamp(18px,4vw,24px);color:rgba(251,191,36,0.85);font-weight:400;margin-bottom:.75rem;line-height:1.6;">
-    დღისით ვარსკვლავები არ ჩანს
-  </h2>
-  <p style="font-size:14px;color:rgba(165,180,252,0.55);margin-bottom:1.75rem;line-height:1.7;">
-    დაკვირვება შესაძლებელია მზის ჩასვლის შემდეგ:
-    <span style="color:#818cf8;font-family:'JetBrains Mono',monospace;font-weight:600;"> {{ observation.sunset_time }}</span>
-  </p>
-  <div class="glass" style="display:inline-block;padding:1.5rem 2.5rem;">
-    <div id="sunset-countdown" style="font-size:clamp(24px,5vw,38px);font-family:'JetBrains Mono',monospace;color:#a5b4fc;font-weight:700;letter-spacing:2px;"></div>
-    <div style="font-size:10px;color:rgba(165,180,252,0.38);margin-top:6px;text-transform:uppercase;letter-spacing:0.22em;">მზის ჩასვლამდე</div>
-  </div>
-</div>
-
-<!-- Tonight Preview -->
-<div class="glass p-5 sm:p-6 animate-in">
-  <h3 style="font-size:16px;color:var(--text-primary);margin-bottom:.4rem;line-height:1.6;">
-    🌙 საღამოს წინასწარი მიმოხილვა
-  </h3>
-  <p style="font-size:13px;color:var(--text-muted);margin-bottom:1.25rem;">პლანეტები, რომლებიც დაისით გამოჩნდება:</p>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 stagger">
-    {% for planet in observation.planets %}
-    {% if planet.is_visible or planet.altitude > -10 %}
-    <div class="glass-card p-4" style="display:flex;align-items:center;gap:12px;">
-      <div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;{% if planet.is_visible %}background:#4ade80;box-shadow:0 0 8px rgba(74,222,128,0.6);{% else %}background:#374151;{% endif %}"></div>
-      <div style="min-width:0;flex:1;">
-        <div style="font-size:13.5px;color:#e0e7ff;font-weight:500;line-height:1.6;">{{ planet.name_ka }}</div>
-        <div style="font-size:11px;color:var(--text-muted);line-height:1.5;">{{ planet.constellation }}</div>
-      </div>
-      <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:rgba(165,180,252,0.55);flex-shrink:0;">{{ planet.magnitude }} mag</div>
-    </div>
-    {% endif %}
-    {% endfor %}
-  </div>
-</div>
-
-<!-- Telescope CTA — daytime -->
-<div class="glass-strong p-6 sm:p-10 text-center animate-in">
-  <div style="font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:#818cf8;margin-bottom:1.25rem;">რეკომენდებული ტელესკოპი</div>
-  <img src="https://astroman.ge/wp-content/uploads/2024/08/Telescope-700x700.jpg"
-       alt="ტელესკოპი Foreseen 80mm"
-       style="width:clamp(110px,18vw,160px);height:clamp(110px,18vw,160px);object-fit:contain;border-radius:20px;margin:0 auto 1.25rem;display:block;"
-       onerror="this.style.display='none';this.nextElementSibling.style.display='block';" loading="lazy">
-  <div style="font-size:3.2rem;margin-bottom:1.25rem;display:none;" class="animate-float">🔭</div>
-  <h3 style="font-size:clamp(18px,3vw,22px);color:#f0f2ff;font-weight:600;margin-bottom:.75rem;line-height:1.5;">ტელესკოპი Foreseen 80mm</h3>
-  <p style="font-size:13px;color:rgba(165,180,252,0.55);margin-bottom:1.75rem;line-height:1.7;">80mm აპერტურა · 500mm ფოკუსი · K25+K10 ლინზები · 3.2კგ — დამწყებთათვის საუკეთესო არჩევანი</p>
-  <a href="https://astroman.ge/telescope-foreseen-80mm/" target="_blank" class="btn btn-primary btn-lg">
-    იხილე ტელესკოპი
-    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-  </a>
-</div>
-
-
-{# ══════════════════════════════════════════════════ #}
-{# TWILIGHT MODE                                      #}
-{# ══════════════════════════════════════════════════ #}
-{% elif is_twilight %}
-
-<div class="glass-strong p-8 sm:p-10 text-center animate-in">
-  <div style="font-size:4.5rem;margin-bottom:1rem;line-height:1;">🌆</div>
-  <h2 style="font-size:clamp(18px,4vw,24px);color:rgba(196,181,253,0.90);font-weight:400;margin-bottom:.6rem;line-height:1.6;">შებინდების დროა</h2>
-  <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">მალე ვარსკვლავები გამოჩნდება</p>
-</div>
-
-{% if visible_planets %}
-<div class="glass p-5 sm:p-6 animate-in">
-  <h3 style="font-size:16px;color:var(--text-primary);margin-bottom:1rem;line-height:1.6;">✨ უკვე ჩანს</h3>
-  <div class="space-y-3 stagger">
-    {% for planet in visible_planets %}
-    {% if planet.name == 'Mercury' %}{% set pcolor = '#9ca3af' %}
-    {% elif planet.name == 'Venus' %}{% set pcolor = '#fbbf24' %}
-    {% elif planet.name == 'Mars' %}{% set pcolor = '#ef4444' %}
-    {% elif planet.name == 'Jupiter' %}{% set pcolor = '#f97316' %}
-    {% elif planet.name == 'Saturn' %}{% set pcolor = '#eab308' %}
-    {% elif planet.name == 'Uranus' %}{% set pcolor = '#22d3ee' %}
-    {% elif planet.name == 'Neptune' %}{% set pcolor = '#3b82f6' %}
-    {% else %}{% set pcolor = '#818cf8' %}{% endif %}
-    <div class="glass-card p-4" style="display:flex;align-items:center;gap:14px;">
-      <div style="width:36px;height:36px;border-radius:50%;flex-shrink:0;background:radial-gradient(circle at 35% 35%,{{ pcolor }}cc,{{ pcolor }}55);box-shadow:0 0 14px {{ pcolor }}44;"></div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:14px;font-weight:600;color:#e8edff;line-height:1.5;">{{ planet.name_ka }}</div>
-        <div style="font-size:11px;color:var(--text-muted);line-height:1.5;">{{ planet.constellation }}</div>
-      </div>
-      <div style="text-align:right;flex-shrink:0;">
-        <div style="font-size:13px;font-family:'JetBrains Mono',monospace;color:rgba(220,228,255,0.75);">{{ planet.altitude|round(1) }}°</div>
-        <div style="font-size:10px;color:var(--text-muted);">mag {{ planet.magnitude }}</div>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-</div>
-{% endif %}
-
-<!-- Telescope CTA — twilight -->
-<div class="glass-strong p-6 sm:p-10 text-center animate-in">
-  <div style="font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:#818cf8;margin-bottom:1.25rem;">რეკომენდებული ტელესკოპი</div>
-  <img src="https://astroman.ge/wp-content/uploads/2024/08/Telescope-700x700.jpg"
-       alt="ტელესკოპი Foreseen 80mm"
-       style="width:clamp(110px,18vw,160px);height:clamp(110px,18vw,160px);object-fit:contain;border-radius:20px;margin:0 auto 1.25rem;display:block;"
-       onerror="this.style.display='none';this.nextElementSibling.style.display='block';" loading="lazy">
-  <div style="font-size:3.2rem;margin-bottom:1.25rem;display:none;" class="animate-float">🔭</div>
-  <h3 style="font-size:clamp(18px,3vw,22px);color:#f0f2ff;font-weight:600;margin-bottom:.75rem;line-height:1.5;">ტელესკოპი Foreseen 80mm</h3>
-  <p style="font-size:13px;color:rgba(165,180,252,0.55);margin-bottom:1.75rem;line-height:1.7;">80mm აპერტურა · 500mm ფოკუსი · K25+K10 ლინზები — ❤️ 856₾</p>
-  <a href="https://astroman.ge/telescope-foreseen-80mm/" target="_blank" class="btn btn-primary btn-lg btn-full">
-    იხილე ტელესკოპი
-    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-  </a>
-</div>
-
-
-{# ══════════════════════════════════════════════════ #}
-{# NIGHT MODE — full observation panel               #}
-{# ══════════════════════════════════════════════════ #}
-{% else %}
-
-<div class="flex flex-col gap-5 lg:grid lg:grid-cols-3 lg:gap-6">
-
-  <!-- ── LEFT 2 Columns ── -->
-  <div class="lg:col-span-2 space-y-5">
-
-    <!-- Planet Section -->
-    <div class="glass p-4 sm:p-6">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
-        <h2 style="font-size:clamp(14px,2.5vw,17px);color:#e8edff;font-weight:600;" class="section-header">🪐 ხილული პლანეტები</h2>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span class="badge badge-indigo">{{ visible_planets|length }}/7</span>
-          <span class="badge badge-gray" title="შეუიარაღებელი თვალით">👁 {{ visible_planets | selectattr('visibility_type', 'eq', 'naked_eye') | list | length }}</span>
-        </div>
-      </div>
-
-      {% if visible_planets %}
-
-      <!-- Mobile card layout -->
-      <div class="block lg:hidden space-y-3 stagger">
-        {% for planet in visible_planets %}
-        {% if planet.name == 'Mercury' %}{% set orb = 'orb-mercury' %}
-        {% elif planet.name == 'Venus' %}{% set orb = 'orb-venus' %}
-        {% elif planet.name == 'Mars' %}{% set orb = 'orb-mars' %}
-        {% elif planet.name == 'Jupiter' %}{% set orb = 'orb-jupiter' %}
-        {% elif planet.name == 'Saturn' %}{% set orb = 'orb-saturn' %}
-        {% elif planet.name == 'Uranus' %}{% set orb = 'orb-uranus' %}
-        {% elif planet.name == 'Neptune' %}{% set orb = 'orb-neptune' %}
-        {% else %}{% set orb = 'orb-mercury' %}{% endif %}
-        <div class="glass-card p-4">
-          <div class="planet-card-toggle" style="display:flex;align-items:center;justify-content:space-between;" onclick="togglePlanet(this)">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <div class="planet-orb {{ orb }}"></div>
-              {% if planet == best_planet %}<span style="color:#fbbf24;font-size:13px;">⭐</span>{% endif %}
-              <span style="font-size:14px;font-weight:600;color:#e0e7ff;">{{ planet.name_ka }}</span>
-              <span style="font-size:11px;color:var(--text-muted);">{{ planet.name }}</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px;">
-              {% if planet == best_planet %}
-              <span class="badge badge-indigo">საუკეთესო</span>
-              {% elif planet.visibility_type == 'binoculars' %}
-              <span class="badge badge-gold">🔭 ბინოკლი</span>
-              {% elif planet.visibility_type == 'telescope' %}
-              <span class="badge badge-gray">🔭 ტელ.</span>
-              {% endif %}
-              <svg class="expand-chevron" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-              </svg>
-            </div>
-          </div>
-          <div style="display:flex;gap:16px;margin-top:8px;font-size:11px;color:var(--text-muted);">
-            <span style="font-family:'JetBrains Mono',monospace;color:rgba(220,228,255,0.65);">{{ planet.altitude|round(1) }}°</span>
-            <span style="font-family:'JetBrains Mono',monospace;">mag {{ planet.magnitude }}</span>
-            <span>{{ planet.azimuth | azimuth_direction }}</span>
-          </div>
-          <div class="planet-detail">
-            <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.05);display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;font-size:13px;">
-              <div><span style="font-size:10px;color:var(--text-muted);">სიმაღლე</span><div style="color:#e0e7ff;font-family:'JetBrains Mono',monospace;margin-top:2px;">{{ planet.altitude|round(1) }}°</div></div>
-              <div><span style="font-size:10px;color:var(--text-muted);">სიკაშკაშე</span><div style="color:#e0e7ff;font-family:'JetBrains Mono',monospace;margin-top:2px;">{{ planet.magnitude }} <span style="font-size:10px;color:var(--text-muted);">mag</span></div></div>
-              <div><span style="font-size:10px;color:var(--text-muted);">მიმართულება</span><div style="color:rgba(220,228,255,0.78);margin-top:2px;">{{ planet.azimuth | azimuth_direction }}</div></div>
-              <div><span style="font-size:10px;color:var(--text-muted);">თანავარსკვლავედი</span><div style="color:rgba(220,228,255,0.78);margin-top:2px;">{{ planet.constellation }}</div></div>
-              <div style="grid-column:1/-1;">
-                <span style="font-size:10px;color:var(--text-muted);">სიმაღლის ბარი</span>
-                <div style="margin-top:6px;height:5px;background:rgba(255,255,255,0.05);border-radius:100px;overflow:hidden;">
-                  <div style="height:100%;border-radius:100px;background:var(--c-{{ planet.name|lower }},#818cf8);width:{{ [planet.altitude/90*100,100]|min }}%;transition:width 0.8s ease;"></div>
+                <div>
+                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;" data-i18n="hero.label.date">თარიღი</div>
+                    <div style="font-size:12px;font-weight:500;color:rgba(215,222,255,0.75);">{{ observation.date | datetimeformat }}</div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {% endfor %}
-      </div>
 
-      <!-- Desktop table -->
-      <div class="hidden lg:block">
-        <p style="font-size:11px;color:var(--text-muted);margin-bottom:12px;line-height:1.6;">სიკაშკაშე: რაც დაბალია (უარყოფითი) — მით კაშკაშაა. 👁 = შეუიარაღებელი თვალი, 🔭 = ბინოკლი/ტელესკოპი</p>
-        <table style="width:100%;border-collapse:collapse;">
-          <thead>
-            <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-              <th style="padding-bottom:10px;text-align:left;font-size:10px;color:#818cf8;text-transform:uppercase;letter-spacing:0.12em;font-weight:600;">პლანეტა</th>
-              <th style="padding-bottom:10px;text-align:left;font-size:10px;color:#818cf8;text-transform:uppercase;letter-spacing:0.12em;font-weight:600;">სიმაღლე</th>
-              <th style="padding-bottom:10px;text-align:left;font-size:10px;color:#818cf8;text-transform:uppercase;letter-spacing:0.12em;font-weight:600;">სიკაშკაშე</th>
-              <th style="padding-bottom:10px;text-align:left;font-size:10px;color:#818cf8;text-transform:uppercase;letter-spacing:0.12em;font-weight:600;">მიმართულება</th>
-              <th style="padding-bottom:10px;text-align:left;font-size:10px;color:#818cf8;text-transform:uppercase;letter-spacing:0.12em;font-weight:600;">თანავარსკვლავედი</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for planet in visible_planets %}
-            <tr style="border-bottom:1px solid rgba(255,255,255,0.025);transition:background 0.15s;" onmouseover="this.style.background='rgba(129,140,248,0.04)'" onmouseout="this.style.background='transparent'">
-              <td style="padding:12px 16px 12px 0;">
-                <div style="display:flex;align-items:center;gap:8px;">
-                  {% if planet == best_planet %}<span style="color:#fbbf24;">⭐</span>{% endif %}
-                  <span style="font-size:14px;font-weight:600;color:#e0e7ff;line-height:1.6;">{{ planet.name_ka }}</span>
-                  <span style="font-size:11px;color:var(--text-muted);">{{ planet.name }}</span>
-                  {% if planet.visibility_type == 'binoculars' %}<span style="font-size:10px;color:rgba(245,200,66,0.70);" title="ბინოკლი">🔭</span>
-                  {% elif planet.visibility_type == 'telescope' %}<span style="font-size:10px;color:var(--text-muted);" title="ტელესკოპი">🔭</span>
-                  {% else %}<span style="font-size:10px;color:var(--text-muted);" title="შეუიარაღებელი თვალი">👁</span>{% endif %}
+                <div style="width:28px;height:1px;background:linear-gradient(90deg,rgba(129,140,248,0.35),transparent);border-radius:2px;"></div>
+
+                <div>
+                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;" data-i18n="hero.label.location">მდებარეობა</div>
+                    <div style="font-size:12px;font-weight:500;color:rgba(215,222,255,0.75);display:flex;align-items:center;gap:4px;">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.5)" stroke-width="2.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        თბილისი · 41.7°N
+                    </div>
                 </div>
-              </td>
-              <td style="padding:12px 16px 12px 0;font-family:'JetBrains Mono',monospace;font-size:13px;color:rgba(220,228,255,0.78);">{{ planet.altitude|round(1) }}°</td>
-              <td style="padding:12px 16px 12px 0;font-family:'JetBrains Mono',monospace;font-size:13px;color:rgba(220,228,255,0.78);">{{ planet.magnitude }}</td>
-              <td style="padding:12px 16px 12px 0;font-size:13px;color:rgba(165,180,252,0.60);">{{ planet.azimuth | azimuth_direction }}</td>
-              <td style="padding:12px 0;font-size:13px;color:rgba(165,180,252,0.60);line-height:1.6;">{{ planet.constellation }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
 
-      {% else %}
-      <div style="padding:3rem 0;text-align:center;">
-        <div style="font-size:3rem;opacity:0.25;margin-bottom:.75rem;">🌫</div>
-        <p style="font-size:13px;color:var(--text-muted);">ამ მომენტში პლანეტები არ ჩანს</p>
-      </div>
-      {% endif %}
-    </div><!-- /planet section -->
+                <div style="width:28px;height:1px;background:linear-gradient(90deg,rgba(129,140,248,0.35),transparent);border-radius:2px;"></div>
 
-    <!-- Altitude Bars -->
-    {% if visible_planets %}
-    <div class="glass p-4 sm:p-6">
-      <h2 style="font-size:clamp(14px,2.5vw,17px);color:#e8edff;font-weight:600;margin-bottom:.25rem;" class="section-header">📡 სიმაღლე ჰორიზონტიდან</h2>
-      <p style="font-size:11px;color:var(--text-muted);margin-bottom:1.25rem;padding-left:.75rem;">0° — 90° (ზენიტი)</p>
-      <div class="space-y-4">
-        {% for planet in visible_planets %}
-        {% if planet.name == 'Mercury' %}{% set pcolor = '#9ca3af' %}
-        {% elif planet.name == 'Venus' %}{% set pcolor = '#fbbf24' %}
-        {% elif planet.name == 'Mars' %}{% set pcolor = '#ef4444' %}
-        {% elif planet.name == 'Jupiter' %}{% set pcolor = '#f97316' %}
-        {% elif planet.name == 'Saturn' %}{% set pcolor = '#eab308' %}
-        {% elif planet.name == 'Uranus' %}{% set pcolor = '#22d3ee' %}
-        {% elif planet.name == 'Neptune' %}{% set pcolor = '#3b82f6' %}
-        {% else %}{% set pcolor = '#818cf8' %}{% endif %}
-        <div>
-          <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px;">
-            <span style="color:rgba(220,228,255,0.80);line-height:1.6;">{{ planet.name_ka }}</span>
-            <span style="font-family:'JetBrains Mono',monospace;color:rgba(165,180,252,0.65);">{{ planet.altitude|round(1) }}°</span>
-          </div>
-          <div style="height:6px;background:rgba(255,255,255,0.05);border-radius:100px;overflow:hidden;">
-            <div style="height:100%;border-radius:100px;width:{{ [planet.altitude/90*100, 100]|min|round }}%;background:linear-gradient(90deg,{{ pcolor }}55,{{ pcolor }});transition:width 0.8s ease;"></div>
-          </div>
+                <div>
+                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;" data-i18n="hero.label.updated">განახლდა</div>
+                    <div style="font-size:12px;font-weight:500;color:rgba(215,222,255,0.75);">{{ last_updated }}</div>
+                </div>
+
+            </div>
+
+            <!-- ══ CENTER TITLE ══ -->
+            <div style="display:flex;flex-direction:column;align-items:center;text-align:center;">
+
+                <!-- Eyebrow -->
+                <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;width:100%;">
+                    <div style="flex:1;max-width:52px;height:1px;border-radius:2px;background:linear-gradient(90deg,transparent,rgba(165,180,252,0.40));"></div>
+                    <span style="font-size:9px;letter-spacing:0.34em;text-transform:uppercase;color:rgba(165,180,252,0.48);white-space:nowrap;">ASTROMAN · AI · REAL&#8209;TIME</span>
+                    <div style="flex:1;max-width:52px;height:1px;border-radius:2px;background:linear-gradient(270deg,transparent,rgba(165,180,252,0.40));"></div>
+                </div>
+
+                <!-- FRAMED TITLE BOX -->
+                <div style="position:relative;display:inline-flex;flex-direction:column;align-items:center;padding:28px 52px;margin-bottom:22px;">
+
+                    <!-- Frame glow -->
+                    <div aria-hidden="true" style="position:absolute;inset:-14px;border-radius:8px;background:radial-gradient(ellipse 75% 75% at 50% 50%,rgba(80,70,200,0.16) 0%,transparent 70%);pointer-events:none;"></div>
+
+                    <!-- Corner: top-left GOLD -->
+                    <div aria-hidden="true" style="position:absolute;top:0;left:0;width:22px;height:22px;border-top:1.5px solid rgba(245,200,66,0.80);border-left:1.5px solid rgba(245,200,66,0.80);pointer-events:none;"></div>
+                    <!-- Corner: bottom-right GOLD -->
+                    <div aria-hidden="true" style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-bottom:1.5px solid rgba(245,200,66,0.80);border-right:1.5px solid rgba(245,200,66,0.80);pointer-events:none;"></div>
+                    <!-- Corner: top-right INDIGO -->
+                    <div aria-hidden="true" style="position:absolute;top:0;right:0;width:22px;height:22px;border-top:1.5px solid rgba(165,180,252,0.55);border-right:1.5px solid rgba(165,180,252,0.55);pointer-events:none;"></div>
+                    <!-- Corner: bottom-left INDIGO -->
+                    <div aria-hidden="true" style="position:absolute;bottom:0;left:0;width:22px;height:22px;border-bottom:1.5px solid rgba(165,180,252,0.55);border-left:1.5px solid rgba(165,180,252,0.55);pointer-events:none;"></div>
+
+                    <!-- Small label -->
+                    <div style="font-size:clamp(11px,1.8vw,15px);font-weight:300;letter-spacing:0.24em;color:rgba(165,180,252,0.60);text-transform:uppercase;margin-bottom:8px;" data-i18n="hero.sub">ღამის ცის</div>
+
+                    <!-- MAIN TITLE -->
+                    <div style="font-size:clamp(36px,6vw,66px);font-weight:800;letter-spacing:-1.5px;line-height:1;background:linear-gradient(145deg,#ffffff 0%,#e4ecff 30%,#c7d2fe 58%,#f5c842 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 44px rgba(165,180,252,0.30));transition:filter .25s;" data-i18n="hero.main">გზამკვლევი</div>
+
+                    <!-- Gold diamond divider -->
+                    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:16px;">
+                        <div style="height:1px;width:32px;border-radius:2px;background:linear-gradient(90deg,transparent,rgba(245,200,66,0.60));"></div>
+                        <div style="width:6px;height:6px;border:1px solid rgba(245,200,66,0.65);transform:rotate(45deg);flex-shrink:0;"></div>
+                        <div style="height:1px;width:32px;border-radius:2px;background:linear-gradient(270deg,transparent,rgba(245,200,66,0.60));"></div>
+                    </div>
+                </a>
+                <!-- Scroll hint -->
+                <div style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(165,180,252,.36);animation:hint-pulse 3s ease-in-out infinite;margin-bottom:18px;" data-i18n="hero.scroll.hint">↓ პლანეტებისკენ</div>
+
+                <!-- Status pill -->
+                <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;">
+                    {% if is_night %}
+                    <div style="display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:100px;background:rgba(99,102,241,0.14);border:1px solid rgba(99,102,241,0.38);color:#a5b4fc;font-size:12px;font-weight:500;box-shadow:0 4px 16px rgba(99,102,241,0.15),inset 0 1px 0 rgba(255,255,255,0.08);">
+                        <span style="width:6px;height:6px;border-radius:50%;background:#818cf8;box-shadow:0 0 8px #818cf8;flex-shrink:0;display:inline-block;"></span>
+                        🌙 ვარსკვლავები ხილულია
+                    </div>
+                    {% elif is_twilight %}
+                    <div style="display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:100px;background:rgba(139,92,246,0.14);border:1px solid rgba(139,92,246,0.38);color:#c4b5fd;font-size:12px;font-weight:500;">
+                        <span style="width:6px;height:6px;border-radius:50%;background:#a78bfa;box-shadow:0 0 8px #a78bfa;flex-shrink:0;display:inline-block;"></span>
+                        🌆 შებინდება
+                    </div>
+                    {% else %}
+                    <div style="display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:100px;background:rgba(251,191,36,0.10);border:1px solid rgba(251,191,36,0.32);color:#fbbf24;font-size:12px;font-weight:500;box-shadow:0 4px 16px rgba(251,191,36,0.10),inset 0 1px 0 rgba(255,255,255,0.06);">
+                        <span style="width:6px;height:6px;border-radius:50%;background:#fbbf24;box-shadow:0 0 8px #fbbf24;flex-shrink:0;display:inline-block;"></span>
+                        ☀️ დღეა · მზე ჩადის {{ observation.sunset_time }}
+                    </div>
+                    {% endif %}
+                    {% if best_planet and is_night %}
+                    <div style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:100px;background:rgba(245,200,66,0.09);border:1px solid rgba(245,200,66,0.28);color:#f5c842;font-size:12px;font-weight:500;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="rgba(245,200,66,0.85)" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <strong>{{ best_planet.name_ka }}</strong>
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- ══ RIGHT META ══ -->
+            <div style="display:flex;flex-direction:column;gap:14px;text-align:right;align-items:flex-end;">
+
+                <div>
+                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;" data-i18n="hero.label.livetime">ლაივ საათი</div>
+                    <div style="font-size:13px;font-weight:600;color:rgba(215,222,255,0.88);font-family:'JetBrains Mono',monospace;letter-spacing:0.06em;display:flex;align-items:center;gap:5px;justify-content:flex-end;">
+                        <span style="width:5px;height:5px;border-radius:50%;background:#22c55e;box-shadow:0 0 7px #22c55e;flex-shrink:0;"></span>
+                        <span id="tbilisi-clock" class="tabular-nums">--:--:--</span>
+                    </div>
+                </div>
+
+                <div style="width:28px;height:1px;background:linear-gradient(270deg,rgba(129,140,248,0.35),transparent);border-radius:2px;"></div>
+
+                <div>
+                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;" data-i18n="hero.label.weather">ამინდი</div>
+                    <div style="font-size:12px;font-weight:500;color:rgba(215,222,255,0.75);">{{ observation.cloud_coverage }}% ☁ · {{ observation.temperature|round(0)|int }}°C</div>
+                </div>
+
+                <div style="width:28px;height:1px;background:linear-gradient(270deg,rgba(129,140,248,0.35),transparent);border-radius:2px;"></div>
+
+                <div>
+                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;" data-i18n="hero.label.moon">მთვარე</div>
+                    <div style="font-size:12px;font-weight:500;color:rgba(215,222,255,0.75);">{{ observation.moon_illumination|round(0)|int }}% · {{ observation.moon_phase }}</div>
+                </div>
+
+            </div>
+
+        </div><!-- /grid -->
+
+        <!-- Mobile fallback row — only on small screens -->
+        <div id="hero-mobile-bar" style="display:none;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 14px;padding:0 20px 16px;border-top:1px solid rgba(255,255,255,0.05);margin-top:-4px;">
+            <span style="font-size:10px;font-family:'JetBrains Mono',monospace;color:rgba(165,180,252,0.58);">📅 {{ observation.date | datetimeformat }}</span>
+            <span style="font-size:10px;color:rgba(34,197,94,0.65);">●</span>
+            <span style="font-size:10px;font-family:'JetBrains Mono',monospace;color:rgba(165,180,252,0.58);" id="tbilisi-clock-mobile">--:--:--</span>
+            <span style="font-size:10px;font-family:'JetBrains Mono',monospace;color:rgba(165,180,252,0.58);">📍 თბილისი</span>
         </div>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
 
-    <!-- Observation Guide (collapsible) -->
-    <details class="glass" style="border-radius:1.25rem;padding:1.25rem 1.5rem;">
-      <summary style="font-size:14px;color:#e0e7ff;font-weight:600;cursor:pointer;list-none;display:flex;align-items:center;justify-content:space-between;" class="section-header">
-        <span>💡 დაკვირვების გზამკვლევი</span>
-        <svg class="details-chevron" width="15" height="15" fill="none" stroke="rgba(165,180,252,0.5)" viewBox="0 0 24 24" style="transition:transform .3s ease;flex-shrink:0;">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-        </svg>
-      </summary>
-      <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;">
-        {% set ns = namespace(count=0) %}
-        {% for line in observation.observation_text.split('\n') %}
-        {% if ns.count < 7 %}
-          {% set stripped = line.strip() %}
-          {% if stripped and not stripped.startswith('═') and not stripped.startswith('─') and not stripped.startswith('📊') %}
-            {% if stripped.startswith('⭐') or stripped.startswith('🪐') or stripped.startswith('🌙') or stripped.startswith('💡') %}
-              <p style="font-size:12px;color:#a5b4fc;font-weight:500;line-height:1.7;margin:0;">{{ stripped }}</p>{% set ns.count = ns.count + 1 %}
-            {% elif stripped.startswith('⚠️') %}
-              <p style="font-size:12px;color:rgba(234,179,8,0.75);line-height:1.7;margin:0;">{{ stripped }}</p>{% set ns.count = ns.count + 1 %}
-            {% elif stripped.startswith('📍') or stripped.startswith('🔍') %}
-              <p style="font-size:12px;color:rgba(165,180,252,0.58);line-height:1.7;margin:0;">{{ stripped }}</p>{% set ns.count = ns.count + 1 %}
-            {% elif stripped %}
-              <p style="font-size:12px;color:var(--text-muted);line-height:1.7;margin:0;">{{ stripped }}</p>{% set ns.count = ns.count + 1 %}
+    </div><!-- /hero -->
+
+    <style>
+    @keyframes twkl { 0%,100%{opacity:1} 35%{opacity:.35} 65%{opacity:.80} }
+    /* Collapse grid to single column on mobile */
+    @media (max-width:680px) {
+        #hero-grid-inner { grid-template-columns:1fr !important; }
+        #hero-left-col, #hero-right-col { display:none !important; }
+        #hero-mobile-bar { display:flex !important; }
+    }
+    </style>
+
+    <!-- ═══ STAT CARDS — Premium Redesign ═══ -->
+    <div class="grid grid-cols-2 gap-3 lg:grid-cols-4 stagger">
+
+        <!-- Sunset -->
+        <div class="glass-card stat-card-sunset p-4 sm:p-5 text-center">
+            <div class="flex justify-center mb-3">
+                <div style="width:42px;height:42px;border-radius:12px;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.20);display:flex;align-items:center;justify-content:center;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(251,191,36,0.85)" stroke-width="1.5" stroke-linecap="round">
+                        <path d="M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z" fill="rgba(251,191,36,0.10)"/>
+                        <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                        <line x1="3" y1="20" x2="21" y2="20" stroke="rgba(251,191,36,0.35)" stroke-width="1"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="text-[10px] uppercase tracking-widest mb-2" style="color:rgba(251,191,36,0.65);">მზის ჩასვლა</div>
+            <div class="text-2xl sm:text-3xl font-mono text-white font-bold" style="letter-spacing:-0.5px;">{{ observation.sunset_time }}</div>
+        </div>
+
+        <!-- Moon -->
+        <div class="glass-card stat-card-moon p-4 sm:p-5 text-center">
+            <div class="flex justify-center mb-3">
+                <div style="width:42px;height:42px;border-radius:12px;background:rgba(165,180,252,0.10);border:1px solid rgba(165,180,252,0.18);display:flex;align-items:center;justify-content:center;">
+                    {% set moon_pct = observation.moon_illumination %}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.85)" stroke-width="1.5">
+                        {% if moon_pct < 5 %}
+                        <circle cx="12" cy="12" r="9" fill="rgba(20,20,40,0.9)"/>
+                        {% elif moon_pct > 95 %}
+                        <circle cx="12" cy="12" r="9" fill="rgba(165,180,252,0.25)"/>
+                        {% else %}
+                        <circle cx="12" cy="12" r="9" fill="rgba(165,180,252,0.08)"/>
+                        <path d="M12 3a9 9 0 0 1 0 18 6 6 0 0 1 0-12 4 4 0 0 0 0-6z" fill="rgba(165,180,252,0.20)"/>
+                        {% endif %}
+                    </svg>
+                </div>
+            </div>
+            <div class="text-[10px] uppercase tracking-widest mb-2" style="color:rgba(165,180,252,0.65);">მთვარე</div>
+            <div class="text-2xl sm:text-3xl font-mono text-white font-bold" style="letter-spacing:-0.5px;">{{ observation.moon_illumination|round(0)|int }}%</div>
+            <div class="text-[10px] mt-1.5" style="color:rgba(165,180,252,0.45);">{{ observation.moon_phase }}</div>
+        </div>
+
+        <!-- Clouds -->
+        <div class="glass-card stat-card-clouds p-4 sm:p-5 text-center">
+            <div class="flex justify-center mb-3">
+                <div style="width:42px;height:42px;border-radius:12px;background:rgba(148,163,184,0.10);border:1px solid rgba(148,163,184,0.16);display:flex;align-items:center;justify-content:center;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(148,163,184,0.80)" stroke-width="1.5" stroke-linecap="round">
+                        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" fill="rgba(148,163,184,0.08)"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="text-[10px] uppercase tracking-widest mb-2" style="color:rgba(148,163,184,0.60);">ღრუბლები</div>
+            <div class="text-2xl sm:text-3xl font-mono text-white font-bold" style="letter-spacing:-0.5px;">{{ observation.cloud_coverage }}%</div>
+            <div class="text-[10px] mt-1.5" style="color:rgba(148,163,184,0.45);">
+                {% if observation.cloud_coverage < 30 %}✨ წმინდა ცა{% elif observation.cloud_coverage < 60 %}⛅ ნაწილობრივ{% else %}☁️ ძლიერი{% endif %}
+            </div>
+        </div>
+
+        <!-- Temperature -->
+        <div class="glass-card stat-card-temp p-4 sm:p-5 text-center">
+            <div class="flex justify-center mb-3">
+                <div style="width:42px;height:42px;border-radius:12px;background:rgba(129,140,248,0.10);border:1px solid rgba(129,140,248,0.18);display:flex;align-items:center;justify-content:center;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(129,140,248,0.80)" stroke-width="1.5" stroke-linecap="round">
+                        <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" fill="rgba(129,140,248,0.08)"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="text-[10px] uppercase tracking-widest mb-2" style="color:rgba(129,140,248,0.65);">ტემპერატურა</div>
+            <div class="text-2xl sm:text-3xl font-mono text-white font-bold" style="letter-spacing:-0.5px;">{{ observation.temperature|round(0)|int }}°C</div>
+            <div class="text-[10px] mt-1.5" style="color:rgba(129,140,248,0.45);">💨 {{ observation.wind_speed }} m/s</div>
+        </div>
+
+    </div>
+
+    {# ══════════════════════════════════════════════════ #}
+    {# DAYTIME MODE                                       #}
+    {# ══════════════════════════════════════════════════ #}
+    {% if not is_night and not is_twilight %}
+
+    <div class="glass-strong p-8 sm:p-12 text-center animate-in">
+        <div class="text-5xl sm:text-6xl mb-4">☀️</div>
+        <h2 class="text-xl sm:text-2xl text-amber-400/80 font-light mb-3" style="line-height:1.6">
+            დღისით ვარსკვლავები არ ჩანს
+        </h2>
+        <p class="text-sm sm:text-base text-gray-400 mb-6" style="line-height:1.6">
+            დაკვირვება შესაძლებელია მზის ჩასვლის შემდეგ:
+            <span class="text-indigo-400 font-mono font-semibold">{{ observation.sunset_time }}</span>
+        </p>
+        <div class="inline-block glass p-6 sm:p-8">
+            <div id="sunset-countdown" class="text-3xl sm:text-4xl font-mono text-indigo-300 font-bold tracking-wider"></div>
+            <div class="text-xs text-gray-500 mt-2 uppercase tracking-widest">მზის ჩასვლამდე</div>
+        </div>
+    </div>
+
+    <!-- Tonight's Preview -->
+    <div class="glass p-5 sm:p-6 animate-in">
+        <h3 class="text-base sm:text-lg text-gray-300 mb-2" style="line-height:1.6">
+            🌙 საღამოს წინასწარი მიმოხილვა
+        </h3>
+        <p class="text-sm text-gray-500 mb-4">პლანეტები, რომლებიც დაისით გამოჩნდება:</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 stagger">
+            {% for planet in observation.planets %}
+            {% if planet.is_visible or planet.altitude > -10 %}
+            <div class="glass-card p-4 flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full flex-shrink-0 {% if planet.is_visible %}bg-green-400{% else %}bg-gray-600{% endif %}"></div>
+                <div class="min-w-0 flex-1">
+                    <div class="text-sm text-white" style="line-height:1.6">{{ planet.name_ka }}</div>
+                    <div class="text-xs text-gray-500" style="line-height:1.6">{{ planet.constellation }}</div>
+                </div>
+                <div class="text-xs font-mono text-gray-400 flex-shrink-0">{{ planet.magnitude }} mag</div>
+            </div>
             {% endif %}
-          {% endif %}
-        {% endif %}
-        {% endfor %}
-      </div>
-    </details>
-
-  </div><!-- /left col -->
-
-
-  <!-- ── RIGHT Column ── -->
-  <div class="space-y-5">
-
-    <!-- Telescope CTA — night -->
-    <div class="glass-strong p-5 sm:p-7 text-center">
-      <div style="font-size:9.5px;letter-spacing:0.24em;text-transform:uppercase;color:#818cf8;margin-bottom:1rem;">რეკომენდებული ტელესკოპი</div>
-      <img src="https://astroman.ge/wp-content/uploads/2024/08/Telescope-700x700.jpg"
-           alt="ტელესკოპი Foreseen 80mm"
-           style="width:clamp(100px,16vw,145px);height:clamp(100px,16vw,145px);object-fit:contain;border-radius:18px;margin:0 auto 1rem;display:block;"
-           onerror="this.style.display='none';this.nextElementSibling.style.display='block';" loading="lazy">
-      <div style="font-size:2.8rem;display:none;margin-bottom:1rem;" class="animate-float">🔭</div>
-      <h3 style="font-size:clamp(16px,2.5vw,19px);color:#f0f2ff;font-weight:600;margin-bottom:.6rem;line-height:1.5;">Foreseen 80mm</h3>
-      <p style="font-size:12px;color:rgba(165,180,252,0.52);margin-bottom:1.25rem;line-height:1.65;">80mm · 500mm ფოკუსი · K25+K10 — ❤️ 856₾</p>
-      <a href="https://astroman.ge/telescope-foreseen-80mm/" target="_blank" class="btn btn-primary btn-full">
-        იხილე ტელესკოპი
-        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-      </a>
-    </div>
-
-    <!-- Moon Phase -->
-    <div class="glass p-5 sm:p-6 text-center">
-      <div style="font-size:9.5px;letter-spacing:0.22em;text-transform:uppercase;color:#818cf8;margin-bottom:1rem;" class="section-header">მთვარის ფაზა</div>
-      <div style="margin-bottom:1rem;">
-        <span class="moon-emoji">
-          {% if observation.moon_illumination < 5 %}🌑
-          {% elif observation.moon_illumination < 25 %}🌒
-          {% elif observation.moon_illumination < 50 %}🌓
-          {% elif observation.moon_illumination < 75 %}🌔
-          {% elif observation.moon_illumination < 95 %}🌖
-          {% else %}🌕{% endif %}
-        </span>
-      </div>
-      <h3 style="font-size:15px;color:#e0e7ff;font-weight:500;margin-bottom:4px;line-height:1.6;">{{ observation.moon_phase }}</h3>
-      <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">{{ observation.moon_illumination|round(0)|int }}% განათებული</div>
-      <div style="height:5px;background:rgba(255,255,255,0.05);border-radius:100px;overflow:hidden;">
-        <div style="height:100%;border-radius:100px;width:{{ observation.moon_illumination }}%;background:linear-gradient(90deg,#4338ca,#a78bfa,#fbbf24);transition:width 0.8s ease;"></div>
-      </div>
-    </div>
-
-    <!-- Observation Quality -->
-    <div class="glass p-5 sm:p-6">
-      <div style="font-size:9.5px;letter-spacing:0.22em;text-transform:uppercase;color:#818cf8;margin-bottom:1rem;" class="section-header">დაკვირვების ხარისხი</div>
-      {% set q = (100 - observation.cloud_coverage) %}
-      {% if observation.moon_illumination > 60 %}{% set q = q - 15 %}{% endif %}
-      {% if q < 0 %}{% set q = 0 %}{% endif %}
-
-      <div style="display:flex;align-items:center;gap:14px;margin-bottom:1.25rem;">
-        <div style="position:relative;width:62px;height:62px;flex-shrink:0;">
-          <svg style="width:62px;height:62px;transform:rotate(-90deg);"
-               class="{% if q >= 70 %}ring-excellent{% elif q >= 40 %}ring-good{% elif q >= 20 %}ring-moderate{% else %}ring-poor{% endif %}"
-               viewBox="0 0 64 64">
-            <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7"/>
-            <circle cx="32" cy="32" r="26" fill="none"
-              stroke="{% if q >= 70 %}#22c55e{% elif q >= 40 %}#eab308{% elif q >= 20 %}#f97316{% else %}#ef4444{% endif %}"
-              stroke-width="7" stroke-linecap="round"
-              stroke-dasharray="{{ q * 1.634 }} 163.4"/>
-          </svg>
-          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-family:'JetBrains Mono',monospace;color:#fff;font-weight:600;">{{ q }}%</div>
+            {% endfor %}
         </div>
-        <div>
-          {% if q >= 70 %}<div style="font-size:15px;font-weight:600;color:#22c55e;">შესანიშნავი</div><div style="font-size:11px;color:var(--text-muted);margin-top:3px;line-height:1.6;">წმინდა ცა — იდეალური</div>
-          {% elif q >= 40 %}<div style="font-size:15px;font-weight:600;color:#eab308;">კარგი</div><div style="font-size:11px;color:var(--text-muted);margin-top:3px;line-height:1.6;">ნაწილობრივ ღრუბლიანი</div>
-          {% elif q >= 20 %}<div style="font-size:15px;font-weight:600;color:#f97316;">საშუალო</div><div style="font-size:11px;color:var(--text-muted);margin-top:3px;line-height:1.6;">შეზღუდული ხილვადობა</div>
-          {% else %}<div style="font-size:15px;font-weight:600;color:#ef4444;">ცუდი</div><div style="font-size:11px;color:var(--text-muted);margin-top:3px;line-height:1.6;">ძლიერი ღრუბლიანობა</div>
-          {% endif %}
-        </div>
-      </div>
-
-      <div class="space-y-3">
-        {% for label, icon, value, color in [
-          ('ღრუბლიანობა','☁',observation.cloud_coverage,'#60a5fa'),
-          ('მთვარე','🌙',observation.moon_illumination|round(0)|int,'#fbbf24'),
-        ] %}
-        <div>
-          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-muted);margin-bottom:5px;">
-            <span>{{ icon }} {{ label }}</span>
-            <span style="font-family:'JetBrains Mono',monospace;">{{ value }}%</span>
-          </div>
-          <div style="height:4px;background:rgba(255,255,255,0.05);border-radius:100px;overflow:hidden;">
-            <div style="height:100%;border-radius:100px;background:{{ color }};opacity:0.65;width:{{ value }}%;transition:width 0.8s ease;"></div>
-          </div>
-        </div>
-        {% endfor %}
-        <div>
-          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-muted);margin-bottom:5px;">
-            <span>💨 ქარი</span>
-            <span style="font-family:'JetBrains Mono',monospace;">{{ observation.wind_speed }} m/s</span>
-          </div>
-          <div style="height:4px;background:rgba(255,255,255,0.05);border-radius:100px;overflow:hidden;">
-            <div style="height:100%;border-radius:100px;background:#34d399;opacity:0.65;width:{{ [observation.wind_speed*10,100]|min }}%;transition:width 0.8s ease;"></div>
-          </div>
-        </div>
-      </div>
     </div>
 
-    <!-- Loyalty Club CTA -->
-    <div class="glass-card p-5 sm:p-6 text-center">
-      <div style="display:flex;justify-content:center;margin-bottom:.75rem;">
-        <svg width="42" height="42" viewBox="0 0 42 42" fill="none">
-          <circle cx="21" cy="21" r="20" fill="rgba(234,179,8,0.10)" stroke="rgba(234,179,8,0.28)" stroke-width="1.2"/>
-          <path d="M21 9 L23.6 17H32L25.3 22L27.8 30L21 25.5L14.2 30L16.7 22L10 17H18.4Z" fill="rgba(234,179,8,0.88)" stroke="rgba(234,179,8,0.40)" stroke-width="0.5" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div style="font-size:14px;color:#e0e7ff;font-weight:600;margin-bottom:5px;line-height:1.6;">ASTROMAN ლოიალობის კლუბი</div>
-      <div style="font-size:12px;color:var(--text-muted);margin-bottom:1rem;line-height:1.65;">
-        დააგროვე ქულები, მიიღე ფასდაკლება ტელესკოპებზე და აქსესუარებზე
-      </div>
-      <div style="display:flex;justify-content:center;gap:10px;margin-bottom:1.25rem;">
-        <div class="glass" style="padding:8px 12px;border-radius:12px;text-align:center;">
-          <div style="font-size:12.5px;color:#f5c842;font-family:'JetBrains Mono',monospace;font-weight:700;">5 ქულა</div>
-          <div style="font-size:9.5px;color:var(--text-muted);margin-top:2px;">1₾-ზე</div>
-        </div>
-        <div class="glass" style="padding:8px 12px;border-radius:12px;text-align:center;">
-          <div style="font-size:12.5px;color:#f5c842;font-family:'JetBrains Mono',monospace;font-weight:700;">10%</div>
-          <div style="font-size:9.5px;color:var(--text-muted);margin-top:2px;">ფასდაკლება</div>
-        </div>
-        <div class="glass" style="padding:8px 12px;border-radius:12px;text-align:center;">
-          <div style="font-size:12.5px;color:#f5c842;font-family:'JetBrains Mono',monospace;font-weight:700;">VIP</div>
-          <div style="font-size:9.5px;color:var(--text-muted);margin-top:2px;">20% off</div>
-        </div>
-      </div>
-      <a href="https://club.astroman.ge" target="_blank" class="btn btn-gold btn-full">
-        შემოუერთდი კლუბს
-        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-      </a>
-    </div>
-
-  </div><!-- /right col -->
-
-</div><!-- /grid -->
-{% endif %}
-
-
-<!-- ═══════════════════════════════════════
-     CHATBOT
-     ═══════════════════════════════════════ -->
-<div class="animate-in" style="background:rgba(4,4,16,0.98);border:1px solid rgba(129,140,248,0.14);border-radius:20px;overflow:hidden;">
-  <!-- Header -->
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;border-bottom:1px solid rgba(255,255,255,0.04);">
-    <div style="display:flex;align-items:center;gap:8px;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(129,140,248,0.72)" stroke-width="1.5">
-        <circle cx="12" cy="12" r="8"/>
-        <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
-        <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
-        <circle cx="12" cy="12" r="2" fill="rgba(129,140,248,0.55)" stroke="none"/>
-      </svg>
-      <span style="font-size:11px;color:rgba(165,180,252,0.65);letter-spacing:0.08em;">ასტრო-ასისტენტი</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:5px;">
-      <div style="width:5px;height:5px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;"></div>
-      <span style="font-size:9.5px;color:rgba(100,200,100,0.55);">ონლაინ</span>
-    </div>
-  </div>
-
-  <!-- Messages -->
-  <div id="chat-messages" style="height:260px;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:9px;scroll-behavior:smooth;">
-    <div style="display:flex;gap:8px;align-items:flex-start;">
-      <div style="width:22px;height:22px;border-radius:50%;background:rgba(99,102,241,0.22);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px;">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.85)" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="2" fill="rgba(129,140,248,0.55)" stroke="none"/></svg>
-      </div>
-      <div style="background:rgba(99,102,241,0.09);border:1px solid rgba(129,140,248,0.13);border-radius:0 12px 12px 12px;padding:8px 12px;max-width:90%;">
-        <p style="font-size:12.5px;color:rgba(210,220,255,0.80);line-height:1.65;margin:0;">გამარჯობა — დამიბარე კითხვებით ტელესკოპებზე, პლანეტებზე ან ღრმა ცაზე.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Suggestions -->
-  <div id="chat-suggestions" style="padding:0 14px 10px;display:flex;flex-wrap:wrap;gap:5px;">
-    <button onclick="askSuggestion('რომელი ტელესკოპი გამოდგება დამწყებისთვის?')" class="btn btn-ghost btn-sm btn-pill" style="font-size:10.5px;">დამწყებთათვის ტელესკოპი</button>
-    <button onclick="askSuggestion('როგორ ჩანს სატურნი 70mm ტელესკოპში?')" class="btn btn-ghost btn-sm btn-pill" style="font-size:10.5px;">სატურნი ტელესკოპში</button>
-    <button onclick="askSuggestion('რა განსხვავებაა რეფრაქტორსა და რეფლექტორს შორის?')" class="btn btn-ghost btn-sm btn-pill" style="font-size:10.5px;">რეფრაქტორი vs რეფლექტორი</button>
-  </div>
-
-  <!-- Input -->
-  <div style="padding:8px 12px;border-top:1px solid rgba(255,255,255,0.04);display:flex;gap:8px;align-items:flex-end;">
-    <textarea id="chat-input" placeholder="დამისვი კითხვა ასტრონომიაზე..." rows="1"
-      style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(129,140,248,0.14);border-radius:12px;padding:9px 13px;font-size:12.5px;color:#c7d2fe;resize:none;outline:none;font-family:inherit;line-height:1.55;max-height:80px;transition:border-color .2s;"
-      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"
-      oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';"
-      onfocus="this.style.borderColor='rgba(129,140,248,0.35)'"
-      onblur="this.style.borderColor='rgba(129,140,248,0.14)'"></textarea>
-    <button onclick="sendChat()" id="chat-send-btn"
-      style="width:38px;height:38px;border-radius:11px;background:rgba(99,102,241,0.28);border:1px solid rgba(129,140,248,0.28);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;"
-      onmouseover="this.style.background='rgba(99,102,241,0.50)'" onmouseout="this.style.background='rgba(99,102,241,0.28)'"
-      title="გაგზავნა">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.92)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-      </svg>
-    </button>
-  </div>
-</div><!-- /chatbot -->
-
-
-<!-- ═══════════════════════════════════════
-     NASA APOD
-     ═══════════════════════════════════════ -->
-<div id="apod-section" class="mt-2 animate-in" style="display:none;">
-  <div style="border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px;">
-      <div>
-        <div style="font-size:9.5px;letter-spacing:0.22em;text-transform:uppercase;color:#818cf8;margin-bottom:3px;">NASA · Astronomy Picture of the Day</div>
-        <div style="font-size:14px;font-weight:600;color:#f0f2ff;" id="apod-title">იტვირთება…</div>
-      </div>
-      <div style="font-size:1.8rem;flex-shrink:0;margin-left:1rem;">📡</div>
-    </div>
-    <div id="apod-img-wrap" style="position:relative;height:220px;overflow:hidden;background:#020509;">
-      <img id="apod-img" src="" alt="NASA APOD"
-           style="width:100%;height:100%;object-fit:cover;display:none;animation:apodFadeIn .8s ease;"
-           onerror="document.getElementById('apod-section').style.display='none';"/>
-      <div id="apod-img-err" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:radial-gradient(ellipse,#1a0a2e,#020509);">
-        <span style="font-size:3rem;">🌌</span>
-        <span style="font-size:12px;color:rgba(255,255,255,0.35);">სურათი ვერ ჩაიტვირთა</span>
-      </div>
-      <div id="apod-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#020509;">
-        <div style="width:32px;height:32px;border:2px solid rgba(99,102,241,0.20);border-top-color:#818cf8;border-radius:50%;animation:apodSpin 1s linear infinite;"></div>
-      </div>
-    </div>
-    <div style="padding:16px 20px;">
-      <p id="apod-desc" style="font-size:12px;color:var(--text-muted);margin-bottom:12px;line-height:1.75;"></p>
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-        <span id="apod-date" style="font-size:10px;color:rgba(165,180,252,0.38);font-family:'JetBrains Mono',monospace;"></span>
-        <a id="apod-link" href="#" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">
-          ↗ NASA-ზე სრული სურათი
+    <!-- Telescope Recommendation — always visible, even during day -->
+    <div class="glass-strong p-6 sm:p-8 text-center animate-in">
+        <div class="text-xs tracking-widest text-indigo-400 uppercase mb-4">რეკომენდებული ტელესკოპი</div>
+        <img src="https://astroman.ge/wp-content/uploads/2024/08/Telescope-700x700.jpg" 
+             alt="ტელესკოპი Foreseen 80mm" 
+             class="w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-4 object-contain rounded-2xl"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';"
+             loading="lazy">
+        <div class="text-4xl sm:text-5xl mb-4 animate-float inline-block" style="display:none;">🔭</div>
+        <h3 class="text-xl sm:text-2xl font-semibold text-white mb-3" style="line-height:1.6">ტელესკოპი Foreseen 80mm</h3>
+        <p class="text-sm text-gray-400 mb-6" style="line-height:1.6">80mm აპერტურა · 500mm ფოკუსი · K25+K10 ლინზები · 3.2კგ — დამწყებთათვის საუკეთესო არჩევანი</p>
+        <a href="https://astroman.ge/telescope-foreseen-80mm/" target="_blank"
+           class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-2xl text-sm sm:text-base font-medium transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/25 hover:-translate-y-0.5">
+            იხილე ტელესკოპი
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
         </a>
-      </div>
     </div>
-  </div>
-</div><!-- /apod -->
 
+    {# ══════════════════════════════════════════════════ #}
+    {# TWILIGHT MODE                                      #}
+    {# ══════════════════════════════════════════════════ #}
+    {% elif is_twilight %}
 
-<!-- ═══════════════════════════════════════
-     PLANETS EXPLORER
-     ═══════════════════════════════════════ -->
-<div class="mt-6">
-  <div style="margin-bottom:1rem;padding:0 2px;">
-    <h2 style="font-size:clamp(16px,3.5vw,20px);font-weight:700;background:linear-gradient(135deg,#e0e7ff 0%,#a5b4fc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">პლანეტები ტელესკოპიდან</h2>
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;sm:grid-template-columns:repeat(7,1fr);" class="sm:grid-cols-7">
-    {% set planet_cards = [
-      ('moon',    'მთვარე',   '#e0d9a0'),
-      ('venus',   'ვენერა',   '#fbbf24'),
-      ('mars',    'მარსი',    '#f87171'),
-      ('jupiter', 'იუპიტერი', '#fb923c'),
-      ('saturn',  'სატურნი',  '#eab308'),
-      ('uranus',  'ურანი',    '#22d3ee'),
-      ('neptune', 'ნეპტუნი',  '#60a5fa'),
-    ] %}
-    {% for slug, name_ka, color in planet_cards %}
-    <button onclick="openPlanetModal('{{ slug }}')"
-       class="glass-card" style="padding:12px 8px;text-align:center;cursor:pointer;border:none;">
-      <div style="width:clamp(44px,8vw,56px);height:clamp(44px,8vw,56px);margin:0 auto 8px;border-radius:50%;overflow:hidden;box-shadow:0 0 20px {{ color }}3a;">
-        <img src="/static/planets/{{ slug }}.png" alt="{{ name_ka }}"
-             style="width:100%;height:100%;object-fit:cover;filter:brightness(1.08);">
-      </div>
-      <div style="font-size:10px;color:var(--text-muted);line-height:1.5;transition:color .2s;">{{ name_ka }}</div>
-    </button>
-    {% endfor %}
-  </div>
-</div>
-
-<!-- Planet Modal -->
-<div id="planet-modal" class="fixed inset-0 z-[70] hidden" role="dialog" aria-modal="true">
-  <div class="absolute inset-0" style="background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);" onclick="closePlanetModal()"></div>
-  <div id="planet-modal-sheet" class="absolute bottom-0 left-0 right-0 sm:inset-0 sm:flex sm:items-center sm:justify-center sm:p-6" style="pointer-events:none;">
-    <div style="pointer-events:auto;width:100%;max-width:640px;max-height:92vh;overflow-y:auto;border-radius:24px 24px 0 0;background:rgba(6,5,22,0.98);border:1px solid rgba(255,255,255,0.10);border-top-color:rgba(255,255,255,0.16);" class="sm:rounded-3xl">
-      <div style="display:flex;justify-content:center;padding:12px 0 4px;" class="sm:hidden">
-        <div style="width:40px;height:4px;border-radius:100px;background:rgba(255,255,255,0.18);"></div>
-      </div>
-      <div id="planet-modal-content" style="padding:20px 22px 24px;"></div>
+    <div class="glass-strong p-8 sm:p-10 text-center animate-in">
+        <div class="text-5xl mb-4">🌆</div>
+        <h2 class="text-xl sm:text-2xl font-light text-violet-300 mb-2" style="line-height:1.6">შებინდების დროა</h2>
+        <p class="text-sm text-gray-400" style="line-height:1.6">მალე ვარსკვლავები გამოჩნდება</p>
     </div>
-  </div>
+
+    {% if visible_planets %}
+    <div class="glass p-5 sm:p-6 animate-in">
+        <h3 class="text-base sm:text-lg text-gray-300 mb-4">✨ უკვე ჩანს</h3>
+        <div class="space-y-3 stagger">
+            {% for planet in visible_planets %}
+            {% if planet.name == 'Mercury' %}{% set pcolor = '#9ca3af' %}
+            {% elif planet.name == 'Venus' %}{% set pcolor = '#fbbf24' %}
+            {% elif planet.name == 'Mars' %}{% set pcolor = '#ef4444' %}
+            {% elif planet.name == 'Jupiter' %}{% set pcolor = '#f97316' %}
+            {% elif planet.name == 'Saturn' %}{% set pcolor = '#eab308' %}
+            {% elif planet.name == 'Uranus' %}{% set pcolor = '#22d3ee' %}
+            {% elif planet.name == 'Neptune' %}{% set pcolor = '#3b82f6' %}
+            {% else %}{% set pcolor = '#818cf8' %}{% endif %}
+            <div class="glass-card p-4 flex items-center gap-4">
+                <div class="w-8 h-8 rounded-full flex-shrink-0" style="background: radial-gradient(circle at 35% 35%, {{ pcolor }}cc, {{ pcolor }}66); box-shadow: 0 0 10px {{ pcolor }}44"></div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm font-semibold text-white" style="line-height:1.6">{{ planet.name_ka }}</div>
+                    <div class="text-xs text-gray-500" style="line-height:1.6">{{ planet.constellation }}</div>
+                </div>
+                <div class="text-right flex-shrink-0">
+                    <div class="text-sm font-mono text-gray-300">{{ planet.altitude|round(1) }}°</div>
+                    <div class="text-xs text-gray-600">mag {{ planet.magnitude }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Telescope Recommendation — also visible during twilight -->
+    <div class="glass-strong p-6 sm:p-8 text-center animate-in">
+        <div class="text-xs tracking-widest text-indigo-400 uppercase mb-4">რეკომენდებული ტელესკოპი</div>
+        <img src="https://astroman.ge/wp-content/uploads/2024/08/Telescope-700x700.jpg" 
+             alt="ტელესკოპი Foreseen 80mm" 
+             class="w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-4 object-contain rounded-2xl"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';"
+             loading="lazy">
+        <div class="text-4xl sm:text-5xl mb-4 animate-float inline-block" style="display:none;">🔭</div>
+        <h3 class="text-xl sm:text-2xl font-semibold text-white mb-3" style="line-height:1.6">ტელესკოპი Foreseen 80mm</h3>
+        <p class="text-sm text-gray-400 mb-6" style="line-height:1.6">80mm აპერტურა · 500mm ფოკუსი · K25+K10 ლინზები · 3.2კგ — დამწყებთათვის საუკეთესო არჩევანი</p>
+        <a href="https://astroman.ge/telescope-foreseen-80mm/" target="_blank"
+           class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-2xl text-sm sm:text-base font-medium transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/25 hover:-translate-y-0.5">
+            იხილე ტელესკოპი
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+        </a>
+    </div>
+
+    {# ══════════════════════════════════════════════════ #}
+    {# NIGHT MODE — full observation panel               #}
+    {# ══════════════════════════════════════════════════ #}
+    {% else %}
+
+    <div class="flex flex-col gap-5 lg:grid lg:grid-cols-3 lg:gap-6">
+
+        <!-- Left column -->
+        <div class="lg:col-span-2 space-y-5">
+
+            <!-- Planet Section -->
+            <div class="glass p-4 sm:p-6">
+                <div class="flex items-center justify-between mb-5">
+                    <h2 class="text-base sm:text-lg text-gray-100 font-medium section-header">🪐 ხილული პლანეტები</h2>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-600 font-mono bg-white/5 px-2.5 py-1 rounded-full">{{ visible_planets|length }}/7</span>
+                        <span class="text-xs text-gray-700 font-mono bg-white/5 px-2.5 py-1 rounded-full" title="შეუიარაღებელი თვალით ხილული">👁 {{ visible_planets | selectattr('visibility_type', 'eq', 'naked_eye') | list | length }}</span>
+                    </div>
+                </div>
+
+                {% if visible_planets %}
+
+                <!-- Mobile: card layout -->
+                <div class="block lg:hidden space-y-3 stagger">
+                    {% for planet in visible_planets %}
+                    {% if planet.name == 'Mercury' %}{% set orb = 'orb-mercury' %}
+                    {% elif planet.name == 'Venus' %}{% set orb = 'orb-venus' %}
+                    {% elif planet.name == 'Mars' %}{% set orb = 'orb-mars' %}
+                    {% elif planet.name == 'Jupiter' %}{% set orb = 'orb-jupiter' %}
+                    {% elif planet.name == 'Saturn' %}{% set orb = 'orb-saturn' %}
+                    {% elif planet.name == 'Uranus' %}{% set orb = 'orb-uranus' %}
+                    {% elif planet.name == 'Neptune' %}{% set orb = 'orb-neptune' %}
+                    {% else %}{% set orb = 'orb-mercury' %}{% endif %}
+                    <div class="glass-card p-4">
+                        <div class="planet-card-toggle flex items-center justify-between" onclick="togglePlanet(this)">
+                            <div class="flex items-center gap-3">
+                                <div class="planet-orb {{ orb }}"></div>
+                                {% if planet == best_planet %}<span class="text-yellow-400 text-sm">⭐</span>{% endif %}
+                                <span class="text-sm font-semibold text-white">{{ planet.name_ka }}</span>
+                                <span class="text-xs text-gray-600">({{ planet.name }})</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                {% if planet == best_planet %}
+                                <span class="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30">საუკეთესო</span>
+                                {% elif planet.visibility_type == 'binoculars' %}
+                                <span class="text-[10px] bg-yellow-500/10 text-yellow-600 px-2 py-0.5 rounded-full border border-yellow-500/20">🔭 ბინოკლი</span>
+                                {% elif planet.visibility_type == 'telescope' %}
+                                <span class="text-[10px] bg-gray-500/10 text-gray-500 px-2 py-0.5 rounded-full border border-gray-500/20">🔭 ტელ.</span>
+                                {% endif %}
+                                <svg class="expand-chevron w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <!-- Collapsed summary -->
+                        <div class="flex gap-4 mt-2 text-xs text-gray-500">
+                            <span class="font-mono text-gray-400">{{ planet.altitude|round(1) }}°</span>
+                            <span class="font-mono text-gray-500">mag {{ planet.magnitude }}</span>
+                            <span class="text-gray-600">{{ planet.azimuth | azimuth_direction }}</span>
+                        </div>
+                        <!-- Expandable detail -->
+                        <div class="planet-detail">
+                            <div class="mt-3 pt-3 border-t border-white/5 grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
+                                <div>
+                                    <span class="text-gray-600 text-xs">სიმაღლე</span>
+                                    <div class="text-white font-mono">{{ planet.altitude|round(1) }}°</div>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600 text-xs">სიკაშკაშე</span>
+                                    <div class="text-white font-mono">{{ planet.magnitude }} <span class="text-gray-600 text-xs">mag</span></div>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600 text-xs">მიმართულება</span>
+                                    <div class="text-gray-300">{{ planet.azimuth | azimuth_direction }}</div>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600 text-xs">თანავარსკვლავედი</span>
+                                    <div class="text-gray-300">{{ planet.constellation }}</div>
+                                </div>
+                                <div class="col-span-2">
+                                    <span class="text-gray-600 text-xs">სიმაღლის ბარი</span>
+                                    <div class="mt-1.5 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                                        <div class="h-full rounded-full" style="width:{{ [planet.altitude/90*100,100]|min }}%; background: var(--c-{{ planet.name|lower }}, #818cf8)"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Desktop: table layout -->
+                <div class="hidden lg:block">
+                    <p class="text-xs text-gray-700 mb-3">სიკაშკაშე: რაც დაბალია (უარყოფითი) — მით კაშკაშაა. 👁 = შეუიარაღებელი თვალი, 🔭 = ბინოკლი/ტელესკოპი</p>
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-white/5">
+                                <th class="pb-3 text-left text-xs text-indigo-400 uppercase tracking-wider font-medium">პლანეტა</th>
+                                <th class="pb-3 text-left text-xs text-indigo-400 uppercase tracking-wider font-medium">სიმაღლე</th>
+                                <th class="pb-3 text-left text-xs text-indigo-400 uppercase tracking-wider font-medium">სიკაშკაშე</th>
+                                <th class="pb-3 text-left text-xs text-indigo-400 uppercase tracking-wider font-medium">მიმართულება</th>
+                                <th class="pb-3 text-left text-xs text-indigo-400 uppercase tracking-wider font-medium">თანავარსკვლავედი</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for planet in visible_planets %}
+                            <tr class="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
+                                <td class="py-3 pr-4">
+                                    <div class="flex items-center gap-2">
+                                        {% if planet == best_planet %}<span class="text-yellow-400">⭐</span>{% endif %}
+                                        <span class="text-white font-medium" style="line-height:1.6">{{ planet.name_ka }}</span>
+                                        <span class="text-xs text-gray-600">{{ planet.name }}</span>
+                                        {% if planet.visibility_type == 'binoculars' %}<span class="text-[10px] text-yellow-600" title="ბინოკლი">🔭</span>
+                                        {% elif planet.visibility_type == 'telescope' %}<span class="text-[10px] text-gray-500" title="ტელესკოპი">🔭</span>
+                                        {% else %}<span class="text-[10px] text-gray-500" title="შეუიარაღებელი თვალი">👁</span>{% endif %}
+                                    </div>
+                                </td>
+                                <td class="py-3 font-mono text-sm text-gray-300">{{ planet.altitude|round(1) }}°</td>
+                                <td class="py-3 font-mono text-sm text-gray-300">{{ planet.magnitude }}</td>
+                                <td class="py-3 text-sm text-gray-400">{{ planet.azimuth | azimuth_direction }}</td>
+                                <td class="py-3 text-sm text-gray-400" style="line-height:1.6">{{ planet.constellation }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% else %}
+                <div class="py-10 text-center text-gray-600">
+                    <div class="text-4xl mb-3 opacity-30">🌫</div>
+                    <p class="text-sm">ამ მომენტში პლანეტები არ ჩანს</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Altitude Bars -->
+            {% if visible_planets %}
+            <div class="glass p-4 sm:p-6">
+                <h2 class="text-base sm:text-lg text-gray-100 font-medium section-header mb-1">📡 სიმაღლე ჰორიზონტიდან</h2>
+                <p class="text-xs text-gray-700 mb-5 pl-3">0° — 90° (ზენიტი)</p>
+                <div class="space-y-3">
+                    {% for planet in visible_planets %}
+                    {% if planet.name == 'Mercury' %}{% set pcolor = '#9ca3af' %}
+                    {% elif planet.name == 'Venus' %}{% set pcolor = '#fbbf24' %}
+                    {% elif planet.name == 'Mars' %}{% set pcolor = '#ef4444' %}
+                    {% elif planet.name == 'Jupiter' %}{% set pcolor = '#f97316' %}
+                    {% elif planet.name == 'Saturn' %}{% set pcolor = '#eab308' %}
+                    {% elif planet.name == 'Uranus' %}{% set pcolor = '#22d3ee' %}
+                    {% elif planet.name == 'Neptune' %}{% set pcolor = '#3b82f6' %}
+                    {% else %}{% set pcolor = '#818cf8' %}{% endif %}
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <span class="text-gray-300" style="line-height:1.6">{{ planet.name_ka }}</span>
+                            <span class="font-mono text-gray-400">{{ planet.altitude|round(1) }}°</span>
+                        </div>
+                        <div class="h-2 bg-gray-800/60 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full transition-all duration-700"
+                                 style="width: {{ [planet.altitude / 90 * 100, 100]|min|round }}%; background: linear-gradient(90deg, {{ pcolor }}55, {{ pcolor }})"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Observation Guide — collapsible, first 7 meaningful lines -->
+            <details class="glass p-4 sm:p-6" style="border-radius:1rem;">
+                <summary class="text-sm text-gray-100 font-medium section-header cursor-pointer list-none flex items-center justify-between">
+                    <span>💡 დაკვირვების გზამკვლევი</span>
+                    <svg class="w-4 h-4 text-gray-500 transition-transform details-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </summary>
+                <div class="space-y-2 text-sm mt-3" style="line-height:1.7">
+                    {% set ns = namespace(count=0) %}
+                    {% for line in observation.observation_text.split('\n') %}
+                        {% if ns.count < 7 %}
+                            {% set stripped = line.strip() %}
+                            {% if stripped and not stripped.startswith('═') and not stripped.startswith('─') and not stripped.startswith('📊') %}
+                                {% if stripped.startswith('⭐') or stripped.startswith('🪐') or stripped.startswith('🌙') or stripped.startswith('💡') %}
+                                    <p class="text-indigo-300 font-medium text-xs">{{ stripped }}</p>
+                                    {% set ns.count = ns.count + 1 %}
+                                {% elif stripped.startswith('⚠️') %}
+                                    <p class="text-yellow-500/70 text-xs">{{ stripped }}</p>
+                                    {% set ns.count = ns.count + 1 %}
+                                {% elif stripped.startswith('📍') or stripped.startswith('🔍') %}
+                                    <p class="text-gray-400 text-xs">{{ stripped }}</p>
+                                    {% set ns.count = ns.count + 1 %}
+                                {% elif stripped %}
+                                    <p class="text-gray-500 text-xs">{{ stripped }}</p>
+                                    {% set ns.count = ns.count + 1 %}
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </details>
+        </div>
+
+        <!-- Right Column -->
+        <div class="space-y-5">
+
+            <!-- Telescope Recommendation -->
+            <div class="glass-strong p-6 sm:p-8 text-center">
+                <div class="text-xs tracking-widest text-indigo-400 uppercase mb-4">რეკომენდებული ტელესკოპი</div>
+                <img src="https://astroman.ge/wp-content/uploads/2024/08/Telescope-700x700.jpg" 
+                     alt="ტელესკოპი Foreseen 80mm" 
+                     class="w-28 h-28 sm:w-36 sm:h-36 mx-auto mb-4 object-contain rounded-2xl"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='block';"
+                     loading="lazy">
+                <div class="text-4xl sm:text-5xl mb-4 animate-float inline-block" style="display:none;">🔭</div>
+                <h3 class="text-xl sm:text-2xl font-semibold text-white mb-3" style="line-height:1.6">ტელესკოპი Foreseen 80mm</h3>
+                <p class="text-sm text-gray-400 mb-6" style="line-height:1.6">80mm აპერტურა · 500mm ფოკუსი · K25+K10 ლინზები — ❤️ 856₾</p>
+                <a href="https://astroman.ge/telescope-foreseen-80mm/" target="_blank"
+                   class="w-full inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 sm:py-4 rounded-2xl text-sm font-medium transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/25 hover:-translate-y-0.5">
+                    იხილე ტელესკოპი
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Moon Phase -->
+            <div class="glass p-5 sm:p-6 text-center">
+                <div class="text-xs tracking-widest text-indigo-400 uppercase mb-4 section-header">მთვარის ფაზა</div>
+                <div class="mb-4">
+                    <span class="moon-emoji">
+                        {% if observation.moon_illumination < 5 %}🌑
+                        {% elif observation.moon_illumination < 25 %}🌒
+                        {% elif observation.moon_illumination < 50 %}🌓
+                        {% elif observation.moon_illumination < 75 %}🌔
+                        {% elif observation.moon_illumination < 95 %}🌖
+                        {% else %}🌕{% endif %}
+                    </span>
+                </div>
+                <h3 class="text-base text-white font-medium mb-1" style="line-height:1.6">{{ observation.moon_phase }}</h3>
+                <div class="text-sm text-gray-500 mb-3">{{ observation.moon_illumination|round(0)|int }}% განათებული</div>
+                <div class="h-2 bg-gray-800/60 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full"
+                         style="width: {{ observation.moon_illumination }}%; background: linear-gradient(90deg, #4338ca, #a78bfa, #fbbf24)"></div>
+                </div>
+            </div>
+
+            <!-- Observation Quality -->
+            <div class="glass p-5 sm:p-6">
+                <div class="text-xs tracking-widest text-indigo-400 uppercase mb-4 section-header">დაკვირვების ხარისხი</div>
+                {% set q = (100 - observation.cloud_coverage) %}
+                {% if observation.moon_illumination > 60 %}{% set q = q - 15 %}{% endif %}
+                {% if q < 0 %}{% set q = 0 %}{% endif %}
+
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="relative w-16 h-16 flex-shrink-0">
+                        <svg class="w-16 h-16 -rotate-90 {% if q >= 70 %}ring-excellent{% elif q >= 40 %}ring-good{% elif q >= 20 %}ring-moderate{% else %}ring-poor{% endif %}" viewBox="0 0 64 64">
+                            <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7"/>
+                            <circle cx="32" cy="32" r="26" fill="none"
+                                stroke="{% if q >= 70 %}#22c55e{% elif q >= 40 %}#eab308{% elif q >= 20 %}#f97316{% else %}#ef4444{% endif %}"
+                                stroke-width="7" stroke-linecap="round"
+                                stroke-dasharray="{{ q * 1.634 }} 163.4"/>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center text-xs font-mono text-white font-semibold">{{ q }}%</div>
+                    </div>
+                    <div class="min-w-0">
+                        {% if q >= 70 %}
+                        <div class="text-green-400 font-semibold">შესანიშნავი</div>
+                        <div class="text-xs text-gray-500 mt-0.5" style="line-height:1.6">წმინდა ცა — იდეალური</div>
+                        {% elif q >= 40 %}
+                        <div class="text-yellow-400 font-semibold">კარგი</div>
+                        <div class="text-xs text-gray-500 mt-0.5" style="line-height:1.6">ნაწილობრივ ღრუბლიანი</div>
+                        {% elif q >= 20 %}
+                        <div class="text-orange-400 font-semibold">საშუალო</div>
+                        <div class="text-xs text-gray-500 mt-0.5" style="line-height:1.6">შეზღუდული ხილვადობა</div>
+                        {% else %}
+                        <div class="text-red-400 font-semibold">ცუდი</div>
+                        <div class="text-xs text-gray-500 mt-0.5" style="line-height:1.6">ძლიერი ღრუბლიანობა</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>☁ ღრუბლიანობა</span>
+                            <span class="font-mono">{{ observation.cloud_coverage }}%</span>
+                        </div>
+                        <div class="h-1.5 bg-gray-800/60 rounded-full overflow-hidden">
+                            <div class="h-full bg-blue-500/60 rounded-full" style="width: {{ observation.cloud_coverage }}%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>🌙 მთვარე</span>
+                            <span class="font-mono">{{ observation.moon_illumination|round(0)|int }}%</span>
+                        </div>
+                        <div class="h-1.5 bg-gray-800/60 rounded-full overflow-hidden">
+                            <div class="h-full bg-yellow-500/60 rounded-full" style="width: {{ observation.moon_illumination }}%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>💨 ქარი</span>
+                            <span class="font-mono">{{ observation.wind_speed }} m/s</span>
+                        </div>
+                        <div class="h-1.5 bg-gray-800/60 rounded-full overflow-hidden">
+                            <div class="h-full bg-emerald-500/60 rounded-full" style="width: {{ [observation.wind_speed * 10, 100]|min }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loyalty Club CTA -->
+            <div class="glass-card p-5 sm:p-6 text-center">
+                <!-- Star badge SVG -->
+                <div class="flex justify-center mb-2">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="20" cy="20" r="19" fill="rgba(234,179,8,0.1)" stroke="rgba(234,179,8,0.3)" stroke-width="1"/>
+                        <path d="M20 8 L22.5 16H31L24.2 21L26.7 29L20 24L13.3 29L15.8 21L9 16H17.5Z" fill="rgba(234,179,8,0.85)" stroke="rgba(234,179,8,0.4)" stroke-width="0.5" stroke-linejoin="round"/>
+                        <circle cx="20" cy="20" r="3" fill="rgba(255,255,255,0.15)"/>
+                    </svg>
+                </div>
+                <div class="text-sm text-gray-200 font-medium mb-1" style="line-height:1.6">ASTROMAN ლოიალობის კლუბი</div>
+                <div class="text-xs text-gray-500 mb-3" style="line-height:1.6">
+                    დააგროვე ქულები, მიიღე ფასდაკლება ტელესკოპებზე და აქსესუარებზე
+                </div>
+                <div class="flex justify-center gap-3 mb-4">
+                    <div class="glass px-3 py-2 rounded-xl text-center">
+                        <div class="text-xs text-yellow-400 font-mono font-bold">5 ქულა</div>
+                        <div class="text-[10px] text-gray-600">1₾-ზე</div>
+                    </div>
+                    <div class="glass px-3 py-2 rounded-xl text-center">
+                        <div class="text-xs text-yellow-400 font-mono font-bold">10%</div>
+                        <div class="text-[10px] text-gray-600">ფასდაკლება</div>
+                    </div>
+                    <div class="glass px-3 py-2 rounded-xl text-center">
+                        <div class="text-xs text-yellow-400 font-mono font-bold">VIP</div>
+                        <div class="text-[10px] text-gray-600">20% off</div>
+                    </div>
+                </div>
+                <a href="https://club.astroman.ge" target="_blank"
+                   class="w-full inline-flex items-center justify-center gap-2 bg-yellow-500/15 hover:bg-yellow-500/25 text-yellow-400 px-5 py-3 rounded-xl text-sm font-medium transition-all border border-yellow-500/20 hover:border-yellow-500/40 min-h-[44px]">
+                    შემოუერთდი კლუბს
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                    </svg>
+                </a>
+            </div>
+
+        </div>
+    </div>
+    {% endif %}
+
+    {# ── ASTROMAN Astronomy Chatbot ── #}
+    <div class="animate-in" style="background:rgba(6,6,18,0.98);border:1px solid rgba(129,140,248,0.15);border-radius:1.25rem;overflow:hidden;">
+        <!-- Minimal header -->
+        <div class="flex items-center justify-between px-4 pt-3 pb-2.5" style="border-bottom:1px solid rgba(255,255,255,0.04);">
+            <div class="flex items-center gap-2">
+                <!-- Crosshair/scope icon -->
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(129,140,248,0.7)" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="8"/>
+                    <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
+                    <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
+                    <circle cx="12" cy="12" r="2" fill="rgba(129,140,248,0.5)" stroke="none"/>
+                </svg>
+                <span style="font-size:11px;color:rgba(165,180,252,0.6);letter-spacing:0.08em;">ასტრო-ასისტენტი</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <div style="width:5px;height:5px;border-radius:50%;background:#22c55e;box-shadow:0 0 5px #22c55e;"></div>
+                <span style="font-size:9px;color:rgba(100,200,100,0.5);">ონლაინ</span>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div id="chat-messages" style="height:260px;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth;">
+            <!-- Welcome message -->
+            <div style="display:flex;gap:7px;align-items:flex-start;">
+                <div style="width:20px;height:20px;border-radius:50%;background:rgba(99,102,241,0.2);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.8)" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="2" fill="rgba(129,140,248,0.5)" stroke="none"/></svg>
+                </div>
+                <div style="background:rgba(99,102,241,0.08);border:1px solid rgba(129,140,248,0.12);border-radius:0 10px 10px 10px;padding:7px 11px;max-width:90%;">
+                    <p style="font-size:12px;color:rgba(200,210,255,0.75);line-height:1.6;margin:0;">გამარჯობა — დამიბარე კითხვებით ტელესკოპებზე, პლანეტებზე ან ღრმა ცაზე.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Suggested questions -->
+        <div id="chat-suggestions" style="padding:0 12px 8px;display:flex;flex-wrap:wrap;gap:5px;">
+            <button onclick="askSuggestion('რომელი ტელესკოპი გამოდგება დამწყებისთვის?')" style="font-size:10px;padding:4px 10px;border-radius:20px;background:rgba(99,102,241,0.08);border:1px solid rgba(129,140,248,0.15);color:rgba(165,180,252,0.65);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(129,140,248,0.35)';this.style.color='rgba(165,180,252,0.9)'" onmouseout="this.style.borderColor='rgba(129,140,248,0.15)';this.style.color='rgba(165,180,252,0.65)'">დამწყებთათვის ტელესკოპი</button>
+            <button onclick="askSuggestion('როგორ ჩანს სატურნი 70mm ტელესკოპში?')" style="font-size:10px;padding:4px 10px;border-radius:20px;background:rgba(99,102,241,0.08);border:1px solid rgba(129,140,248,0.15);color:rgba(165,180,252,0.65);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(129,140,248,0.35)';this.style.color='rgba(165,180,252,0.9)'" onmouseout="this.style.borderColor='rgba(129,140,248,0.15)';this.style.color='rgba(165,180,252,0.65)'">სატურნი ტელესკოპში</button>
+            <button onclick="askSuggestion('რა განსხვავებაა რეფრაქტორსა და რეფლექტორს შორის?')" style="font-size:10px;padding:4px 10px;border-radius:20px;background:rgba(99,102,241,0.08);border:1px solid rgba(129,140,248,0.15);color:rgba(165,180,252,0.65);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(129,140,248,0.35)';this.style.color='rgba(165,180,252,0.9)'" onmouseout="this.style.borderColor='rgba(129,140,248,0.15)';this.style.color='rgba(165,180,252,0.65)'">რეფრაქტორი vs რეფლექტორი</button>
+        </div>
+
+        <!-- Input -->
+        <div style="padding:8px 10px;border-top:1px solid rgba(255,255,255,0.04);display:flex;gap:7px;align-items:flex-end;">
+            <textarea id="chat-input" placeholder="დამისვი კითხვა ასტრონომიაზე..." rows="1"
+                style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(129,140,248,0.15);border-radius:10px;padding:8px 11px;font-size:12px;color:#c7d2fe;resize:none;outline:none;font-family:inherit;line-height:1.5;max-height:80px;"
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"
+                oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';"
+                onfocus="this.style.borderColor='rgba(129,140,248,0.35)'"
+                onblur="this.style.borderColor='rgba(129,140,248,0.15)'"></textarea>
+            <button onclick="sendChat()" id="chat-send-btn"
+                style="width:34px;height:34px;border-radius:9px;background:rgba(99,102,241,0.3);border:1px solid rgba(129,140,248,0.3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;"
+                title="გაგზავნა"
+                onmouseover="this.style.background='rgba(99,102,241,0.5)'"
+                onmouseout="this.style.background='rgba(99,102,241,0.3)'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    {# ── NASA APOD — Astronomy Picture of the Day ── #}
+    <div id="apod-section" class="mt-2 animate-in" style="display:none;">
+        <div style="border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.09);background:rgba(255,255,255,0.04);">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-5 pt-4 pb-2">
+                <div>
+                    <div class="text-[10px] tracking-widest uppercase text-indigo-400 mb-0.5">NASA · Astronomy Picture of the Day</div>
+                    <div class="text-sm font-semibold text-white" id="apod-title">იტვირთება…</div>
+                </div>
+                <div class="text-2xl flex-shrink-0 ml-4">📡</div>
+            </div>
+            <!-- Image -->
+            <div id="apod-img-wrap" style="position:relative;height:220px;overflow:hidden;background:#03050d;">
+                <img id="apod-img" src="" alt="NASA APOD"
+                     style="width:100%;height:100%;object-fit:cover;display:none;animation:apodFadeIn .8s ease;"
+                     onerror="document.getElementById('apod-section').style.display='none';" />
+                <div id="apod-img-err" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:radial-gradient(ellipse,#1a0a2e,#03050d);">
+                    <span style="font-size:48px;">🌌</span>
+                    <span style="font-size:12px;color:rgba(255,255,255,0.4);">სურათი ვერ ჩაიტვირთა</span>
+                </div>
+                <div id="apod-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#03050d;">
+                    <div style="width:32px;height:32px;border:2px solid rgba(99,102,241,0.2);border-top-color:#818cf8;border-radius:50%;animation:apodSpin 1s linear infinite;"></div>
+                </div>
+            </div>
+            <!-- Caption -->
+            <div class="px-5 py-4">
+                <p id="apod-desc" class="text-xs text-gray-500 mb-3" style="line-height:1.7;"></p>
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                    <span id="apod-date" class="text-[10px] text-gray-700 font-mono"></span>
+                    <a id="apod-link" href="#" target="_blank" rel="noopener"
+                       style="display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:100px;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.3);color:#a5b4fc;font-size:12px;text-decoration:none;">
+                        ↗ NASA-ზე სრული სურათი
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ── Planets Explorer Section ── #}
+    <div class="mt-6 section-anchor" id="planets-explorer" style="scroll-margin-top:70px;">
+        <div class="mb-4 px-1">
+            <h2 style="font-size:clamp(16px,4vw,21px);font-weight:600;background:linear-gradient(135deg,#e0e7ff 0%,#a5b4fc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;" data-i18n="planets.explorer.title">პლანეტები ტელესკოპიდან</h2>
+        </div>
+        <div class="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3">
+            {% set planet_cards = [
+                ('moon',    'მთვარე',   '#f0e68c'),
+                ('venus',   'ვენერა',   '#fbbf24'),
+                ('mars',    'მარსი',    '#f87171'),
+                ('jupiter', 'იუპიტერი', '#fb923c'),
+                ('saturn',  'სატურნი',  '#eab308'),
+                ('uranus',  'ურანი',    '#22d3ee'),
+                ('neptune', 'ნეპტუნი',  '#60a5fa'),
+            ] %}
+            {% for slug, name_ka, color in planet_cards %}
+            <button onclick="openPlanetModal('{{ slug }}')"
+               class="glass-card p-3 text-center group hover:scale-105 transition-all duration-200 cursor-pointer">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-2 rounded-full overflow-hidden"
+                     style="box-shadow: 0 0 20px {{ color }}40;">
+                    <img src="/static/planets/{{ slug }}.png" alt="{{ name_ka }}"
+                         class="w-full h-full object-cover rounded-full"
+                         style="filter: brightness(1.05);">
+                </div>
+                <div class="text-[10px] text-gray-500 group-hover:text-white transition-colors" style="line-height:1.6">{{ name_ka }}</div>
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+
+    <style>
+    details[open] .details-chevron{transform:rotate(180deg);}
+    @keyframes apodFadeIn{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:scale(1)}}
+    @keyframes apodSpin{to{transform:rotate(360deg)}}
+    </style>
+
+    <!-- Planet Modal Overlay -->
+    <div id="planet-modal" class="fixed inset-0 z-[70] hidden" role="dialog" aria-modal="true">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/75 backdrop-blur-sm" onclick="closePlanetModal()"></div>
+        <!-- Sheet — slides up from bottom on mobile, centered on desktop -->
+        <div id="planet-modal-sheet"
+             class="absolute bottom-0 left-0 right-0 sm:inset-0 sm:flex sm:items-center sm:justify-center sm:p-6 pointer-events-none">
+            <div class="pointer-events-auto w-full sm:max-w-2xl max-h-[92vh] sm:max-h-[88vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl"
+                 style="background: rgba(8,8,22,0.97); border: 1px solid rgba(255,255,255,0.1); border-top-color: rgba(255,255,255,0.15);">
+
+                <!-- Drag handle (mobile) -->
+                <div class="flex justify-center pt-3 pb-1 sm:hidden">
+                    <div class="w-10 h-1 rounded-full bg-white/20"></div>
+                </div>
+
+                <!-- Modal content (filled by JS) -->
+                <div id="planet-modal-content" class="p-5 sm:p-6"></div>
+            </div>
+        </div>
+    </div>
+
+    {# ── Sky Map — always visible in all modes ── #}
+    {% include "skymap_widget.html" %}
+
 </div>
-
-{# ── Sky Map ── #}
-{% include "skymap_widget.html" %}
-
-</div><!-- /space-y-5 -->
 {% endblock %}
 
 {% block scripts %}
-<script>
-  // ── Live clock ──
-  function updateClock() {
-    const t = new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tbilisi',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date());
-    const el=document.getElementById('tbilisi-clock'); if(el) el.textContent=t;
-    const em=document.getElementById('tbilisi-clock-mobile'); if(em) em.textContent=t;
-  }
-  updateClock(); setInterval(updateClock,1000);
 
-  // ── Sunset countdown ──
-  function updateSunsetCountdown() {
-    const el=document.getElementById('sunset-countdown'); if(!el) return;
-    const s="{{ observation.sunset_time }}"; if(!s||s==='N/A'){el.textContent='--:--';return;}
-    const now=new Date(),parts=s.split(':').map(Number),sunset=new Date(now);
-    sunset.setHours(parts[0],parts[1],0,0);
-    const diff=sunset-now;
-    if(diff>0){
-      const h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),sc=Math.floor((diff%60000)/1000);
-      el.textContent=h>0?`${h} სთ ${m} წთ`:`${m} წთ ${sc} წმ`;
-    } else { el.textContent='მზე ჩავიდა!'; }
-  }
-  updateSunsetCountdown(); setInterval(updateSunsetCountdown,1000);
-
-  // ── Planet card expand ──
-  function togglePlanet(header) {
-    const card=header.closest('.glass-card');
-    const detail=card.querySelector('.planet-detail');
-    const chevron=header.querySelector('.expand-chevron');
-    if(!detail) return;
-    const isOpen=detail.classList.contains('open');
-    detail.classList.toggle('open',!isOpen);
-    chevron&&chevron.classList.toggle('open',!isOpen);
-  }
-
-  // ─────────────────────────────────────────────
-  // Planet Modal
-  // ─────────────────────────────────────────────
-  const PLANETS={
-    moon:{emoji:'🌕',name:'მთვარე',nameEn:'Moon',color:'#e0d9a0',type:'სატელიტი',dist:'~384,400 კმ',desc:'ყველაზე ადვილი სამიზნე — კრატერები, მთები და ზღვები (მარია) ნათლად ჩანს.',views:[{mag:'80x–120x',label:'70mm ტელესკოპი — რეალური ხედი',desc:'კრატერების კიდეები, მთის ჯაჭვები ნათლად ჩანს. ასეთი სურათი გელოდებათ Foreseen 80mm-ით.'}]},
-    venus:{emoji:'🟡',name:'ვენერა',nameEn:'Venus',color:'#fbbf24',type:'კლდოვანი პლანეტა',dist:'~38–261 მლნ კმ',desc:'ყველაზე კაშკაშა პლანეტა ცაზე (mag −3.5). ფაზები ჩანს — სრული, ნახევარი ან ნამგალი.',views:[{mag:'60x–100x',label:'70mm ტელესკოპი — რეალური ხედი',desc:'კაშკაშა თეთრი ნამგალი ან ნახევარი ფაზა ნათლად ჩანს.'}]},
-    mars:{emoji:'🔴',name:'მარსი',nameEn:'Mars',color:'#f87171',type:'კლდოვანი პლანეტა',dist:'~54–401 მლნ კმ',desc:'წითელი პლანეტა. ოპოზიციის დროს პოლარული ყინვა და მუქი ზღვები ჩანს.',views:[{mag:'100x–150x',label:'70mm ტელესკოპი — რეალური ხედი',desc:'პატარა ნარინჯისფერ-წითელი დისკი.'}]},
-    jupiter:{emoji:'🟠',name:'იუპიტერი',nameEn:'Jupiter',color:'#fb923c',type:'გაზის გიგანტი',dist:'~588–968 მლნ კმ',desc:'4 გალილეური თანამგზავრი 40x-ზე ჩანს. დიდი წითელი ლაქა — 400 წლის ჭექა-ქუხილი.',views:[{mag:'80x–120x',label:'70mm ტელესკოპი — რეალური ხედი',desc:'2–4 ღრუბლოვანი ზოლი, 4 გალილეური თანამგზავრი — Foreseen 80mm-ით ეს ყველაფერი ჩანს.'}]},
-    saturn:{emoji:'🪐',name:'სატურნი',nameEn:'Saturn',color:'#eab308',type:'გაზის გიგანტი',dist:'~1.2–1.7 მლრდ კმ',desc:'ყველაზე შთამბეჭდავი ხედი ტელესკოპში! რგოლები 50x-ზე მკაფიოდ ჩანს.',views:[{mag:'80x–120x',label:'70mm ტელესკოპი — რეალური ხედი',desc:'რგოლები ნათლად ჩანს — ყველაზე გასაოცარი სანახაობა ამ ზომის ტელესკოპში.'}]},
-    uranus:{emoji:'🔵',name:'ურანი',nameEn:'Uranus',color:'#22d3ee',type:'ყინულის გიგანტი',dist:'~2.6–3.2 მლრდ კმ',desc:'მეთანის ატმოსფეროს გამო ცისფერ-მწვანე ფერი. ტელესკოპით პატარა მოცისფრო დისკი ჩანს.',views:[{mag:'100x–150x',label:'70mm ტელესკოპი — რეალური ხედი',desc:'ცისფერ-მწვანე წერტილი — ვარსკვლავისგან ფერი განარჩევს.'}]},
-    neptune:{emoji:'💙',name:'ნეპტუნი',nameEn:'Neptune',color:'#60a5fa',type:'ყინულის გიგანტი',dist:'~4.3–4.7 მლრდ კმ',desc:'ყველაზე შორეული პლანეტა. mag 7.8 — 70mm+-ით ცისფერი წერტილი ჩანს.',views:[{mag:'100x–150x',label:'70mm ტელესკოპი — რეალური ხედი',desc:'ძლივს შესამჩნევი ცისფერი წერტილი — ვარსკვლავებისგან ფერი განარჩევს.'}]},
-  };
-
-  function openPlanetModal(slug){
-    const p=PLANETS[slug]; if(!p) return;
-    const content=document.getElementById('planet-modal-content');
-    content.style.position='relative';
-    content.innerHTML=`
-      <button onclick="closePlanetModal()" style="position:absolute;top:0;right:0;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);cursor:pointer;color:rgba(165,180,252,0.70);font-size:16px;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">✕</button>
-      <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
-        <div style="width:56px;height:56px;border-radius:50%;overflow:hidden;flex-shrink:0;box-shadow:0 0 22px ${p.color}55;">
-          <img src="/static/planets/${slug}.png" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=\\'font-size:2.2rem;\\' >${p.emoji}</span>';this.parentElement.style.display='flex';this.parentElement.style.alignItems='center';this.parentElement.style.justifyContent='center';">
-        </div>
-        <div>
-          <div style="font-size:9.5px;text-transform:uppercase;letter-spacing:0.22em;color:${p.color}99;margin-bottom:4px;">${p.type}</div>
-          <div style="font-size:20px;font-weight:700;color:#f0f2ff;">${p.name}</div>
-          <div style="font-size:11px;color:rgba(165,180,252,0.48);">${p.nameEn} · ${p.dist}</div>
-        </div>
-      </div>
-      <p style="font-size:13px;color:rgba(180,190,230,0.70);margin-bottom:18px;line-height:1.70;">${p.desc}</p>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-        <div style="flex:1;height:1px;background:rgba(255,255,255,0.05);"></div>
-        <span style="font-size:10px;color:rgba(165,180,252,0.38);text-transform:uppercase;letter-spacing:0.18em;">ტელესკოპის ხედები</span>
-        <div style="flex:1;height:1px;background:rgba(255,255,255,0.05);"></div>
-      </div>
-      <div style="border-radius:18px;overflow:hidden;border:1px solid ${p.color}28;background:#020509;margin-bottom:18px;">
-        <div style="position:relative;display:flex;align-items:center;justify-content:center;height:200px;background:radial-gradient(ellipse at center,${p.color}18,#020509 72%);">
-          <img src="/static/planets/${slug}.png" alt="${p.name}" style="max-height:188px;max-width:100%;object-fit:contain;filter:drop-shadow(0 0 26px ${p.color}70);" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-          <div style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;font-size:5rem;filter:drop-shadow(0 0 30px ${p.color}66);">${p.emoji}</div>
-        </div>
-        <div style="padding:14px 16px;border-top:1px solid ${p.color}15;">
-          <div style="margin-bottom:6px;">
-            <span style="background:rgba(0,0,0,0.5);border:1px solid ${p.color}44;color:${p.color};font-size:10px;font-family:'JetBrains Mono',monospace;padding:3px 10px;border-radius:100px;">🔭 70mm · ${p.views[0].mag}</span>
-          </div>
-          <div style="font-size:13.5px;font-weight:600;color:#f0f2ff;margin-bottom:5px;">${p.views[0].label}</div>
-          <div style="font-size:12px;color:rgba(165,180,252,0.55);line-height:1.65;">${p.views[0].desc}</div>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;">
-        ${['გადიდება:'+p.views[0].mag,'აპერტურა:70mm+','სირთულე:საშუალო'].map(s=>{const[k,v]=s.split(':');return`<div class="glass" style="text-align:center;padding:10px;border-radius:14px;"><div style="font-size:10px;color:rgba(165,180,252,0.45);margin-bottom:4px;">${k}</div><div style="font-size:11.5px;font-family:'JetBrains Mono',monospace;color:#e0e7ff;">${v}</div></div>`;}).join('')}
-      </div>
-      <a href="https://astroman.ge/telescope-foreseen-80mm/" target="_blank" class="btn btn-full" style="background:${p.color}18;border:1px solid ${p.color}35;color:${p.color};border-radius:14px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;font-size:13.5px;font-weight:600;text-decoration:none;transition:all .22s;" onmouseover="this.style.background='${p.color}28'" onmouseout="this.style.background='${p.color}18'">
-        🔭 შეიძინე Foreseen 80mm — ${p.name}ს სანახავად →
-      </a>`;
-
-    const modal=document.getElementById('planet-modal');
-    modal.classList.remove('hidden');
-    document.body.style.overflow='hidden';
-    const sheet=document.getElementById('planet-modal-sheet');
-    sheet.style.transform='translateY(100%)';
-    sheet.style.transition='none';
-    requestAnimationFrame(()=>{
-      sheet.style.transition='transform .35s cubic-bezier(0.4,0,0.2,1)';
-      sheet.style.transform='translateY(0)';
+    // Language change → update dynamic elements
+    document.addEventListener('langchange', function(e) {
+        // Update chat suggestions text
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const v = t(el.getAttribute('data-i18n'));
+            if (v) el.textContent = v;
+        });
+        // Update chat placeholder
+        const ci = document.getElementById('chat-input');
+        if (ci) { const v = t('chat.placeholder'); if(v) ci.placeholder = v; }
+        // Update countdown label if present
+        const cdl = document.getElementById('countdown-label');
+        if (cdl) { const v = t('daytime.countdown'); if(v) cdl.textContent = v; }
     });
-  }
-
-  function closePlanetModal(){
-    const sheet=document.getElementById('planet-modal-sheet');
-    sheet.style.transition='transform .30s cubic-bezier(0.4,0,0.2,1)';
-    sheet.style.transform='translateY(100%)';
-    setTimeout(()=>{
-      document.getElementById('planet-modal').classList.add('hidden');
-      document.body.style.overflow='';
-      sheet.style.transform='';
-    },300);
-  }
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')closePlanetModal();});
-
-  // ─────────────────────────────────────────────
-  // NASA APOD
-  // ─────────────────────────────────────────────
-  (async function loadAPOD(){
-    const DATES=['2024-04-24','2024-03-11','2024-01-09','2024-06-12','2023-11-01','2024-02-19','2023-09-12','2024-05-03','2023-07-12','2024-08-06','2023-10-22','2024-03-25','2023-12-14','2024-01-29','2023-08-16','2024-07-04','2024-09-10','2023-05-22','2024-10-01','2023-04-10'];
-    const idx=Math.floor(Date.now()/86400000)%DATES.length;
-    const urls=['https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY',...DATES.map((_,i)=>`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${DATES[(idx+i)%DATES.length]}`)];
-    for(const url of urls){
-      try{
-        const res=await fetch(url); if(!res.ok) continue;
-        const d=await res.json(); if(d.media_type!=='image') continue;
-        document.getElementById('apod-title').textContent=d.title||'';
-        document.getElementById('apod-desc').textContent=(d.explanation||'').slice(0,220)+'…';
-        document.getElementById('apod-date').textContent='📅 '+(d.date||'');
-        document.getElementById('apod-link').href=d.url;
-        const img=document.getElementById('apod-img');
-        img.onload=()=>{document.getElementById('apod-loading').style.display='none';img.style.display='block';};
-        img.src=d.hdurl||d.url;
-        document.getElementById('apod-section').style.display='block';
-        break;
-      }catch(_){}
+<script>
+    // Live Tbilisi clock
+    function updateClock() {
+        const now = new Date();
+        const time = new Intl.DateTimeFormat('en-GB', {
+            timeZone: 'Asia/Tbilisi',
+            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+        }).format(now);
+        const el = document.getElementById('tbilisi-clock');
+        if (el) el.textContent = time;
+        const elM = document.getElementById('tbilisi-clock-mobile');
+        if (elM) elM.textContent = time;
     }
-  })();
+    updateClock();
+    setInterval(updateClock, 1000);
 
-  // ─────────────────────────────────────────────
-  // Chatbot
-  // ─────────────────────────────────────────────
-  const chatHistory=[];
-  function appendMessage(role,text){
-    const container=document.getElementById('chat-messages');
-    const isBot=role==='assistant';
-    const div=document.createElement('div');
-    div.style.cssText='display:flex;gap:9px;align-items:flex-start;'+(isBot?'':'flex-direction:row-reverse;');
-    const avatar=document.createElement('div');
-    avatar.style.cssText='width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;'+(isBot?'background:linear-gradient(135deg,rgba(99,102,241,0.55),rgba(139,92,246,0.42));':'background:rgba(255,255,255,0.07);');
-    avatar.innerHTML=isBot?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.92)" stroke-width="2"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M9 8V6a3 3 0 016 0v2"/><circle cx="9" cy="14" r="1.5" fill="rgba(165,180,252,0.9)" stroke="none"/><circle cx="15" cy="14" r="1.5" fill="rgba(165,180,252,0.9)" stroke="none"/></svg>':'👤';
-    const bubble=document.createElement('div');
-    bubble.style.cssText='padding:9px 13px;max-width:86%;font-size:12.5px;line-height:1.65;'+(isBot?'background:rgba(99,102,241,0.09);border:1px solid rgba(129,140,248,0.14);border-radius:0 12px 12px 12px;color:rgba(215,225,255,0.82);':'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.09);border-radius:12px 0 12px 12px;color:#e2e8ff;');
-    bubble.innerHTML=text.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" style="color:#818cf8;text-decoration:underline;word-break:break-all;">$1</a>');
-    div.appendChild(avatar); div.appendChild(bubble);
-    container.appendChild(div); container.scrollTop=container.scrollHeight;
-  }
-  function showTyping(){
-    const c=document.getElementById('chat-messages'),div=document.createElement('div');
-    div.id='chat-typing'; div.style.cssText='display:flex;gap:9px;align-items:flex-start;';
-    div.innerHTML=`<div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,rgba(99,102,241,0.55),rgba(139,92,246,0.42));flex-shrink:0;display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.92)" stroke-width="2"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M9 8V6a3 3 0 016 0v2"/><circle cx="9" cy="14" r="1.5" fill="rgba(165,180,252,0.9)" stroke="none"/><circle cx="15" cy="14" r="1.5" fill="rgba(165,180,252,0.9)" stroke="none"/></svg></div>
-    <div style="background:rgba(99,102,241,0.09);border:1px solid rgba(129,140,248,0.14);border-radius:0 12px 12px 12px;padding:10px 14px;display:flex;gap:5px;align-items:center;">
-      <span style="width:6px;height:6px;border-radius:50%;background:rgba(165,180,252,0.52);animation:chatDot 1.2s ease-in-out infinite;"></span>
-      <span style="width:6px;height:6px;border-radius:50%;background:rgba(165,180,252,0.52);animation:chatDot 1.2s ease-in-out 0.2s infinite;"></span>
-      <span style="width:6px;height:6px;border-radius:50%;background:rgba(165,180,252,0.52);animation:chatDot 1.2s ease-in-out 0.4s infinite;"></span>
-    </div>`;
-    c.appendChild(div); c.scrollTop=c.scrollHeight;
-  }
-  function removeTyping(){document.getElementById('chat-typing')?.remove();}
-  async function sendChat(){
-    const input=document.getElementById('chat-input');
-    const text=input.value.trim(); if(!text) return;
-    document.getElementById('chat-suggestions').style.display='none';
-    input.value=''; input.style.height='auto'; input.disabled=true;
-    document.getElementById('chat-send-btn').style.opacity='0.4';
-    chatHistory.push({role:'user',content:text}); appendMessage('user',text); showTyping();
-    try{
-      const res=await fetch('/api/chatbot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:chatHistory})});
-      const data=await res.json(); removeTyping();
-      chatHistory.push({role:'assistant',content:data.reply}); appendMessage('assistant',data.reply);
-    }catch(_){ removeTyping(); appendMessage('assistant','⚠️ კავშირის შეცდომა. სცადე კიდევ ერთხელ.'); }
-    finally{ input.disabled=false; document.getElementById('chat-send-btn').style.opacity='1'; input.focus(); }
-  }
-  function askSuggestion(q){document.getElementById('chat-input').value=q;sendChat();}
+    // Sunset countdown (daytime mode only)
+    function updateSunsetCountdown() {
+        const el = document.getElementById('sunset-countdown');
+        if (!el) return;
+        const sunsetStr = "{{ observation.sunset_time }}";
+        if (!sunsetStr || sunsetStr === 'N/A') { el.textContent = '--:--'; return; }
+        const now = new Date();
+        const parts = sunsetStr.split(':').map(Number);
+        const sunset = new Date(now);
+        sunset.setHours(parts[0], parts[1], 0, 0);
+        const diff = sunset - now;
+        if (diff > 0) {
+            const hours = Math.floor(diff / 3600000);
+            const mins = Math.floor((diff % 3600000) / 60000);
+            const secs = Math.floor((diff % 60000) / 1000);
+            el.textContent = hours > 0
+                ? `${hours} სთ ${mins} წთ`
+                : `${mins} წთ ${secs} წმ`;
+        } else {
+            el.textContent = 'მზე ჩავიდა!';
+        }
+    }
+    updateSunsetCountdown();
+    setInterval(updateSunsetCountdown, 1000);
+
+    // Expandable planet cards
+    function togglePlanet(header) {
+        const card = header.closest('.glass-card');
+        const detail = card.querySelector('.planet-detail');
+        const chevron = header.querySelector('.expand-chevron');
+        if (!detail) return;
+        const isOpen = detail.classList.contains('open');
+        detail.classList.toggle('open', !isOpen);
+        chevron && chevron.classList.toggle('open', !isOpen);
+    }
+
+    // ─────────────────────────────────────────────
+    // Planet Modal Data + Logic
+    // ─────────────────────────────────────────────
+    const PLANETS = {
+        moon: {
+            emoji: '🌕', name: 'მთვარე', nameEn: 'Moon', color: '#f0e68c', type: 'სატელიტი',
+            dist: '~384,400 კმ დედამიწიდან',
+            desc: 'ყველაზე ადვილი სამიზნე — კრატერები, მთები და ზღვები (მარია) ნათლად ჩანს. ნახევარი ფაზა ყველაზე შთამბეჭდავია ტერმინატორის ჩრდილების გამო.',
+            views: [
+                { ap: '70mm', mag: '80x–120x', label: '70mm ტელესკოპი — რეალური ხედი', desc: 'კრატერების კიდეები, მთის ჯაჭვები, ტიხო და კოპერნიკი ნათლად ჩანს. ასეთი სურათი გელოდებათ Foreseen 80mm-ით.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Full_Moon_Luc_Viatour.jpg/400px-Full_Moon_Luc_Viatour.jpg' },
+            ]
+        },
+        venus: {
+            emoji: '🟡', name: 'ვენერა', nameEn: 'Venus', color: '#fbbf24', type: 'კლდოვანი პლანეტა',
+            dist: '~38–261 მლნ კმ დედამიწიდან',
+            desc: 'ყველაზე კაშკაშა პლანეტა ცაზე (mag −3.5 to −4.9). ფაზები ჩანს — სრული, ნახევარი ან ნამგალი. ატმოსფეროს ღრუბლები ზედაპირს მალავს.',
+            views: [
+                { ap: '70mm', mag: '60x–100x', label: '70mm ტელესკოპი — რეალური ხედი', desc: 'კაშკაშა თეთრი ნამგალი ან ნახევარი ფაზა ნათლად ჩანს. ზედაპირი ღრუბლების გამო არ ჩანს.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/PIA23791.jpg/400px-PIA23791.jpg' },
+            ]
+        },
+        mars: {
+            emoji: '🔴', name: 'მარსი', nameEn: 'Mars', color: '#f87171', type: 'კლდოვანი პლანეტა',
+            dist: '~54–401 მლნ კმ დედამიწიდან',
+            desc: 'წითელი პლანეტა — ჟანგის მტვრით დაფარული. ოპოზიციის დროს (ყოველ ~2 წელიწადში) პოლარული ყინვის ქუდი და მუქი ზღვები ჩანს.',
+            views: [
+                { ap: '70mm', mag: '100x–150x', label: '70mm ტელესკოპი — რეალური ხედი', desc: 'პატარა ნარინჯისფერ-წითელი დისკი. ოპოზიციის დროს პოლარული ყინვა და მუქი ზღვები ჩანს.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/400px-OSIRIS_Mars_true_color.jpg' },
+            ]
+        },
+        jupiter: {
+            emoji: '🟠', name: 'იუპიტერი', nameEn: 'Jupiter', color: '#fb923c', type: 'გაზის გიგანტი',
+            dist: '~588–968 მლნ კმ დედამიწიდან',
+            desc: 'მზის სისტემის უდიდესი პლანეტა. 4 გალილეური თანამგზავრი (იო, ევროპა, განიმედი, კალისტო) 40x-ზე ჩანს. დიდი წითელი ლაქა — 400 წლის ჭექა-ქუხილი.',
+            views: [
+                { ap: '70mm', mag: '80x–120x', label: '70mm ტელესკოპი — რეალური ხედი', desc: '2–4 ღრუბლოვანი ზოლი, 4 გალილეური თანამგზავრი — ეს ზუსტად ის სურათია, რასაც Foreseen 80mm გაჩვენებთ.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Jupiter_and_its_shrunken_Great_Red_Spot.jpg/400px-Jupiter_and_its_shrunken_Great_Red_Spot.jpg' },
+            ]
+        },
+        saturn: {
+            emoji: '🪐', name: 'სატურნი', nameEn: 'Saturn', color: '#eab308', type: 'გაზის გიგანტი',
+            dist: '~1.2–1.7 მლრდ კმ დედამიწიდან',
+            desc: 'ყველაზე შთამბეჭდავი ხედი ტელესკოპში! რგოლები 50x-ზე მკაფიოდ ჩანს. Foreseen 80mm-ით კასინის ხვრელი (რგოლებს შორის ბნელი ზოლი) ასევე შესამჩნევია.',
+            views: [
+                { ap: '70mm', mag: '80x–120x', label: '70mm ტელესკოპი — რეალური ხედი', desc: 'რგოლები ნათლად ჩანს — ეს ყველაზე გასაოცარი სანახაობაა ამ ზომის ტელესკოპში. კასინის ხვრელი კარგ ღამეს შესამჩნევია.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Saturn_during_Equinox.jpg/400px-Saturn_during_Equinox.jpg' },
+            ]
+        },
+        uranus: {
+            emoji: '🔵', name: 'ურანი', nameEn: 'Uranus', color: '#22d3ee', type: 'ყინულის გიგანტი',
+            dist: '~2.6–3.2 მლრდ კმ დედამიწიდან',
+            desc: 'მეთანის ატმოსფეროს გამო ცისფერ-მწვანე ფერი. ბინოკლით ხელმისაწვდომია, ტელესკოპით პატარა მოცისფრო დისკი ჩანს.',
+            views: [
+                { ap: '70mm', mag: '100x–150x', label: '70mm ტელესკოპი — რეალური ხედი', desc: 'ცისფერ-მწვანე წერტილი — ვარსკვლავისგან ფერი განარჩევს. მაღალ გადიდებაზე პატარა დისკი ჩანს.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Uranus_as_seen_by_NASA%27s_Voyager_2_%28remastered%29_-_JPEG_converted.jpg/400px-Uranus_as_seen_by_NASA%27s_Voyager_2_%28remastered%29_-_JPEG_converted.jpg' },
+            ]
+        },
+        neptune: {
+            emoji: '💙', name: 'ნეპტუნი', nameEn: 'Neptune', color: '#60a5fa', type: 'ყინულის გიგანტი',
+            dist: '~4.3–4.7 მლრდ კმ დედამიწიდან',
+            desc: 'ყველაზე შორეული პლანეტა — 1846 წელს მათემატიკური გამოთვლებით აღმოაჩინეს. mag 7.8 — ბინოკლით ხელმისაწვდომი, 70mm+-ით ცისფერი წერტილი ჩანს.',
+            views: [
+                { ap: '70mm', mag: '100x–150x', label: '70mm ტელესკოპი — რეალური ხედი', desc: 'ძლივს შესამჩნევი ცისფერი წერტილი — მაღალ გადიდებაზე ვარსკვლავებისგან ფერი განარჩევს. ვარსკვლავური რუქა სავალდებულოა.', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg/400px-Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg' },
+            ]
+        },
+    };
+
+    function openPlanetModal(slug) {
+        const p = PLANETS[slug];
+        if (!p) return;
+
+        const content = document.getElementById('planet-modal-content');
+        content.innerHTML = `
+            <!-- Close button -->
+            <button onclick="closePlanetModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/10 transition-all text-lg z-10">✕</button>
+
+            <!-- Hero row -->
+            <div class="flex items-center gap-4 mb-5">
+                <div class="w-14 h-14 rounded-full overflow-hidden flex-shrink-0" style="box-shadow:0 0 20px ${p.color}55;">
+                    <img src="/static/planets/${slug}.png" alt="${p.name}"
+                         class="w-full h-full object-cover"
+                         onerror="this.parentElement.innerHTML='<span style=\'font-size:2.5rem;filter:drop-shadow(0 0 16px ${p.color}88)\'>${p.emoji}</span>';">
+                </div>
+                <div>
+                    <div class="text-[10px] uppercase tracking-widest mb-1" style="color:${p.color}88">${p.type}</div>
+                    <div class="text-xl font-semibold text-white">${p.name}</div>
+                    <div class="text-xs text-gray-600">${p.nameEn} · ${p.dist}</div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <p class="text-sm text-gray-400 mb-5 leading-relaxed">${p.desc}</p>
+
+            <!-- Divider -->
+            <div class="flex items-center gap-3 mb-4">
+                <div class="flex-1 h-px bg-white/5"></div>
+                <span class="text-xs text-gray-700 uppercase tracking-widest">ტელესკოპის ხედები</span>
+                <div class="flex-1 h-px bg-white/5"></div>
+            </div>
+
+            <!-- 70mm telescope view — real planet image -->
+            <div class="rounded-2xl overflow-hidden mb-5" style="border:1px solid ${p.color}30;background:#03050d;">
+                <div class="relative flex items-center justify-center" style="height:220px;background:radial-gradient(ellipse at center,${p.color}18,#03050d 70%);">
+                    <img src="/static/planets/${slug}.png" alt="${p.name}"
+                         style="max-height:200px;max-width:100%;object-fit:contain;filter:drop-shadow(0 0 24px ${p.color}66);"
+                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                    <div style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;font-size:5rem;filter:drop-shadow(0 0 30px ${p.color}66);">${p.emoji}</div>
+                </div>
+                <div class="p-4" style="border-top:1px solid ${p.color}15;">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span style="background:rgba(0,0,0,0.6);border:1px solid ${p.color}44;color:${p.color};font-size:0.65rem;font-family:monospace;padding:3px 9px;border-radius:20px;">🔭 70mm · ${p.views[0].mag}</span>
+                    </div>
+                    <div class="text-sm font-medium text-white mb-1">${p.views[0].label}</div>
+                    <div class="text-xs text-gray-500" style="line-height:1.6">${p.views[0].desc}</div>
+                </div>
+            </div>
+
+            <!-- Quick specs -->
+            <div class="grid grid-cols-3 gap-2 mb-5">
+                <div class="glass text-center p-3 rounded-xl">
+                    <div class="text-xs text-gray-600 mb-1">გადიდება</div>
+                    <div class="text-xs font-mono text-white">${p.views[0].mag}</div>
+                </div>
+                <div class="glass text-center p-3 rounded-xl">
+                    <div class="text-xs text-gray-600 mb-1">აპერტურა</div>
+                    <div class="text-xs font-mono text-white">70mm+</div>
+                </div>
+                <div class="glass text-center p-3 rounded-xl">
+                    <div class="text-xs text-gray-600 mb-1">სირთულე</div>
+                    <div class="text-xs font-mono text-white">საშუალო</div>
+                </div>
+            </div>
+
+            <!-- CTA -->
+            <a href="https://astroman.ge/telescope-foreseen-80mm/" target="_blank"
+               class="flex items-center justify-center gap-2 w-full py-3 rounded-2xl text-sm font-medium transition-all hover:-translate-y-0.5"
+               style="background:${p.color}18;border:1px solid ${p.color}35;color:${p.color};">
+                🔭 შეიძინე Foreseen 80mm — ${p.name}ს სანახავად →
+            </a>
+        `;
+
+        // Make content position relative for close button
+        content.style.position = 'relative';
+
+        // Show modal
+        const modal = document.getElementById('planet-modal');
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+
+        // Animate in
+        const sheet = document.getElementById('planet-modal-sheet');
+        sheet.style.transform = 'translateY(100%)';
+        sheet.style.transition = 'none';
+        requestAnimationFrame(() => {
+            sheet.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+            sheet.style.transform = 'translateY(0)';
+        });
+    }
+
+    function closePlanetModal() {
+        const modal = document.getElementById('planet-modal');
+        const sheet = document.getElementById('planet-modal-sheet');
+        sheet.style.transition = 'transform 0.3s cubic-bezier(0.4,0,0.2,1)';
+        sheet.style.transform = 'translateY(100%)';
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+            sheet.style.transform = '';
+        }, 300);
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlanetModal(); });
+
+    // ─────────────────────────────────────────────
+    // NASA APOD — Astronomy Picture of the Day
+    // ─────────────────────────────────────────────
+    (async function loadAPOD() {
+        const COSMOS_DATES = [
+            '2024-04-24','2024-03-11','2024-01-09','2024-06-12','2023-11-01',
+            '2024-02-19','2023-09-12','2024-05-03','2023-07-12','2024-08-06',
+            '2023-10-22','2024-03-25','2023-12-14','2024-01-29','2023-08-16',
+            '2024-07-04','2024-09-10','2023-05-22','2024-10-01','2023-04-10',
+            '2024-11-05','2023-03-15','2024-12-03','2023-02-20','2024-02-05',
+            '2023-01-18','2024-10-29','2023-08-30','2024-06-28','2023-06-01',
+        ];
+        const dayIdx = Math.floor(Date.now() / 86400000) % COSMOS_DATES.length;
+
+        // Try today first, then rotate through deep-space archive
+        const urls = [
+            'https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY',
+            ...COSMOS_DATES.map((d, i) => `https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${COSMOS_DATES[(dayIdx+i)%COSMOS_DATES.length]}`)
+        ];
+
+        for (const url of urls) {
+            try {
+                const res = await fetch(url);
+                if (!res.ok) continue;
+                const d = await res.json();
+                if (d.media_type !== 'image') continue;
+
+                const imgSrc = d.hdurl || d.url;
+                const titleEl = document.getElementById('apod-title');
+                const imgEl   = document.getElementById('apod-img');
+                const descEl  = document.getElementById('apod-desc');
+                const dateEl  = document.getElementById('apod-date');
+                const linkEl  = document.getElementById('apod-link');
+                const loadEl  = document.getElementById('apod-loading');
+                const section = document.getElementById('apod-section');
+
+                if (titleEl) titleEl.textContent = d.title || '';
+                if (descEl)  descEl.textContent  = (d.explanation || '').slice(0, 220) + '…';
+                if (dateEl)  dateEl.textContent  = '📅 ' + (d.date || '');
+                if (linkEl)  linkEl.href         = d.url;
+
+                if (imgEl) {
+                    imgEl.onload = () => { if (loadEl) loadEl.style.display='none'; imgEl.style.display='block'; };
+                    imgEl.src = imgSrc;
+                }
+                if (section) section.style.display = 'block';
+                break;
+            } catch(_) {}
+        }
+    })();
+
+    // ─────────────────────────────────────────────
+    // ASTROMAN Astronomy Chatbot
+    // ─────────────────────────────────────────────
+    const chatHistory = [];
+
+    function appendMessage(role, text) {
+        const container = document.getElementById('chat-messages');
+        const isBot = role === 'assistant';
+        const div = document.createElement('div');
+        div.style.cssText = 'display:flex;gap:8px;align-items:flex-start;' + (isBot ? '' : 'flex-direction:row-reverse;');
+
+        const avatar = document.createElement('div');
+        avatar.style.cssText = 'width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;' +
+            (isBot
+                ? 'background:linear-gradient(135deg,rgba(99,102,241,0.5),rgba(139,92,246,0.4));'
+                : 'background:rgba(255,255,255,0.08);');
+        avatar.innerHTML = isBot
+            ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.9)" stroke-width="2"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M9 8V6a3 3 0 016 0v2"/><circle cx="9" cy="14" r="1.5" fill="rgba(165,180,252,0.9)" stroke="none"/><circle cx="15" cy="14" r="1.5" fill="rgba(165,180,252,0.9)" stroke="none"/></svg>'
+            : '👤';
+
+        const bubble = document.createElement('div');
+        bubble.style.cssText = 'padding:8px 12px;max-width:85%;font-size:12px;line-height:1.65;' +
+            (isBot
+                ? 'background:rgba(99,102,241,0.1);border:1px solid rgba(129,140,248,0.15);border-radius:0 12px 12px 12px;color:rgba(220,225,255,0.85);'
+                : 'background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:12px 0 12px 12px;color:#e2e8ff;');
+
+        // Render links in text
+        bubble.innerHTML = text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" style="color:#818cf8;text-decoration:underline;word-break:break-all;">$1</a>');
+
+        div.appendChild(avatar);
+        div.appendChild(bubble);
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function showTyping() {
+        const container = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.id = 'chat-typing';
+        div.style.cssText = 'display:flex;gap:8px;align-items:flex-start;';
+        div.innerHTML = `<div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,rgba(99,102,241,0.5),rgba(139,92,246,0.4));flex-shrink:0;display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.9)" stroke-width="2"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M9 8V6a3 3 0 016 0v2"/><circle cx="9" cy="14" r="1.5" fill="rgba(165,180,252,0.9)" stroke="none"/><circle cx="15" cy="14" r="1.5" fill="rgba(165,180,252,0.9)" stroke="none"/></svg></div>
+        <div style="background:rgba(99,102,241,0.1);border:1px solid rgba(129,140,248,0.15);border-radius:0 12px 12px 12px;padding:10px 14px;display:flex;gap:5px;align-items:center;">
+            <span style="width:6px;height:6px;border-radius:50%;background:rgba(165,180,252,0.5);animation:chatDot 1.2s ease-in-out infinite;"></span>
+            <span style="width:6px;height:6px;border-radius:50%;background:rgba(165,180,252,0.5);animation:chatDot 1.2s ease-in-out 0.2s infinite;"></span>
+            <span style="width:6px;height:6px;border-radius:50%;background:rgba(165,180,252,0.5);animation:chatDot 1.2s ease-in-out 0.4s infinite;"></span>
+        </div>`;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function removeTyping() {
+        document.getElementById('chat-typing')?.remove();
+    }
+
+    async function sendChat() {
+        const input = document.getElementById('chat-input');
+        const text = input.value.trim();
+        if (!text) return;
+
+        // Hide suggestions after first message
+        document.getElementById('chat-suggestions').style.display = 'none';
+
+        input.value = '';
+        input.style.height = 'auto';
+        input.disabled = true;
+        document.getElementById('chat-send-btn').style.opacity = '0.4';
+
+        chatHistory.push({ role: 'user', content: text });
+        appendMessage('user', text);
+        showTyping();
+
+        try {
+            const res = await fetch('/api/chatbot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: chatHistory }),
+            });
+            const data = await res.json();
+            removeTyping();
+            chatHistory.push({ role: 'assistant', content: data.reply });
+            appendMessage('assistant', data.reply);
+        } catch(_) {
+            removeTyping();
+            appendMessage('assistant', '⚠️ კავშირის შეცდომა. სცადე კიდევ ერთხელ.');
+        } finally {
+            input.disabled = false;
+            document.getElementById('chat-send-btn').style.opacity = '1';
+            input.focus();
+        }
+    }
+
+    function askSuggestion(q) {
+        document.getElementById('chat-input').value = q;
+        sendChat();
+    }
 </script>
 <style>
-@keyframes chatDot{0%,80%,100%{transform:scale(0.6);opacity:0.4}40%{transform:scale(1);opacity:1}}
-#chat-messages::-webkit-scrollbar{width:3px;}
-#chat-messages::-webkit-scrollbar-thumb{background:rgba(129,140,248,0.2);border-radius:2px;}
-details[open] .details-chevron{transform:rotate(180deg);}
+@keyframes chatDot { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} }
+#chat-messages::-webkit-scrollbar { width:3px; }
+#chat-messages::-webkit-scrollbar-track { background:transparent; }
+#chat-messages::-webkit-scrollbar-thumb { background:rgba(129,140,248,0.2);border-radius:2px; }
 </style>
 {% endblock %}
