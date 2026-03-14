@@ -2,26 +2,6 @@
 
 {% block title %}ცის ობსერვატორია — ASTROMAN{% endblock %}
 
-
-    <style>
-    @keyframes hint-pulse{0%,100%{opacity:.36;transform:translateY(0)}50%{opacity:.65;transform:translateY(3px)}}
-    /* Better mobile spacing */
-    @media(max-width:640px){
-        .space-y-5>*{margin-top:10px!important;}
-        .glass{border-radius:16px!important;}
-        .glass-strong{border-radius:18px!important;}
-    }
-    /* Planet explorer mobile grid */
-    .grid.grid-cols-4{display:grid;grid-template-columns:repeat(4,1fr);}
-    @media(min-width:480px){.sm\:grid-cols-7{grid-template-columns:repeat(7,1fr)!important;}}
-    /* Touch improvements */
-    button,a{-webkit-tap-highlight-color:transparent;}
-    /* Bigger touch targets on mobile */
-    @media(max-width:640px){
-        .hero-status-pill{padding:8px 15px!important;font-size:12px!important;}
-        .stat-card-sunset,.stat-card-moon,.stat-card-clouds,.stat-card-temp{padding:14px!important;}
-    }
-    </style>
 {% block content %}
 <div class="space-y-5">
 
@@ -46,14 +26,14 @@
             <div style="display:flex;flex-direction:column;gap:14px;">
 
                 <div>
-                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;" data-i18n="hero.label.date">თარიღი</div>
+                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;">თარიღი</div>
                     <div style="font-size:12px;font-weight:500;color:rgba(215,222,255,0.75);">{{ observation.date | datetimeformat }}</div>
                 </div>
 
                 <div style="width:28px;height:1px;background:linear-gradient(90deg,rgba(129,140,248,0.35),transparent);border-radius:2px;"></div>
 
                 <div>
-                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;" data-i18n="hero.label.location">მდებარეობა</div>
+                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;">მდებარეობა</div>
                     <div style="font-size:12px;font-weight:500;color:rgba(215,222,255,0.75);display:flex;align-items:center;gap:4px;">
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(165,180,252,0.5)" stroke-width="2.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                         თბილისი · 41.7°N
@@ -63,7 +43,7 @@
                 <div style="width:28px;height:1px;background:linear-gradient(90deg,rgba(129,140,248,0.35),transparent);border-radius:2px;"></div>
 
                 <div>
-                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;" data-i18n="hero.label.updated">განახლდა</div>
+                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;">განახლდა</div>
                     <div style="font-size:12px;font-weight:500;color:rgba(215,222,255,0.75);">{{ last_updated }}</div>
                 </div>
 
@@ -95,10 +75,10 @@
                     <div aria-hidden="true" style="position:absolute;bottom:0;left:0;width:22px;height:22px;border-bottom:1.5px solid rgba(165,180,252,0.55);border-left:1.5px solid rgba(165,180,252,0.55);pointer-events:none;"></div>
 
                     <!-- Small label -->
-                    <div style="font-size:clamp(11px,1.8vw,15px);font-weight:300;letter-spacing:0.24em;color:rgba(165,180,252,0.60);text-transform:uppercase;margin-bottom:8px;" data-i18n="hero.sub">ღამის ცის</div>
+                    <div style="font-size:clamp(11px,1.8vw,15px);font-weight:300;letter-spacing:0.24em;color:rgba(165,180,252,0.60);text-transform:uppercase;margin-bottom:8px;">ღამის ცის</div>
 
                     <!-- MAIN TITLE -->
-                    <div style="font-size:clamp(36px,6vw,66px);font-weight:800;letter-spacing:-1.5px;line-height:1;background:linear-gradient(145deg,#ffffff 0%,#e4ecff 30%,#c7d2fe 58%,#f5c842 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 44px rgba(165,180,252,0.30));transition:filter .25s;" data-i18n="hero.main">გზამკვლევი</div>
+                    <div style="font-size:clamp(36px,6vw,66px);font-weight:800;letter-spacing:-1.5px;line-height:1;background:linear-gradient(145deg,#ffffff 0%,#e4ecff 30%,#c7d2fe 58%,#f5c842 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 44px rgba(165,180,252,0.30));">გზამკვლევი</div>
 
                     <!-- Gold diamond divider -->
                     <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:16px;">
@@ -106,9 +86,7 @@
                         <div style="width:6px;height:6px;border:1px solid rgba(245,200,66,0.65);transform:rotate(45deg);flex-shrink:0;"></div>
                         <div style="height:1px;width:32px;border-radius:2px;background:linear-gradient(270deg,transparent,rgba(245,200,66,0.60));"></div>
                     </div>
-                </a>
-                <!-- Scroll hint -->
-                <div style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(165,180,252,.36);animation:hint-pulse 3s ease-in-out infinite;margin-bottom:18px;" data-i18n="hero.scroll.hint">↓ პლანეტებისკენ</div>
+                </div>
 
                 <!-- Status pill -->
                 <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;">
@@ -142,7 +120,7 @@
             <div style="display:flex;flex-direction:column;gap:14px;text-align:right;align-items:flex-end;">
 
                 <div>
-                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;" data-i18n="hero.label.livetime">ლაივ საათი</div>
+                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;">ლაივ საათი</div>
                     <div style="font-size:13px;font-weight:600;color:rgba(215,222,255,0.88);font-family:'JetBrains Mono',monospace;letter-spacing:0.06em;display:flex;align-items:center;gap:5px;justify-content:flex-end;">
                         <span style="width:5px;height:5px;border-radius:50%;background:#22c55e;box-shadow:0 0 7px #22c55e;flex-shrink:0;"></span>
                         <span id="tbilisi-clock" class="tabular-nums">--:--:--</span>
@@ -152,14 +130,14 @@
                 <div style="width:28px;height:1px;background:linear-gradient(270deg,rgba(129,140,248,0.35),transparent);border-radius:2px;"></div>
 
                 <div>
-                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;" data-i18n="hero.label.weather">ამინდი</div>
+                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;">ამინდი</div>
                     <div style="font-size:12px;font-weight:500;color:rgba(215,222,255,0.75);">{{ observation.cloud_coverage }}% ☁ · {{ observation.temperature|round(0)|int }}°C</div>
                 </div>
 
                 <div style="width:28px;height:1px;background:linear-gradient(270deg,rgba(129,140,248,0.35),transparent);border-radius:2px;"></div>
 
                 <div>
-                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;" data-i18n="hero.label.moon">მთვარე</div>
+                    <div style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(165,180,252,0.38);margin-bottom:4px;">მთვარე</div>
                     <div style="font-size:12px;font-weight:500;color:rgba(215,222,255,0.75);">{{ observation.moon_illumination|round(0)|int }}% · {{ observation.moon_phase }}</div>
                 </div>
 
@@ -834,9 +812,9 @@
     </div>
 
     {# ── Planets Explorer Section ── #}
-    <div class="mt-6 section-anchor" id="planets-explorer" style="scroll-margin-top:70px;">
+    <div class="mt-6">
         <div class="mb-4 px-1">
-            <h2 style="font-size:clamp(16px,4vw,21px);font-weight:600;background:linear-gradient(135deg,#e0e7ff 0%,#a5b4fc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;" data-i18n="planets.explorer.title">პლანეტები ტელესკოპიდან</h2>
+            <h2 style="font-size:clamp(16px,4vw,21px);font-weight:600;background:linear-gradient(135deg,#e0e7ff 0%,#a5b4fc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">პლანეტები ტელესკოპიდან</h2>
         </div>
         <div class="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3">
             {% set planet_cards = [
@@ -897,21 +875,6 @@
 {% endblock %}
 
 {% block scripts %}
-
-    // Language change → update dynamic elements
-    document.addEventListener('langchange', function(e) {
-        // Update chat suggestions text
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            const v = t(el.getAttribute('data-i18n'));
-            if (v) el.textContent = v;
-        });
-        // Update chat placeholder
-        const ci = document.getElementById('chat-input');
-        if (ci) { const v = t('chat.placeholder'); if(v) ci.placeholder = v; }
-        // Update countdown label if present
-        const cdl = document.getElementById('countdown-label');
-        if (cdl) { const v = t('daytime.countdown'); if(v) cdl.textContent = v; }
-    });
 <script>
     // Live Tbilisi clock
     function updateClock() {
