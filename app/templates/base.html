@@ -2,7 +2,7 @@
 <html lang="ka" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>{% block title %}ASTROMAN{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://upload.wikimedia.org">
@@ -105,6 +105,35 @@
             box-shadow: 0 0 20px rgba(99, 102, 241, 0.12), inset 0 1px 0 rgba(255,255,255,0.04);
         }
     </style>
+
+    <style>
+    /* Language toggle buttons */
+    .lang-btn {
+        padding: 5px 13px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .08em;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        color: rgba(165,180,252,.45);
+        transition: all .18s;
+        font-family: 'JetBrains Mono', monospace;
+        line-height: 1.5;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .lang-btn.active {
+        background: rgba(99,102,241,.40);
+        color: #e0e7ff;
+    }
+    .lang-btn:hover:not(.active) { color: rgba(165,180,252,.85); }
+    /* Touch targets */
+    .touch-target { min-height: 44px; }
+    /* Smooth scroll */
+    html { scroll-behavior: smooth; }
+    /* Section anchor offset */
+    .section-anchor { scroll-margin-top: 68px; }
+    </style>
     {% block head %}{% endblock %}
 </head>
 <body class="min-h-screen text-gray-200 antialiased overflow-x-hidden">
@@ -114,41 +143,36 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
             <div class="flex items-center justify-between h-14 sm:h-16">
                 <a href="/" class="flex items-center gap-2.5 sm:gap-3 group">
-                    <!-- Optical reticle logo -->
-                    <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0">
-                        <!-- outer ring -->
-                        <circle cx="17" cy="17" r="15" fill="rgba(99,102,241,0.06)" stroke="rgba(129,140,248,0.35)" stroke-width="1"/>
-                        <!-- inner ring -->
-                        <circle cx="17" cy="17" r="8" fill="none" stroke="rgba(129,140,248,0.2)" stroke-width="0.8"/>
-                        <!-- crosshair lines -->
-                        <line x1="17" y1="2" x2="17" y2="9" stroke="rgba(165,180,252,0.6)" stroke-width="1" stroke-linecap="round"/>
-                        <line x1="17" y1="25" x2="17" y2="32" stroke="rgba(165,180,252,0.6)" stroke-width="1" stroke-linecap="round"/>
-                        <line x1="2" y1="17" x2="9" y2="17" stroke="rgba(165,180,252,0.6)" stroke-width="1" stroke-linecap="round"/>
-                        <line x1="25" y1="17" x2="32" y2="17" stroke="rgba(165,180,252,0.6)" stroke-width="1" stroke-linecap="round"/>
-                        <!-- center dot -->
-                        <circle cx="17" cy="17" r="2.5" fill="rgba(165,180,252,0.85)"/>
-                        <!-- diffraction spikes (tiny stars at cardinal) -->
-                        <circle cx="17" cy="4" r="1" fill="#f5c842" opacity="0.7"/>
-                        <circle cx="30" cy="17" r="0.8" fill="rgba(165,180,252,0.5)"/>
-                    </svg>
+                    <img src="/static/logo-saturn.png" alt="ASTROMAN" style="width:38px;height:38px;object-fit:contain;mix-blend-mode:screen;filter:brightness(1.15) contrast(1.05);flex-shrink:0;">
                     <div class="flex flex-col leading-none">
-                        <span class="font-bold text-white" style="font-size:clamp(14px,3.5vw,17px);letter-spacing:0.02em;">ასტრომანი</span>
+                        <span class="font-bold text-white" style="font-size:clamp(14px,3.5vw,17px);letter-spacing:0.02em;" data-i18n="brand">ასტრომანი</span>
                         <span class="text-indigo-400/55 tracking-[0.2em] uppercase" style="font-size:9px;margin-top:1px;">SKY INTELLIGENCE</span>
                     </div>
                 </a>
 
                 <!-- Desktop nav -->
                 <div class="hidden sm:flex items-center gap-6">
-                    <a href="/" class="text-sm text-gray-400 hover:text-indigo-300 transition-colors">დაკვირვება</a>
-                    <a href="https://club.astroman.ge" target="_blank" class="text-sm text-gray-400 hover:text-indigo-300 transition-colors flex items-center gap-1.5"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>ლოიალობის კლუბი</a>
+                    <a href="/" class="text-sm text-gray-400 hover:text-indigo-300 transition-colors" data-i18n="nav.observe">დაკვირვება</a>
+                    <a href="https://club.astroman.ge" target="_blank" class="text-sm text-gray-400 hover:text-indigo-300 transition-colors flex items-center gap-1.5"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span data-i18n="nav.club">ლოიალობის კლუბი</span></a>
+                    <!-- Language Toggle -->
+                    <div style="display:inline-flex;align-items:center;border-radius:100px;overflow:hidden;border:1px solid rgba(129,140,248,.25);background:rgba(10,8,32,.55);">
+                        <button class="lang-btn active" id="btn-ka" onclick="setLang('ka')">GE</button>
+                        <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+                    </div>
                 </div>
 
-                <!-- Mobile hamburger -->
-                <button id="mobile-menu-btn" class="sm:hidden text-gray-400 p-2 -mr-2" aria-label="მენიუ">
+                <!-- Mobile lang + hamburger -->
+                <div class="sm:hidden flex items-center gap-2">
+                    <div style="display:inline-flex;align-items:center;border-radius:100px;overflow:hidden;border:1px solid rgba(129,140,248,.25);background:rgba(10,8,32,.55);">
+                        <button class="lang-btn active" id="btn-ka-m" onclick="setLang('ka')">GE</button>
+                        <button class="lang-btn" id="btn-en-m" onclick="setLang('en')">EN</button>
+                    </div>
+                    <button id="mobile-menu-btn" class="text-gray-400 p-2 -mr-2" aria-label="მენიუ">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
+                </div><!-- /mobile controls -->
             </div>
         </div>
     </nav>
@@ -176,16 +200,7 @@
                 <!-- Brand -->
                 <div class="text-center sm:text-left">
                     <a href="/" class="inline-flex items-center gap-2 justify-center sm:justify-start mb-3">
-                        <svg width="26" height="26" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="17" cy="17" r="15" fill="rgba(99,102,241,0.06)" stroke="rgba(129,140,248,0.25)" stroke-width="1"/>
-                            <circle cx="17" cy="17" r="8" fill="none" stroke="rgba(129,140,248,0.15)" stroke-width="0.8"/>
-                            <line x1="17" y1="2" x2="17" y2="9" stroke="rgba(165,180,252,0.5)" stroke-width="1" stroke-linecap="round"/>
-                            <line x1="17" y1="25" x2="17" y2="32" stroke="rgba(165,180,252,0.5)" stroke-width="1" stroke-linecap="round"/>
-                            <line x1="2" y1="17" x2="9" y2="17" stroke="rgba(165,180,252,0.5)" stroke-width="1" stroke-linecap="round"/>
-                            <line x1="25" y1="17" x2="32" y2="17" stroke="rgba(165,180,252,0.5)" stroke-width="1" stroke-linecap="round"/>
-                            <circle cx="17" cy="17" r="2.5" fill="rgba(165,180,252,0.7)"/>
-                            <circle cx="17" cy="4" r="0.9" fill="#f5c842" opacity="0.6"/>
-                        </svg>
+                        <img src="/static/logo-saturn.png" alt="ASTROMAN" style="width:26px;height:26px;object-fit:contain;mix-blend-mode:screen;filter:brightness(1.15);">
                         <div>
                             <div class="text-sm font-bold text-white" style="letter-spacing:0.02em;">ასტრომანი</div>
                             <div class="text-[9px] text-indigo-400/45 tracking-[0.2em] uppercase">Sky Intelligence</div>
@@ -244,6 +259,119 @@
             if (window.scrollY > 10) nav.classList.add('nav-scrolled');
             else nav.classList.remove('nav-scrolled');
         }, { passive: true });
+    </script>
+
+    <!-- i18n Translation System -->
+    <script>
+    const TRANSLATIONS = {
+      ka: {
+        "brand":"ასტრომანი","nav.observe":"დაკვირვება","nav.club":"ლოიალობის კლუბი","nav.store":"მაღაზია","nav.close":"დახურვა",
+        "footer.desc":"საქართველოს პირველი ასტრონომიული მაღაზია. ტელესკოპები, პროექტორები და კოსმოსის აქსესუარები.",
+        "footer.contact":"კონტაქტი","footer.links":"ბმულები","footer.blog":"📝 ბლოგი","footer.copy":"© 2026 ASTROMAN · თბილისი, საქართველო",
+        "hero.eyebrow":"ASTROMAN · AI · REAL\u2011TIME","hero.sub":"ღამის ცის","hero.main":"გზამკვლევი",
+        "hero.label.date":"თარიღი","hero.label.location":"მდებარეობა","hero.label.updated":"განახლდა",
+        "hero.label.livetime":"ლაივ საათი","hero.label.weather":"ამინდი","hero.label.moon":"მთვარე",
+        "hero.scroll.hint":"↓ პლანეტებისკენ",
+        "status.stars":"🌙 ვარსკვლავები ხილულია","status.twilight":"🌆 შებინდება","status.daytime.prefix":"☀️ დღეა · მზე ჩადის",
+        "stat.sunset":"მზის ჩასვლა","stat.moon":"მთვარე","stat.clouds":"ღრუბლები","stat.temp":"ტემპერატურა",
+        "sky.clear":"✨ წმინდა ცა","sky.partly":"⛅ ნაწილობრივ","sky.heavy":"☁️ ძლიერი",
+        "planets.title":"🪐 ხილული პლანეტები","planets.empty":"ამ მომენტში პლანეტები არ ჩანს",
+        "planets.hint":"სიკაშკაშე: რაც დაბალია — მით კაშკაშაა. 👁 = შეუიარაღებელი თვალი, 🔭 = ბინოკლი/ტელესკოპი",
+        "col.planet":"პლანეტა","col.alt":"სიმაღლე","col.mag":"სიკაშკაშე","col.dir":"მიმართულება","col.const":"თანავარსკვლავედი",
+        "badge.best":"საუკეთესო","badge.bino":"🔭 ბინოკლი","badge.tel":"🔭 ტელ.",
+        "altbars.title":"📡 სიმაღლე ჰორიზონტიდან","altbars.hint":"0° — 90° (ზენიტი)",
+        "guide.title":"💡 დაკვირვების გზამკვლევი",
+        "telescope.label":"რეკომენდებული ტელესკოპი","telescope.name":"Foreseen 80mm","telescope.btn":"იხილე ტელესკოპი",
+        "telescope.desc":"80mm აპერტურა · 500mm ფოკუსი · K25+K10 ლინზები · 3.2კგ — დამწყებთათვის საუკეთესო არჩევანი",
+        "telescope.desc.short":"80mm · 500mm ფოკუსი · K25+K10 — ❤️ 856₾",
+        "moon.title":"მთვარის ფაზა","moon.illuminated":"განათებული",
+        "quality.title":"დაკვირვების ხარისხი",
+        "quality.excellent":"შესანიშნავი","quality.good":"კარგი","quality.moderate":"საშუალო","quality.poor":"ცუდი",
+        "quality.excellent.sub":"წმინდა ცა — იდეალური","quality.good.sub":"ნაწილობრივ ღრუბლიანი","quality.moderate.sub":"შეზღუდული ხილვადობა","quality.poor.sub":"ძლიერი ღრუბლიანობა",
+        "quality.clouds":"☁ ღრუბლიანობა","quality.moon":"🌙 მთვარე","quality.wind":"💨 ქარი",
+        "club.title":"ASTROMAN ლოიალობის კლუბი","club.desc":"დააგროვე ქულები, მიიღე ფასდაკლება ტელესკოპებზე","club.btn":"შემოუერთდი კლუბს",
+        "club.per1":"1₾-ზე","club.discount":"ფასდაკლება",
+        "planets.explorer.title":"პლანეტები ტელესკოპიდან",
+        "chat.header":"ასტრო-ასისტენტი","chat.online":"ონლაინ",
+        "chat.welcome":"გამარჯობა — დამიბარე კითხვებით ტელესკოპებზე, პლანეტებზე ან ღრმა ცაზე.",
+        "chat.placeholder":"დამისვი კითხვა ასტრონომიაზე...","chat.q1":"დამწყებთათვის ტელესკოპი","chat.q2":"სატურნი ტელესკოპში","chat.q3":"რეფრაქტორი vs რეფლექტორი",
+        "apod.label":"NASA · Astronomy Picture of the Day","apod.loading":"იტვირთება…","apod.link":"↗ NASA-ზე სრული სურათი",
+        "daytime.title":"დღისით ვარსკვლავები არ ჩანს","daytime.desc":"დაკვირვება შესაძლებელია მზის ჩასვლის შემდეგ:","daytime.countdown":"მზის ჩასვლამდე","daytime.gone":"მზე ჩავიდა!",
+        "tonight.title":"🌙 საღამოს წინასწარი მიმოხილვა","tonight.desc":"პლანეტები, რომლებიც დაისით გამოჩნდება:",
+        "twilight.title":"შებინდების დროა","twilight.sub":"მალე ვარსკვლავები გამოჩნდება",
+        "visible.title":"✨ უკვე ჩანს","chat.error":"⚠️ კავშირის შეცდომა. სცადე კიდევ ერთხელ.",
+      },
+      en: {
+        "brand":"ASTROMAN","nav.observe":"Observe","nav.club":"Loyalty Club","nav.store":"Store","nav.close":"Close",
+        "footer.desc":"Georgia\'s first astronomy store. Telescopes, projectors and cosmic accessories.",
+        "footer.contact":"Contact","footer.links":"Links","footer.blog":"📝 Blog","footer.copy":"© 2026 ASTROMAN · Tbilisi, Georgia",
+        "hero.eyebrow":"ASTROMAN · AI · REAL\u2011TIME","hero.sub":"Tonight\'s Sky","hero.main":"Guide",
+        "hero.label.date":"Date","hero.label.location":"Location","hero.label.updated":"Updated",
+        "hero.label.livetime":"Live Time","hero.label.weather":"Weather","hero.label.moon":"Moon",
+        "hero.scroll.hint":"↓ To Planets",
+        "status.stars":"🌙 Stars Visible","status.twilight":"🌆 Twilight","status.daytime.prefix":"☀️ Daytime · Sunset at",
+        "stat.sunset":"Sunset","stat.moon":"Moon","stat.clouds":"Cloud Cover","stat.temp":"Temperature",
+        "sky.clear":"✨ Clear Sky","sky.partly":"⛅ Partly Cloudy","sky.heavy":"☁️ Overcast",
+        "planets.title":"🪐 Visible Planets","planets.empty":"No planets visible right now",
+        "planets.hint":"Magnitude: lower = brighter. 👁 = naked eye, 🔭 = binoculars/telescope",
+        "col.planet":"Planet","col.alt":"Altitude","col.mag":"Magnitude","col.dir":"Direction","col.const":"Constellation",
+        "badge.best":"Best","badge.bino":"🔭 Binoculars","badge.tel":"🔭 Tel.",
+        "altbars.title":"📡 Altitude from Horizon","altbars.hint":"0° — 90° (zenith)",
+        "guide.title":"💡 Observation Guide",
+        "telescope.label":"Recommended Telescope","telescope.name":"Foreseen 80mm","telescope.btn":"View Telescope",
+        "telescope.desc":"80mm aperture · 500mm focal length · K25+K10 lenses · 3.2kg — perfect for beginners",
+        "telescope.desc.short":"80mm · 500mm focal · K25+K10 — ❤️ 856₾",
+        "moon.title":"Moon Phase","moon.illuminated":"illuminated",
+        "quality.title":"Observation Quality",
+        "quality.excellent":"Excellent","quality.good":"Good","quality.moderate":"Moderate","quality.poor":"Poor",
+        "quality.excellent.sub":"Clear sky — perfect","quality.good.sub":"Partly cloudy","quality.moderate.sub":"Limited visibility","quality.poor.sub":"Heavy cloud cover",
+        "quality.clouds":"☁ Cloud Cover","quality.moon":"🌙 Moon","quality.wind":"💨 Wind",
+        "club.title":"ASTROMAN Loyalty Club","club.desc":"Earn points, get discounts on telescopes","club.btn":"Join the Club",
+        "club.per1":"per ₾","club.discount":"discount",
+        "planets.explorer.title":"Planets Through Telescope",
+        "chat.header":"Astro Assistant","chat.online":"Online",
+        "chat.welcome":"Hello! Ask me anything about telescopes, planets, or deep sky objects.",
+        "chat.placeholder":"Ask a question about astronomy...","chat.q1":"Best telescope for beginners","chat.q2":"Saturn through a telescope","chat.q3":"Refractor vs Reflector",
+        "apod.label":"NASA · Astronomy Picture of the Day","apod.loading":"Loading…","apod.link":"↗ Full image on NASA",
+        "daytime.title":"Stars not visible during daytime","daytime.desc":"Observation is possible after sunset:","daytime.countdown":"until sunset","daytime.gone":"Sun has set!",
+        "tonight.title":"🌙 Tonight\'s Preview","tonight.desc":"Planets that appear after sunset:",
+        "twilight.title":"Twilight","twilight.sub":"Stars will appear soon",
+        "visible.title":"✨ Already Visible","chat.error":"⚠️ Connection error. Please try again.",
+      }
+    };
+
+    let currentLang = localStorage.getItem('sky-lang') || 'ka';
+
+    function t(key) {
+        return (TRANSLATIONS[currentLang]||{})[key] || (TRANSLATIONS['ka']||{})[key] || key;
+    }
+
+    function applyTranslations() {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const v = t(el.getAttribute('data-i18n'));
+            if (v && el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA') el.textContent = v;
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const v = t(el.getAttribute('data-i18n-placeholder'));
+            if (v) el.placeholder = v;
+        });
+        document.documentElement.lang = currentLang;
+    }
+
+    function setLang(lang) {
+        currentLang = lang;
+        localStorage.setItem('sky-lang', lang);
+        ['btn-ka','btn-en','btn-ka-m','btn-en-m'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const isActive = (id.includes('ka') && lang==='ka') || (id.includes('en') && lang==='en');
+            el.classList.toggle('active', isActive);
+        });
+        applyTranslations();
+        document.dispatchEvent(new CustomEvent('langchange', { detail: { lang } }));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => setLang(currentLang));
     </script>
     {% block scripts %}{% endblock %}
 </body>
