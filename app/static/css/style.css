@@ -131,6 +131,97 @@ body > * { position: relative; z-index: 1; }
 }
 
 /* ═══════════════════════════════════════
+   NEW COSMIC ANIMATIONS — Enhanced v5
+   ═══════════════════════════════════════ */
+
+/* Shooting star animation */
+@keyframes shoot {
+    0% { transform: translateX(0) translateY(0); opacity: 1; }
+    70% { opacity: 1; }
+    100% { transform: translateX(300px) translateY(200px); opacity: 0; }
+}
+.shooting-star {
+    position: absolute;
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.9), transparent);
+    border-radius: 50%;
+    animation: shoot 3s ease-in-out infinite;
+    opacity: 0;
+}
+
+/* Nebula pulse */
+@keyframes nebulaPulse {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.05); }
+}
+.nebula-pulse {
+    animation: nebulaPulse 8s ease-in-out infinite;
+}
+
+/* Planet glow animation */
+@keyframes planetGlow {
+    0%, 100% { box-shadow: 0 0 20px var(--glow-color, rgba(129,140,248,0.5)); }
+    50% { box-shadow: 0 0 40px var(--glow-color, rgba(129,140,248,0.8)); }
+}
+.planet-glow {
+    animation: planetGlow 3s ease-in-out infinite;
+}
+
+/* Cosmic dust particles */
+@keyframes cosmicDust {
+    0% { transform: translateY(0) rotate(0deg); opacity: 0.3; }
+    50% { opacity: 0.6; }
+    100% { transform: translateY(-100vh) rotate(360deg); opacity: 0.3; }
+}
+.cosmic-particle {
+    position: fixed;
+    width: 3px;
+    height: 3px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: cosmicDust linear infinite;
+    z-index: 0;
+}
+
+/* Floating observatory icon */
+@keyframes observatoryFloat {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-8px) rotate(2deg); }
+}
+.observatory-float {
+    animation: observatoryFloat 6s ease-in-out infinite;
+}
+
+/* Comet trail effect */
+@keyframes cometTrail {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+.comet-gradient {
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(129,140,248,0.3) 20%,
+        rgba(165,180,252,0.6) 50%,
+        rgba(129,140,248,0.3) 80%,
+        transparent 100%);
+    background-size: 200% 100%;
+    animation: cometTrail 4s linear infinite;
+}
+
+/* Constellation twinkle */
+@keyframes constellationTwinkle {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    25% { opacity: 0.8; transform: scale(1.2); }
+    50% { opacity: 0.5; transform: scale(0.9); }
+    75% { opacity: 1; transform: scale(1.1); }
+}
+.constellation-star {
+    animation: constellationTwinkle 2s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════
    BUTTON SYSTEM — Refined CTAs
    ═══════════════════════════════════════ */
 
@@ -579,6 +670,177 @@ details[open] .details-chevron{transform:rotate(180deg);}
   font-size: 10px;
   font-family: 'JetBrains Mono', monospace;
   color: rgba(165,180,252,0.55);
+}
+
+/* ═══════════════════════════════════════
+   ENHANCED MOBILE RESPONSIVENESS v5
+   ═══════════════════════════════════════ */
+
+/* Mobile-optimized cards */
+@media (max-width: 640px) {
+  /* Better touch targets */
+  .glass-card,
+  .glass,
+  .glass-strong {
+    border-radius: 16px;
+    padding: 14px;
+  }
+
+  /* Larger buttons on mobile */
+  .btn {
+    min-height: 48px;
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+
+  /* Better spacing for mobile grids */
+  .grid {
+    gap: 12px;
+  }
+
+  /* Full-width cards on mobile */
+  .glass-card {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  /* Improved text hierarchy */
+  .text-xl { font-size: 1.1rem !important; }
+  .text-lg { font-size: 1rem !important; }
+  .text-base { font-size: 0.9rem !important; }
+
+  /* Better scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Prevent horizontal overflow */
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Mobile-optimized tables */
+  table {
+    font-size: 12px;
+  }
+
+  th, td {
+    padding: 8px 4px;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .glass-card {
+    padding: 16px;
+  }
+}
+
+/* Mobile navigation improvements */
+@media (max-width: 768px) {
+  /* Sticky footer CTA for mobile */
+  .mobile-sticky-cta {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px 16px;
+    background: rgba(6, 6, 18, 0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(99, 102, 241, 0.2);
+    z-index: 100;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Better modal handling on mobile */
+  .modal-sheet {
+    max-height: 85vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Swipe-friendly elements */
+  .swipeable {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+
+  .swipeable > * {
+    scroll-snap-align: start;
+  }
+}
+
+/* Landscape phone optimization */
+@media (max-width: 640px) and (orientation: landscape) {
+  .hero-outer {
+    min-height: auto;
+    padding: 12px;
+  }
+
+  .hero-frame {
+    padding: 16px 24px;
+    margin-bottom: 12px;
+  }
+
+  .hero-main {
+    font-size: 28px;
+  }
+}
+
+/* Dark mode text improvements for mobile OLED */
+@media (max-width: 640px) {
+  /* True black backgrounds for OLED */
+  @media (prefers-color-scheme: dark) {
+    body {
+      background: #000000 !important;
+    }
+  }
+}
+
+/* Mobile performance optimizations */
+@media (max-width: 768px) {
+  /* Reduce animation complexity on mobile */
+  .animate-float,
+  .animate-pulse-slow {
+    animation-duration: 8s;
+  }
+
+  /* Simplify glass effects for performance */
+  .glass-card,
+  .glass,
+  .glass-strong {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  /* Disable parallax on mobile for performance */
+  .parallax {
+    transform: none !important;
+  }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Sharper text */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Print styles (hide interactive elements) */
+@media print {
+  .glass-card,
+  .glass,
+  .glass-strong,
+  nav,
+  footer,
+  .mobile-sticky-cta,
+  #chat-messages,
+  #planet-modal {
+    display: none !important;
+  }
 }
 
 /* ── BADGE ── */
