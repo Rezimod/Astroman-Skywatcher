@@ -149,39 +149,68 @@ const S = {
 
 // ─── Components ──────────────────────────────────────────────────────────────
 
-function Navbar({ menuOpen, setMenuOpen }) {
+function Navbar({ menuOpen, setMenuOpen, skyStatus, visibleCount }) {
   return (
     <nav className="astroman-nav" style={{
       position: 'sticky', top: 0, zIndex: 100,
-      background: 'rgba(8,12,20,0.92)',
-      backdropFilter: 'blur(20px) saturate(180%)',
-      WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-      borderBottom: '1px solid rgba(255,255,255,0.06)',
+      background: 'rgba(8,12,20,0.96)',
+      backdropFilter: 'blur(24px) saturate(180%)',
+      WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+      borderBottom: '1px solid rgba(255,255,255,0.07)',
       padding: '0 20px',
     }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 60 }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
+
+        {/* Brand */}
         <a href="https://astroman.ge" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <img src="/logo-icon.png" alt="Astroman" style={{ height: 40, width: 'auto', filter: 'invert(1) drop-shadow(0 0 6px rgba(201,168,76,0.5))' }} />
+          <img src="/logo-icon.png" alt="Astroman" style={{ height: 42, width: 'auto', filter: 'invert(1) drop-shadow(0 0 8px rgba(201,168,76,0.6))' }} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             <span style={{ fontWeight: 700, fontSize: 18, color: S.gold, letterSpacing: 1, lineHeight: 1 }}>ასტრომანი</span>
             <span style={{ fontSize: 10, color: S.dim, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: "'Chakra Petch', monospace" }}>Sky Intelligence</span>
           </div>
         </a>
 
+        {/* Live status pill — center */}
+        {skyStatus && (
+          <div className="desktop-nav" style={{
+            display: 'flex', alignItems: 'center', gap: 7,
+            background: `${skyStatus.color}14`,
+            border: `1px solid ${skyStatus.color}40`,
+            borderRadius: 100, padding: '6px 16px',
+            fontSize: 12, color: skyStatus.color, fontWeight: 500,
+          }}>
+            <span style={{
+              width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
+              background: skyStatus.color, display: 'inline-block',
+              animation: 'pulseGlow 2s cubic-bezier(0.4,0,0.2,1) infinite',
+            }} />
+            {skyStatus.label}
+            {visibleCount > 0 && (
+              <span style={{
+                marginLeft: 8, paddingLeft: 8,
+                borderLeft: `1px solid ${skyStatus.color}40`,
+                color: S.gold, fontFamily: "'Chakra Petch', monospace", fontSize: 11,
+              }}>
+                {visibleCount} 🪐
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Desktop nav */}
-        <div style={{ display: 'flex', gap: 28, alignItems: 'center' }} className="desktop-nav">
-          <a href="#planets"  className="nav-link" style={{ color: S.dim, textDecoration: 'none', fontSize: 15 }}>🪐 პლანეტები</a>
-          <a href="#store"    className="nav-link" style={{ color: S.dim, textDecoration: 'none', fontSize: 15 }}>⭐ მაღაზია</a>
-          <a href="https://astroman.ge" className="nav-link" style={{ color: S.dim, textDecoration: 'none', fontSize: 15 }}>🏠 მთავარი</a>
+        <div style={{ display: 'flex', gap: 24, alignItems: 'center' }} className="desktop-nav">
+          <a href="#planets" className="nav-link" style={{ color: S.dim, textDecoration: 'none', fontSize: 14 }}>🪐 პლანეტები</a>
+          <a href="#sky-map" className="nav-link" style={{ color: S.dim, textDecoration: 'none', fontSize: 14 }}>🗺 ცის რუკა</a>
+          <a href="https://astroman.ge" className="nav-link" style={{
+            color: S.gold, textDecoration: 'none', fontSize: 14, fontWeight: 600,
+            border: `1px solid ${S.gold}44`, borderRadius: 8, padding: '5px 14px',
+          }}>მაღაზია ↗</a>
         </div>
 
         {/* Hamburger */}
-        <button
-          onClick={() => setMenuOpen(o => !o)}
+        <button onClick={() => setMenuOpen(o => !o)}
           style={{ background: 'none', border: 'none', color: '#E8EDF5', fontSize: 24, cursor: 'pointer', padding: 8 }}
-          aria-label="მენიუ"
-          className="hamburger"
-        >
+          aria-label="მენიუ" className="hamburger">
           {menuOpen ? '✕' : '☰'}
         </button>
       </div>
@@ -189,14 +218,25 @@ function Navbar({ menuOpen, setMenuOpen }) {
       {/* Mobile menu */}
       {menuOpen && (
         <div style={{
-          background: 'rgba(8,12,20,0.97)',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-          padding: '12px 20px 20px',
-          display: 'flex', flexDirection: 'column', gap: 16,
+          background: 'rgba(8,12,20,0.98)',
+          borderTop: '1px solid rgba(255,255,255,0.07)',
+          padding: '16px 20px 24px',
+          display: 'flex', flexDirection: 'column', gap: 18,
         }}>
+          {skyStatus && (
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 7,
+              background: `${skyStatus.color}14`, border: `1px solid ${skyStatus.color}40`,
+              borderRadius: 100, padding: '6px 16px',
+              fontSize: 13, color: skyStatus.color, alignSelf: 'flex-start',
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: skyStatus.color, display: 'inline-block', animation: 'pulseGlow 2s infinite' }} />
+              {skyStatus.label}
+            </div>
+          )}
           <a href="#planets"  onClick={() => setMenuOpen(false)} className="nav-link" style={{ color: S.dim, textDecoration: 'none', fontSize: 16 }}>🪐 პლანეტები</a>
-          <a href="#store"    onClick={() => setMenuOpen(false)} className="nav-link" style={{ color: S.dim, textDecoration: 'none', fontSize: 16 }}>⭐ მაღაზია</a>
-          <a href="https://astroman.ge" className="nav-link" style={{ color: S.dim, textDecoration: 'none', fontSize: 16 }}>🏠 მთავარი</a>
+          <a href="#sky-map"  onClick={() => setMenuOpen(false)} className="nav-link" style={{ color: S.dim, textDecoration: 'none', fontSize: 16 }}>🗺 ცის რუკა</a>
+          <a href="https://astroman.ge" className="nav-link" style={{ color: S.gold, textDecoration: 'none', fontSize: 16 }}>🏠 მაღაზია</a>
         </div>
       )}
 
@@ -260,48 +300,118 @@ function Hero({ now, skyStatus, sunset }) {
   );
 }
 
-function StatsRow({ weather, sunData }) {
+function StatsRow({ weather, sunData, now }) {
   const moon = getMoonPhase();
+
+  function fmtT(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit', hour12: false });
+  }
+  function windDirLabel(deg) {
+    if (deg == null) return '';
+    return ['N','NE','E','SE','S','SW','W','NW'][Math.round(deg / 45) % 8];
+  }
+  function cloudColor(pct) {
+    if (pct <= 20) return '#4ade80';
+    if (pct <= 60) return '#f59e0b';
+    return '#ff6b6b';
+  }
+  function tempColor(t) {
+    if (t > 25) return '#f59e0b';
+    if (t > 5)  return '#4FC3C3';
+    return '#93c5fd';
+  }
+  function seeingScore() {
+    if (!weather) return null;
+    let s = 10 - Math.floor(weather.cloud_cover / 10);
+    if (weather.wind_speed_10m > 20) s -= 2;
+    if (weather.wind_speed_10m > 40) s -= 2;
+    return Math.max(1, Math.min(10, s));
+  }
+  const seeing = seeingScore();
+  const seeingColor = seeing ? (seeing >= 7 ? '#4ade80' : seeing >= 4 ? '#f59e0b' : '#ff6b6b') : S.dim;
+  const cc = weather?.cloud_cover ?? 0;
+  const wsp = weather?.wind_speed_10m ?? 0;
+
   const cards = [
     {
-      icon: '🌅',
-      label: 'მზის ჩასვლა',
-      value: sunData?.sunset ? new Date(sunData.sunset).toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit', hour12: false }) : '…',
+      id: 'sunset', icon: '🌅', label: 'მზის ჩასვლა',
+      value: fmtT(sunData?.sunset),
+      sub: sunData?.sunset ? relativeTime(sunData.sunset, now) : '',
     },
     {
-      icon: '🌙',
-      label: `მთვარე ${moon.emoji}`,
+      id: 'sunrise', icon: '🌄', label: 'მზის ამოსვლა',
+      value: fmtT(sunData?.sunrise),
+      sub: sunData?.sunrise ? relativeTime(sunData.sunrise, now) : '',
+    },
+    {
+      id: 'moon', icon: moon.emoji, label: 'მთვარე',
       value: `${moon.illumination}%`,
       sub: moon.name,
+      bar: { pct: moon.illumination, color: '#94a3b8' },
     },
     {
-      icon: '☁️',
-      label: 'ღრუბლიანობა',
-      value: weather ? `${weather.cloud_cover}%` : '…',
+      id: 'clouds', icon: '☁️', label: 'ღრუბლიანობა',
+      value: weather ? `${cc}%` : '…',
       sub: weather ? (WEATHER_CODES[weather.weather_code] || '') : '',
+      bar: weather ? { pct: cc, color: cloudColor(cc) } : null,
+      valueColor: weather ? cloudColor(cc) : '#E8EDF5',
     },
     {
-      icon: '🌡',
-      label: 'ტემპერატურა',
+      id: 'temp', icon: '🌡', label: 'ტემპერატურა',
       value: weather ? `${Math.round(weather.temperature_2m)}°C` : '…',
-      sub: weather ? `💨 ${weather.wind_speed_10m}კმ/სთ` : '',
+      sub: weather?.apparent_temperature != null ? `შეგრძნება ${Math.round(weather.apparent_temperature)}°C` : '',
+      valueColor: weather ? tempColor(weather.temperature_2m) : '#E8EDF5',
+    },
+    {
+      id: 'wind', icon: '💨', label: 'ქარი',
+      value: weather ? `${Math.round(wsp)} კმ/სთ` : '…',
+      sub: weather?.wind_direction_10m != null ? windDirLabel(weather.wind_direction_10m) : '',
+      windDeg: weather?.wind_direction_10m,
+    },
+    {
+      id: 'seeing', icon: '🔭', label: 'ცის ხილვადობა',
+      value: seeing != null ? `${seeing}/10` : '…',
+      sub: seeing != null ? (seeing >= 7 ? 'შესანიშნავი' : seeing >= 4 ? 'საშუალო' : 'ცუდი') : '',
+      bar: seeing != null ? { pct: seeing * 10, color: seeingColor } : null,
+      valueColor: seeingColor,
     },
   ];
 
   return (
     <div style={{ overflowX: 'auto', padding: '0 16px 4px', marginBottom: 32 }}>
       <div style={{ display: 'flex', gap: 12, minWidth: 'max-content', maxWidth: 1100, margin: '0 auto' }}>
-        {cards.map((c, i) => (
-          <div key={i} className="stat-card" style={{
+        {cards.map(c => (
+          <div key={c.id} className="stat-card" style={{
             ...S.glass,
-            minWidth: 160, padding: '16px 20px',
-            display: 'flex', flexDirection: 'column', gap: 4,
-            flex: '1 1 160px',
+            minWidth: 148, padding: '16px 18px',
+            display: 'flex', flexDirection: 'column', gap: 5,
+            flex: '1 1 148px',
           }}>
-            <div className="stat-icon">{c.icon}</div>
-            <div style={{ fontSize: 12, color: S.dim }}>{c.label}</div>
-            <div className="numeric-value" style={{ fontSize: 22, fontWeight: 700, color: '#E8EDF5' }}>{c.value}</div>
-            {c.sub && <div style={{ fontSize: 12, color: S.dim }}>{c.sub}</div>}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div className="stat-icon" style={{ fontSize: 17, width: 36, height: 36 }}>{c.icon}</div>
+              <div style={{ fontSize: 11, color: S.dim, lineHeight: 1.3 }}>{c.label}</div>
+            </div>
+            <div className="numeric-value" style={{ fontSize: 22, fontWeight: 700, color: c.valueColor || '#E8EDF5', lineHeight: 1.1 }}>
+              {c.value}
+            </div>
+            {c.sub && (
+              <div style={{ fontSize: 11, color: S.dim, display: 'flex', alignItems: 'center', gap: 5 }}>
+                {c.windDeg != null && (
+                  <span style={{
+                    display: 'inline-block',
+                    transform: `rotate(${c.windDeg}deg)`,
+                    fontSize: 13, lineHeight: 1,
+                  }}>↑</span>
+                )}
+                {c.sub}
+              </div>
+            )}
+            {c.bar && (
+              <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.08)', overflow: 'hidden', marginTop: 2 }}>
+                <div style={{ height: '100%', width: `${Math.min(100, c.bar.pct)}%`, background: c.bar.color, borderRadius: 2, transition: 'width 0.6s ease' }} />
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -309,106 +419,239 @@ function StatsRow({ weather, sunData }) {
   );
 }
 
+function AltGauge({ alt, size = 64 }) {
+  const pct  = Math.max(0, Math.min(90, alt)) / 90;
+  const cx   = size / 2, cy = size * 0.62, r = size * 0.42;
+  const endA = Math.PI - pct * Math.PI;
+  const dot  = { x: cx + r * Math.cos(endA), y: cy - r * Math.sin(endA) };
+  const lg   = pct > 0.5 ? 1 : 0;
+  const col  = alt > 40 ? '#4ade80' : alt > 15 ? '#f59e0b' : S.blue;
+  return (
+    <svg width={size} height={size * 0.72} style={{ overflow: 'visible', display: 'block' }}>
+      <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 0 ${cx + r} ${cy}`}
+        fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={2.5} strokeLinecap="round" />
+      {pct > 0.01 && (
+        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 ${lg} 0 ${dot.x} ${dot.y}`}
+          fill="none" stroke={col} strokeWidth={2.5} strokeLinecap="round" />
+      )}
+      {pct > 0.01 && <circle cx={dot.x} cy={dot.y} r={3.5} fill={col} />}
+      <text x={cx} y={cy - 1} textAnchor="middle" fill="#E8EDF5"
+        fontSize={11} fontFamily="'Chakra Petch', monospace" fontWeight="700">{alt}°</text>
+    </svg>
+  );
+}
+
 function PlanetCard({ planet, onClick }) {
   const dim = !planet.visible;
+  function fmtRise(d) {
+    if (!d) return null;
+    return new Date(d).toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit', hour12: false });
+  }
   return (
     <button
       onClick={() => onClick(planet)}
       style={{
         ...S.glass,
-        minWidth: 140, padding: '16px 14px',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+        minWidth: 148, padding: '16px 14px 14px',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
         cursor: 'pointer', border: 'none', color: '#E8EDF5',
-        opacity: dim ? 0.4 : 1,
-        transition: 'transform 0.15s, opacity 0.15s',
+        opacity: dim ? 0.38 : 1,
+        transition: 'transform 0.18s, box-shadow 0.18s, opacity 0.18s',
         flexShrink: 0,
         background: planet.visible ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.03)',
+        boxShadow: planet.visible ? `0 0 0 1px ${S.success}28, 0 4px 24px rgba(74,222,128,0.06)` : 'none',
+        position: 'relative', overflow: 'hidden',
       }}
-      onMouseEnter={e => { if (!dim) e.currentTarget.style.transform = 'translateY(-4px)'; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+      onMouseEnter={e => { if (!dim) { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = `0 0 0 1px ${S.success}60, 0 12px 32px rgba(74,222,128,0.15)`; }}}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = planet.visible ? `0 0 0 1px ${S.success}28, 0 4px 24px rgba(74,222,128,0.06)` : 'none'; }}
       aria-label={planet.ka}
     >
-      <span style={{ fontSize: 36 }}>{planet.emoji}</span>
+      {/* Glow bg for visible */}
+      {planet.visible && (
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: 3,
+          background: `linear-gradient(90deg, transparent, ${S.success}80, transparent)`,
+        }} />
+      )}
+
+      <span style={{ fontSize: 38, filter: planet.visible ? 'drop-shadow(0 0 8px rgba(255,255,255,0.3))' : 'none' }}>
+        {planet.emoji}
+      </span>
       <span style={{ fontWeight: 700, fontSize: 15 }}>{planet.ka}</span>
-      <span style={{ fontSize: 11, color: S.dim }}>{planet.constellation}</span>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%', fontSize: 11, color: S.dim }}>
-        <span>alt: {planet.maxAlt}°</span>
-        <span>mag: {planet.mag}</span>
+      <span style={{ fontSize: 10, color: S.dim }}>{planet.constellation}</span>
+
+      {/* Altitude gauge */}
+      <AltGauge alt={planet.altitude} size={68} />
+
+      {/* Rise / Set */}
+      <div style={{ display: 'flex', gap: 10, fontSize: 10, color: S.dim, width: '100%', justifyContent: 'center' }}>
+        {fmtRise(planet.rise) && <span>↑ {fmtRise(planet.rise)}</span>}
+        {fmtRise(planet.set)  && <span>↓ {fmtRise(planet.set)}</span>}
       </div>
+
+      {/* Mag */}
+      <div style={{ fontSize: 10, color: S.dim }}>mag {planet.mag}</div>
+
+      {/* Visibility badge */}
       <div style={{
-        padding: '3px 10px', borderRadius: 100, fontSize: 11,
-        background: planet.visible ? 'rgba(74,222,128,0.15)' : 'rgba(255,107,107,0.15)',
+        padding: '3px 10px', borderRadius: 100, fontSize: 10, marginTop: 2,
+        background: planet.visible ? 'rgba(74,222,128,0.12)' : 'rgba(255,107,107,0.12)',
         color: planet.visible ? S.success : S.danger,
         border: `1px solid ${planet.visible ? S.success : S.danger}44`,
       }}>
-        {planet.visible
-          ? (planet.eye ? '👁 შეუიარაღებელი' : '🔭 ტელესკოპი')
-          : '🚫 არ ჩანს'}
+        {planet.visible ? (planet.eye ? '👁 შეუიარაღებელი' : '🔭 ტელესკოპი') : '🚫 არ ჩანს'}
       </div>
     </button>
   );
 }
 
 function PlanetsSection({ onPlanetClick }) {
+  const livePlanets = useMemo(() => {
+    const live = getVisiblePlanets();
+    return PLANETS.map(p => {
+      const ld = live.find(l => l.id === p.id) || {};
+      return {
+        ...p,
+        altitude: ld.altitude != null ? ld.altitude : p.maxAlt,
+        azimuth:  ld.azimuth  != null ? ld.azimuth  : 0,
+        visible:  ld.visible  != null ? ld.visible   : p.visible,
+        rise: ld.rise || null,
+        set:  ld.set  || null,
+      };
+    });
+  }, []);
+
+  const visibleNow  = livePlanets.filter(p => p.visible);
+  const hiddenNow   = livePlanets.filter(p => !p.visible);
+
   return (
-    <section id="planets" style={{ maxWidth: 1100, margin: '0 auto 40px', padding: '0 16px' }}>
-      <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-        🪐 <span>დღის ცის</span>
-      </h2>
+    <section id="planets" style={{ maxWidth: 1100, margin: '0 auto 44px', padding: '0 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 18 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 700 }}>🪐 პლანეტები ღამის ცაზე</h2>
+        <span style={{
+          fontSize: 12, color: S.success, fontFamily: "'Chakra Petch', monospace",
+          background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)',
+          borderRadius: 100, padding: '2px 10px',
+        }}>{visibleNow.length} ჩანს</span>
+      </div>
       <div style={{ overflowX: 'auto', paddingBottom: 8 }}>
         <div style={{ display: 'flex', gap: 12, minWidth: 'max-content' }}>
-          {PLANETS.map(p => <PlanetCard key={p.id} planet={p} onClick={onPlanetClick} />)}
+          {[...visibleNow, ...hiddenNow].map(p => (
+            <PlanetCard key={p.id} planet={p} onClick={onPlanetClick} />
+          ))}
         </div>
       </div>
-      <style>{`
-        @media (min-width: 768px) {
-          #planets .planet-row { flex-wrap: wrap; overflow-x: visible; }
-        }
-      `}</style>
     </section>
+  );
+}
+
+function ISSGlobe({ lat, lon }) {
+  const W = 160, H = 100;
+  const cx = W / 2, cy = H / 2, r = 44;
+  const tbX = cx + (44.8271 / 180) * r * 2;
+  const tbY = cy - (41.7151 / 90) * r;
+  const issX = cx + ((lon > 180 ? lon - 360 : lon) / 180) * r * 2;
+  const issY = cy - (lat / 90) * r;
+  return (
+    <svg width={W} height={H} style={{ flexShrink: 0 }}>
+      {/* Earth ellipse */}
+      <ellipse cx={cx} cy={cy} rx={r * 2} ry={r} fill="rgba(29,78,216,0.12)" stroke="rgba(59,130,246,0.25)" strokeWidth={1} />
+      {/* Equator */}
+      <line x1={cx - r * 2} y1={cy} x2={cx + r * 2} y2={cy} stroke="rgba(255,255,255,0.07)" strokeWidth={0.5} />
+      {/* Prime meridian */}
+      <ellipse cx={cx} cy={cy} rx={0.5} ry={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={0.5} />
+      {/* Tbilisi dot */}
+      <circle cx={tbX} cy={tbY} r={3} fill={S.gold} opacity={0.8} />
+      <circle cx={tbX} cy={tbY} r={6} fill="none" stroke={S.gold} strokeWidth={0.8} opacity={0.4} />
+      {/* ISS */}
+      <circle cx={issX} cy={issY} r={5} fill={S.blue} />
+      <circle cx={issX} cy={issY} r={10} fill="none" stroke={S.blue} strokeWidth={1} opacity={0.5} className="iss-ring-pulse" />
+      {/* Legend */}
+      <text x={tbX + 8} y={tbY + 4} fill={S.gold} fontSize={8} fontFamily="'Chakra Petch', monospace">TBS</text>
+      <text x={issX + 8} y={issY + 4} fill={S.blue} fontSize={8} fontFamily="'Chakra Petch', monospace">ISS</text>
+    </svg>
   );
 }
 
 function ISSTracker({ iss }) {
   const dist = iss ? Math.round(distanceKm(LAT, LON, iss.latitude, iss.longitude)) : null;
-  const alertLevel = dist !== null
-    ? (dist < 500 ? 'danger' : dist < 1000 ? 'warn' : 'ok')
-    : 'ok';
-  const alertColor = alertLevel === 'danger' ? S.danger : alertLevel === 'warn' ? '#C9A84C' : S.dim;
-  const alertMsg   = alertLevel === 'danger' ? '🔴 ISS ახლოსაა! ზეცაში ადევნეთ თვალი!' :
-                     alertLevel === 'warn'   ? '🟡 ISS ახლოვდება!' : '';
+  const alertLevel = dist !== null ? (dist < 500 ? 'danger' : dist < 1500 ? 'warn' : 'ok') : 'ok';
+  const alertColor = alertLevel === 'danger' ? S.danger : alertLevel === 'warn' ? S.gold : S.dim;
+  const alertMsg   = alertLevel === 'danger' ? '🔴 ISS ახლოსაა — ადევნეთ თვალი ზეცას!' :
+                     alertLevel === 'warn'   ? '🟡 ISS ახლოვდება თბილისს' : null;
+  const velKms = iss ? (iss.velocity / 3600).toFixed(2) : null;
 
   return (
-    <section style={{ maxWidth: 1100, margin: '0 auto 40px', padding: '0 16px' }}>
-      <div style={{ ...S.glass, padding: '24px 28px' }}>
-        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-          🛸 ISS — საერთაშორისო კოსმოსური სადგური
-        </h2>
-        {iss ? (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: '1 1 200px' }}>
-              <div style={{ fontSize: 14 }}>📍 {iss.latitude.toFixed(2)}°N, {iss.longitude.toFixed(2)}°E</div>
-              <div style={{ fontSize: 14 }}>⬆️ სიმაღლე: {Math.round(iss.altitude)} კმ</div>
-              <div style={{ fontSize: 14 }}>⚡ სიჩქარე: {Math.round(iss.velocity).toLocaleString()} კმ/სთ</div>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: '1 1 200px' }}>
-              <div style={{ fontSize: 14 }}>📏 დაშორება: <span style={{ color: alertColor, fontWeight: 700 }}>{dist?.toLocaleString()} კმ</span></div>
-              {alertMsg && <div style={{ color: alertColor, fontSize: 13, fontWeight: 600 }}>{alertMsg}</div>}
-              {/* Distance bar */}
-              <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: 100, height: 8, overflow: 'hidden', maxWidth: 220 }}>
-                <div style={{
-                  height: '100%', borderRadius: 100,
-                  background: alertColor,
-                  width: `${Math.max(5, Math.min(100, 100 - (dist / 20000) * 100))}%`,
-                  transition: 'width 0.5s',
-                }} />
-              </div>
+    <section style={{ maxWidth: 1100, margin: '0 auto 44px', padding: '0 16px' }}>
+      <div style={{ ...S.glass, padding: '24px 28px', overflow: 'hidden', position: 'relative' }}>
+
+        {/* Subtle orbital bg decoration */}
+        <div style={{
+          position: 'absolute', top: -60, right: -60,
+          width: 220, height: 220, borderRadius: '50%',
+          border: '1px solid rgba(79,195,195,0.08)',
+          pointerEvents: 'none',
+        }} />
+        <div style={{
+          position: 'absolute', top: -30, right: -30,
+          width: 140, height: 140, borderRadius: '50%',
+          border: '1px solid rgba(79,195,195,0.12)',
+          pointerEvents: 'none',
+        }} />
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+          <div>
+            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
+              🛸 ISS — საერთაშორისო კოსმოსური სადგური
+            </h2>
+            <div style={{ fontSize: 11, color: S.dim, fontFamily: "'Chakra Petch', monospace" }}>
+              REAL-TIME · 5s REFRESH · ALTITUDE ~408 KM
             </div>
           </div>
+          {iss && <ISSGlobe lat={iss.latitude} lon={iss.longitude} />}
+        </div>
+
+        {iss ? (
+          <>
+            {alertMsg && (
+              <div style={{
+                marginBottom: 16, padding: '10px 16px', borderRadius: 10,
+                background: `${alertColor}18`, border: `1px solid ${alertColor}44`,
+                color: alertColor, fontSize: 13, fontWeight: 600,
+              }}>{alertMsg}</div>
+            )}
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
+              {[
+                { icon: '📍', label: 'კოორდინატები', value: `${iss.latitude.toFixed(2)}°, ${iss.longitude.toFixed(2)}°` },
+                { icon: '⬆️', label: 'სიმაღლე', value: `${Math.round(iss.altitude)} კმ`, bar: { pct: (iss.altitude / 450) * 100, color: S.blue } },
+                { icon: '⚡', label: 'სიჩქარე', value: `${Math.round(iss.velocity).toLocaleString()} კმ/სთ`, sub: `${velKms} კმ/წმ` },
+                { icon: '📏', label: 'დაშორება (თბ.)', value: `${dist?.toLocaleString()} კმ`, valueColor: alertColor, bar: { pct: Math.max(2, Math.min(100, 100 - (dist / 20000) * 100)), color: alertColor } },
+              ].map(item => (
+                <div key={item.label} style={{
+                  background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
+                  borderRadius: 10, padding: '12px 14px',
+                }}>
+                  <div style={{ fontSize: 11, color: S.dim, marginBottom: 4 }}>{item.icon} {item.label}</div>
+                  <div className="numeric-value" style={{ fontSize: 20, fontWeight: 700, color: item.valueColor || '#E8EDF5' }}>{item.value}</div>
+                  {item.sub && <div style={{ fontSize: 11, color: S.dim, marginTop: 2 }}>{item.sub}</div>}
+                  {item.bar && (
+                    <div style={{ height: 3, background: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden', marginTop: 8 }}>
+                      <div style={{ height: '100%', width: `${item.bar.pct}%`, background: item.bar.color, borderRadius: 2, transition: 'width 0.5s' }} />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
           <div style={{ color: S.dim, fontSize: 14 }}>ISS მონაცემები იტვირთება…</div>
         )}
       </div>
+      <style>{`
+        @keyframes issRingPulse { 0%,100% { r: 10; opacity: 0.5; } 50% { r: 15; opacity: 0.1; } }
+        .iss-ring-pulse { animation: issRingPulse 2s ease-in-out infinite; }
+      `}</style>
     </section>
   );
 }
@@ -567,15 +810,57 @@ function CosmosGallery({ cosmos }) {
 
 function SkyMap() {
   return (
-    <section style={{ maxWidth: 1100, margin: '0 auto 40px', padding: '0 16px' }}>
-      <div style={{ ...S.glass, overflow: 'hidden' }}>
-        <div style={{ padding: '20px 24px 12px', fontWeight: 700, fontSize: 17 }}>
-          🗺 ვარსკვლავური რუკა
+    <section id="sky-map" style={{ maxWidth: 1100, margin: '0 auto 44px', padding: '0 16px' }}>
+      <div style={{ ...S.glass, overflow: 'hidden', border: '1px solid rgba(79,195,195,0.15)' }}>
+
+        {/* Header */}
+        <div style={{ padding: '20px 28px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 4 }}>🗺 ცოცხალი ვარსკვლავური რუკა</div>
+            <div style={{ fontSize: 11, color: S.dim, fontFamily: "'Chakra Petch', monospace" }}>
+              STELLARIUM · TBILISI · 41.71°N 44.82°E · ALT 491M
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {[
+              { label: 'გადაიტანე', icon: '✋' },
+              { label: 'ზუმი', icon: '🔍' },
+              { label: 'სრული ეკრანი', icon: '⛶' },
+            ].map(h => (
+              <div key={h.label} style={{
+                display: 'flex', alignItems: 'center', gap: 5,
+                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 8, padding: '5px 10px', fontSize: 11, color: S.dim,
+              }}>
+                <span>{h.icon}</span> {h.label}
+              </div>
+            ))}
+          </div>
         </div>
-        <div style={{ padding: '0 0 8px', color: S.dim, fontSize: 12, paddingLeft: 24 }}>
-          შეეხეთ და გადაიტანეთ ცის სანახავად · Tbilisi, Georgia
+
+        {/* Coordinate strip */}
+        <div style={{
+          margin: '14px 28px 0',
+          padding: '8px 14px',
+          background: 'rgba(79,195,195,0.06)', border: '1px solid rgba(79,195,195,0.15)',
+          borderRadius: 8,
+          display: 'flex', gap: 24, flexWrap: 'wrap',
+        }}>
+          {[
+            { label: 'LAT', value: '41.7151° N' },
+            { label: 'LON', value: '44.8271° E' },
+            { label: 'ALT', value: '491 m' },
+            { label: 'TZ',  value: 'Asia/Tbilisi (UTC+4)' },
+          ].map(c => (
+            <div key={c.label} style={{ fontSize: 11 }}>
+              <span style={{ color: S.dim, fontFamily: "'Chakra Petch', monospace" }}>{c.label} </span>
+              <span style={{ color: S.blue, fontFamily: "'Chakra Petch', monospace", fontWeight: 700 }}>{c.value}</span>
+            </div>
+          ))}
         </div>
-        <div style={{ position: 'relative', height: 400, overflow: 'hidden', borderRadius: '0 0 20px 20px' }}>
+
+        {/* Map iframe */}
+        <div style={{ position: 'relative', height: 520, overflow: 'hidden', margin: '14px 0 0', borderRadius: '0 0 12px 12px' }}>
           <iframe
             src="https://stellarium-web.org/"
             title="Stellarium Sky Map"
@@ -621,27 +906,104 @@ function Footer() {
   return (
     <footer style={{
       borderTop: '1px solid rgba(255,255,255,0.08)',
-      padding: '32px 20px',
-      textAlign: 'center',
+      background: 'linear-gradient(180deg, transparent, rgba(201,168,76,0.03))',
+      padding: '48px 20px 28px',
       color: S.dim,
       fontSize: 13,
     }}>
-      <div style={{ maxWidth: 700, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-          <img src="/logo-icon.png" alt="Astroman" style={{ height: 44, width: 'auto', filter: 'invert(1) drop-shadow(0 0 6px rgba(201,168,76,0.5))' }} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, textAlign: 'left' }}>
-            <span style={{ fontSize: 20, fontWeight: 700, color: S.gold, letterSpacing: 1, lineHeight: 1 }}>ასტრომანი</span>
-            <span style={{ fontSize: 10, color: S.dim, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: "'Chakra Petch', monospace" }}>Sky Intelligence</span>
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+
+        {/* Top grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 40, marginBottom: 40 }}>
+
+          {/* Brand column */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <img src="/logo-icon.png" alt="Astroman" style={{ height: 44, filter: 'invert(1) drop-shadow(0 0 8px rgba(201,168,76,0.5))' }} />
+              <div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: S.gold, lineHeight: 1 }}>ასტრომანი</div>
+                <div style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: "'Chakra Petch', monospace", marginTop: 2 }}>Sky Intelligence</div>
+              </div>
+            </div>
+            <div style={{ fontSize: 13, lineHeight: 1.7, color: S.dim, maxWidth: 220 }}>
+              სამყაროს ყოველდღიური სახელმძღვანელო. ცოცხალი სამყაროს ინტელექტი.
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              {['FB', 'IG', 'YT', 'TG'].map(s => (
+                <div key={s} style={{
+                  width: 32, height: 32, borderRadius: 8,
+                  background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 10, fontFamily: "'Chakra Petch', monospace", color: S.dim,
+                  cursor: 'pointer',
+                }}>
+                  {s}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <div>
+            <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', color: S.gold, fontFamily: "'Chakra Petch', monospace", marginBottom: 16 }}>ნავიგაცია</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                { href: '#planets',   label: '🪐 პლანეტები' },
+                { href: '#sky-map',   label: '🗺 ცის რუკა' },
+                { href: '#planets',   label: '🌌 NASA სურათი' },
+                { href: 'https://astroman.ge', label: '🛍 ტელესკოპები' },
+                { href: 'https://club.astroman.ge', label: '⭐ ასტრომანი კლუბი' },
+              ].map(l => (
+                <a key={l.label} href={l.href} style={{ color: S.dim, textDecoration: 'none', fontSize: 13, transition: 'color 0.2s' }}
+                  onMouseEnter={e => e.target.style.color = S.gold}
+                  onMouseLeave={e => e.target.style.color = S.dim}>
+                  {l.label}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', color: S.gold, fontFamily: "'Chakra Petch', monospace", marginBottom: 16 }}>კონტაქტი</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                { icon: '📍', text: 'თბილისი, ქ. ყიფიანის 17' },
+                { icon: '📞', text: '599 39 67 21' },
+                { icon: '✉️', text: 'info@astroman.ge' },
+                { icon: '🌐', text: 'astroman.ge' },
+              ].map(c => (
+                <div key={c.icon} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13 }}>
+                  <span>{c.icon}</span>
+                  <span style={{ color: S.dim }}>{c.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Sky status / live */}
+          <div>
+            <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', color: S.gold, fontFamily: "'Chakra Petch', monospace", marginBottom: 16 }}>ცოცხალი სტატუსი</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
+              <div style={{ color: S.dim }}>📡 Open-Meteo — ამინდი</div>
+              <div style={{ color: S.dim }}>🛸 WhereTheISS — ISS</div>
+              <div style={{ color: S.dim }}>🔭 Stellarium — ცის რუკა</div>
+              <div style={{ color: S.dim }}>🌙 NASA APOD — სურათი</div>
+              <div style={{ color: S.dim }}>☀️ Sunrise-Sunset API</div>
+            </div>
           </div>
         </div>
-        <div>სამყაროს ყოველდღიური სახელმძღვანელო</div>
-        <div>📍 თბილისი, ქ. ყიფიანის 17 | 📞 599 39 67 21 | ✉️ info@astroman.ge</div>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginTop: 4 }}>
-          <a href="https://astroman.ge" style={{ color: S.dim, textDecoration: 'none' }}>🏠 მთავარი</a>
-          <a href="https://astroman.ge" style={{ color: S.dim, textDecoration: 'none' }}>⭐ მაღაზია</a>
-          <a href="https://astroman.ge" style={{ color: S.dim, textDecoration: 'none' }}>📱 აპლიკაცია</a>
+
+        {/* Divider */}
+        <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: 20 }} />
+
+        {/* Bottom row */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+          <div style={{ fontSize: 12 }}>© 2026 ASTROMAN — ყველა უფლება დაცულია</div>
+          <div style={{ fontSize: 11, fontFamily: "'Chakra Petch', monospace", color: S.dim }}>
+            sky.astroman.ge · TBILISI · 41.71°N
+          </div>
         </div>
-        <div style={{ fontSize: 12, marginTop: 8 }}>© 2026 ASTROMAN</div>
       </div>
     </footer>
   );
@@ -958,7 +1320,7 @@ export default function SKY() {
   const fetchAllData = useCallback(async () => {
     try {
       const [wRes, sRes] = await Promise.all([
-        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,cloud_cover,wind_speed_10m,weather_code,precipitation&timezone=Asia/Tbilisi`),
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,cloud_cover,wind_speed_10m,wind_direction_10m,weather_code,precipitation,relative_humidity_2m&timezone=Asia/Tbilisi`),
         fetch(`https://api.sunrise-sunset.org/json?lat=${LAT}&lng=${LON}&formatted=0&tzid=Asia/Tbilisi`),
       ]);
       if (wRes.ok) {
@@ -1021,16 +1383,17 @@ export default function SKY() {
     load();
   }, []);
 
-  const skyStatus = getSkyStatus(sunData?.sunrise, sunData?.sunset, sunData?.civil_twilight_end, now);
+  const skyStatus    = getSkyStatus(sunData?.sunrise, sunData?.sunset, sunData?.civil_twilight_end, now);
+  const visibleCount = useMemo(() => getVisiblePlanets().filter(p => p.visible).length, []);
 
   return (
     <div style={S.root}>
-      <Navbar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+      <Navbar menuOpen={menuOpen} setMenuOpen={setMenuOpen} skyStatus={skyStatus} visibleCount={visibleCount} />
 
       <Hero now={now} skyStatus={skyStatus} sunset={sunData?.sunset} />
 
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <StatsRow weather={weather} sunData={sunData} />
+        <StatsRow weather={weather} sunData={sunData} now={now} />
       </div>
 
       <TonightsSkyCard weather={weather} />
