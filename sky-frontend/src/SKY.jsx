@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { getVisiblePlanets, getMoonInfo, getSunTimes, getStargazingScore } from './lib/astronomy';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -769,6 +770,172 @@ function PlanetModal({ planet, onClose }) {
   );
 }
 
+function TonightsSkyCard({ weather }) {
+  const cloudCover = weather?.cloud_cover ?? null;
+
+  const astro = useMemo(() => {
+    const now = new Date();
+    const sun     = getSunTimes(now);
+    const moon    = getMoonInfo(now);
+    const planets = getVisiblePlanets(now).filter(p => p.visible);
+    const score   = getStargazingScore(
+      cloudCover ?? 50,
+      moon.illumination,
+      now.getHours()
+    );
+    return { sun, moon, planets, score };
+  }, [cloudCover]);
+
+  function fmt(date) {
+    if (!date) return '—';
+    return new Date(date).toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit', hour12: false });
+  }
+
+  function cloudLabel(pct) {
+    if (pct === null) return '—';
+    if (pct <= 10)  return 'მოწმენდილი';
+    if (pct <= 30)  return 'ძირითადად მოწმენდილი';
+    if (pct <= 60)  return 'ნაწილობრივ მოღრუბლული';
+    return 'მოღრუბლული';
+  }
+
+  function scoreColor(s) {
+    if (s >= 80) return '#4FC3C3';
+    if (s >= 60) return '#4ade80';
+    if (s >= 30) return '#f59e0b';
+    return '#ff6b6b';
+  }
+
+  function scoreLabel(s) {
+    if (s >= 80) return 'შესანიშნავი';
+    if (s >= 60) return 'კარგი';
+    if (s >= 30) return 'საშუალო';
+    return 'ცუდი';
+  }
+
+  const now = new Date();
+  const dateStr = `${now.getDate()} ${GEO_MONTHS[now.getMonth()]}`;
+
+  const viewStart = astro.sun.astroTwilightEnd || astro.sun.sunset;
+  const viewEnd   = astro.sun.astroTwilightBegin || astro.sun.sunrise;
+
+  return (
+    <section style={{ maxWidth: 1100, margin: '0 auto 32px', padding: '0 16px' }}>
+      <a
+        href="/sky-tools/conditions"
+        style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+      >
+        <div
+          style={{
+            ...S.glass,
+            padding: '24px 28px',
+            cursor: 'pointer',
+            transition: 'border-color 0.2s, background 0.2s',
+            border: '1px solid rgba(201,168,76,0.15)',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.35)'; e.currentTarget.style.background = S.glassHover.background; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.15)'; e.currentTarget.style.background = S.glass.background; }}
+        >
+          {/* Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 8 }}>
+            <div>
+              <div style={{ fontSize: 18, fontWeight: 700 }}>🌌 დღეს ღამის ცა</div>
+              <div style={{ fontSize: 12, color: S.dim, marginTop: 2 }}>{dateStr} · თბილისი</div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{
+                fontSize: 48, fontWeight: 700, lineHeight: 1,
+                color: scoreColor(astro.score),
+                fontFamily: "'Chakra Petch', monospace",
+              }}>
+                {astro.score}
+              </div>
+              <div style={{ fontSize: 11, color: scoreColor(astro.score), textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                {scoreLabel(astro.score)}
+              </div>
+            </div>
+          </div>
+
+          {/* Row 1: Sun + Cloud */}
+          <div style={{ display: 'flex', gap: 24, marginBottom: 18, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ fontSize: 11, color: S.dim, textTransform: 'uppercase', letterSpacing: '0.08em' }}>მზე</div>
+              <div style={{ fontSize: 13, display: 'flex', gap: 16 }}>
+                <span>🌅 {fmt(astro.sun.sunset)}</span>
+                <span>🌄 {fmt(astro.sun.sunrise)}</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ fontSize: 11, color: S.dim, textTransform: 'uppercase', letterSpacing: '0.08em' }}>ღრუბლიანობა</div>
+              <div style={{ fontSize: 13 }}>
+                {cloudCover !== null
+                  ? `☁️ ${cloudCover}% — ${cloudLabel(cloudCover)}`
+                  : '—'}
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ fontSize: 11, color: S.dim, textTransform: 'uppercase', letterSpacing: '0.08em' }}>საუკეთესო პერიოდი</div>
+              <div style={{ fontSize: 13, color: '#4FC3C3', fontFamily: "'Chakra Petch', monospace" }}>
+                🔭 {fmt(viewStart)} — {fmt(viewEnd)}
+              </div>
+            </div>
+          </div>
+
+          {/* Moon */}
+          <div style={{
+            ...S.glass,
+            display: 'flex', alignItems: 'center', gap: 14,
+            padding: '12px 16px', marginBottom: 16, borderRadius: 10,
+            background: 'rgba(255,255,255,0.03)',
+          }}>
+            <span style={{ fontSize: 28 }}>{astro.moon.phaseEmoji}</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13, fontWeight: 600 }}>{astro.moon.phaseName}</div>
+              <div style={{ fontSize: 11, color: S.dim }}>{astro.moon.illumination}% განათება · {astro.moon.age} დღე</div>
+            </div>
+            <div style={{ fontSize: 12, color: S.dim, textAlign: 'right' }}>
+              <div>↑ {fmt(astro.moon.rise)}</div>
+              <div>↓ {fmt(astro.moon.set)}</div>
+            </div>
+          </div>
+
+          {/* Visible Planets */}
+          {astro.planets.length > 0 ? (
+            <div>
+              <div style={{ fontSize: 11, color: S.dim, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+                ხილული პლანეტები ({astro.planets.length})
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {astro.planets.map(p => (
+                  <div key={p.id} style={{
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.07)',
+                    borderRadius: 8, padding: '8px 12px',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                    minWidth: 72,
+                  }}>
+                    <span style={{ fontSize: 20 }}>{p.emoji}</span>
+                    <span style={{ fontSize: 11, fontWeight: 600 }}>{p.ka}</span>
+                    <span style={{ fontSize: 10, color: S.dim }}>{p.altitude}°</span>
+                    <span style={{ fontSize: 10, color: S.dim }}>↑ {fmt(p.rise)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div style={{ fontSize: 13, color: S.dim }}>ამჟამად პლანეტები ჰორიზონტის ქვემოთაა</div>
+          )}
+
+          {/* Footer hint */}
+          <div style={{ marginTop: 16, fontSize: 11, color: S.dim, textAlign: 'right' }}>
+            სრული ინფო → /sky-tools/conditions ↗
+          </div>
+        </div>
+      </a>
+    </section>
+  );
+}
+
 // ─── Main App ─────────────────────────────────────────────────────────────────
 
 export default function SKY() {
@@ -865,6 +1032,8 @@ export default function SKY() {
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
         <StatsRow weather={weather} sunData={sunData} />
       </div>
+
+      <TonightsSkyCard weather={weather} />
 
       <PlanetsSection onPlanetClick={setSelPlanet} />
 
