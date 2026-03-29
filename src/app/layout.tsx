@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono, Noto_Sans_Georgian, Space_Grotesk } from "next/font/google";
 
+import { MobileNav } from "@/components/layout/MobileNav";
+import { Navigation } from "@/components/layout/Navigation";
 import { AppProviders } from "@/components/providers/AppProviders";
 import "./globals.css";
 
@@ -20,8 +22,8 @@ const notoSansGeorgian = Noto_Sans_Georgian({
 });
 
 export const metadata: Metadata = {
-  title: "Astroman Skywatcher",
-  description: "Unified Astroman astronomy, missions, and community platform.",
+  title: "ასტრომანი",
+  description: "ასტრონომიის, მისიების და საზოგადოების ერთიანი პლატფორმა.",
 };
 
 export default function RootLayout({
@@ -30,11 +32,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ka">
+    <html lang="ka" suppressHydrationWarning>
       <body
         className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} ${notoSansGeorgian.variable} bg-void text-text-primary antialiased`}
       >
-        <AppProviders>{children}</AppProviders>
+        <AppProviders>
+          <Navigation />
+          <MobileNav />
+          {children}
+        </AppProviders>
       </body>
     </html>
   );

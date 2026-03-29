@@ -1,7 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+import { hasSupabaseConfig } from "./supabase";
+
 export async function createClient() {
+  if (!hasSupabaseConfig()) {
+    throw new Error("Supabase environment variables are not configured.");
+  }
+
   const cookieStore = await cookies();
 
   return createServerClient(
