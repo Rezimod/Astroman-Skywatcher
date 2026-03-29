@@ -1,140 +1,36 @@
-# 🔭 Astroman Skywatcher System
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-**ავტომატური ასტრონომიული დაკვირვების სისტემა თბილისისთვის**
+## Getting Started
 
-ყოველდღიურად აგზავნის პერსონალიზებულ ასტრონომიულ გზამკვლევს: პლანეტების პოზიციები, მთვარის ფაზა, ამინდის პროგნოზი და ტელესკოპის რეკომენდაცია.
-
----
-
-## 🏗 ტექნოლოგიური სტეკი
-
-| კომპონენტი | ტექნოლოგია |
-|---|---|
-| Backend | Python 3.11+, FastAPI |
-| Scheduler | APScheduler |
-| Astronomy | Skyfield + Ephem |
-| Weather | OpenWeather API |
-| Email | SMTP / SendGrid |
-| Telegram | python-telegram-bot |
-| Frontend | HTML + Tailwind CSS |
-| Database | SQLite (aiofiles) |
-| Deployment | Docker, Railway/Render |
-
-## 📁 პროექტის სტრუქტურა
-
-```
-astroman-skywatcher/
-├── app/
-│   ├── __init__.py
-│   ├── main.py                  # FastAPI application entry
-│   ├── config.py                # Settings & environment
-│   ├── database.py              # SQLite setup
-│   ├── models.py                # DB models
-│   ├── api/
-│   │   ├── __init__.py
-│   │   ├── routes_dashboard.py  # Dashboard routes
-│   │   ├── routes_admin.py      # Admin panel routes
-│   │   ├── routes_subscribers.py # Subscriber management
-│   │   └── routes_api.py        # REST API endpoints
-│   ├── core/
-│   │   ├── __init__.py
-│   │   ├── astronomy.py         # Planet positions, moon phase
-│   │   ├── weather.py           # OpenWeather integration
-│   │   ├── observation.py       # AI observation text generator
-│   │   └── telescope.py         # Smart telescope linking
-│   ├── services/
-│   │   ├── __init__.py
-│   │   ├── email_service.py     # Email sender (SMTP/SendGrid)
-│   │   ├── telegram_service.py  # Telegram bot
-│   │   ├── scheduler.py         # Cron job scheduler
-│   │   └── daily_pipeline.py    # Daily data pipeline
-│   ├── templates/
-│   │   ├── base.html
-│   │   ├── dashboard.html
-│   │   ├── admin.html
-│   │   ├── subscribe.html
-│   │   └── email/
-│   │       ├── daily_observation.html
-│   │       └── weekly_summary.html
-│   └── static/
-│       ├── css/
-│       │   └── style.css
-│       └── js/
-│           └── admin.js
-├── scripts/
-│   └── init_db.py
-├── tests/
-│   └── test_astronomy.py
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-├── .env.example
-├── .gitignore
-└── README.md
-```
-
-## 🚀 სწრაფი დაწყება
-
-### 1. კლონირება და სეტაპი
+First, run the development server:
 
 ```bash
-git clone https://github.com/your-org/astroman-skywatcher.git
-cd astroman-skywatcher
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-### 2. Environment Variables
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-```bash
-cp .env.example .env
-# შეავსეთ .env ფაილი თქვენი API keys-ით
-```
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-### 3. მონაცემთა ბაზის ინიციალიზაცია
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-```bash
-python scripts/init_db.py
-```
+## Learn More
 
-### 4. გაშვება
+To learn more about Next.js, take a look at the following resources:
 
-```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-Dashboard: http://localhost:8000
-Admin: http://localhost:8000/admin
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## 🐳 Docker Deployment
+## Deploy on Vercel
 
-```bash
-docker-compose up --build -d
-```
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-## ☁️ Railway/Render Deployment
-
-### Railway
-1. შექმენით ახალი პროექტი Railway-ზე
-2. დააკავშირეთ GitHub repo
-3. დააყენეთ Environment Variables
-4. Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-
-### Render
-1. შექმენით ახალი Web Service
-2. Build Command: `pip install -r requirements.txt`
-3. Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-4. დააყენეთ Environment Variables
-
-## 🔐 Security
-
-- ყველა API key `.env` ფაილში
-- Admin panel დაცულია პაროლით
-- Rate limiting API endpoints-ზე
-- Input validation ყველა ფორმაზე
-- CORS კონფიგურაცია
-
-## 📄 ლიცენზია
-
-© ASTROMAN — ყველა უფლება დაცულია.
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
