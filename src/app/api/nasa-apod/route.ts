@@ -17,6 +17,8 @@ export async function GET() {
       title: data.title,
       explanation: data.explanation,
       imageUrl: data.url,
+      hdurl: data.hdurl ?? data.url,
+      mediaType: data.media_type ?? "image",
       date: data.date,
     });
   } catch {

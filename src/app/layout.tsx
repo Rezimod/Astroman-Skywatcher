@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono, Noto_Sans_Georgian, Space_Grotesk } from "next/font/google";
 
-import { MobileNav } from "@/components/layout/MobileNav";
-import { Navigation } from "@/components/layout/Navigation";
 import { AppProviders } from "@/components/providers/AppProviders";
 import "./globals.css";
 
@@ -37,8 +35,6 @@ export default function RootLayout({
         className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} ${notoSansGeorgian.variable} bg-void text-text-primary antialiased`}
       >
         <AppProviders>
-          <Navigation />
-          <MobileNav />
           {children}
         </AppProviders>
       </body>

@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { getMoonInfo, getStargazingScore, getSunTimes, getVisiblePlanets } from "@/lib/astronomy";
 import { DEFAULT_LOCATION, OPEN_METEO_URL } from "@/lib/site";
 
-export const revalidate = 600;
+export const revalidate = 1800;
 
 export async function GET() {
   try {
@@ -17,23 +17,25 @@ export async function GET() {
     });
 
     const response = await fetch(`${OPEN_METEO_URL}?${params.toString()}`, {
-      next: { revalidate: 600 },
+      next: { revalidate: 1800 },
     });
 
     const weather = response.ok ? await response.json() : null;
     const moon = getMoonInfo();
     const sun = getSunTimes();
-    const cloudCover = weather?.hourly?.cloud_cover?.[12] ?? 25;
-    const score = getStargazingScore(cloudCover, moon.illumination);
+    const nowHour = new Date().getHours();
+    const cloudCover = weather?.hourly?.cloud_cover?.[nowHour] ?? 25;
+    const score = getStargazingScore(cloudCover, moon.illumination / 100);
 
     return NextResponse.json({
       location: DEFAULT_LOCATION,
       stargazingScore: score,
       cloudCover,
-      visibility: weather?.hourly?.visibility?.[12] ?? 12000,
-      temperature: weather?.hourly?.temperature_2m?.[12] ?? 12,
-      humidity: weather?.hourly?.relative_humidity_2m?.[12] ?? 55,
-      windSpeed: weather?.hourly?.wind_speed_10m?.[12] ?? 3.5,
+      visibility: weather?.hourly?.visibility?.[nowHour] ?? 12000,
+      temperature: weather?.hourly?.temperature_2m?.[nowHour] ?? 12,
+      humidity: weather?.hourly?.relative_humidity_2m?.[nowHour] ?? 55,
+      windSpeed: weather?.hourly?.wind_speed_10m?.[nowHour] ?? 3.5,
+      hourlyCloudCover: weather?.hourly?.cloud_cover?.slice(nowHour, nowHour + 12) ?? [],
       moon,
       sun,
       planets: getVisiblePlanets(),

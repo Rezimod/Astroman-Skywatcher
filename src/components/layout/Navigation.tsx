@@ -14,7 +14,7 @@ const desktopNavItems = [
   { href: "/missions", label: "მისიები" },
   { href: "/gallery", label: "გალერეა" },
   { href: "/leaderboard", label: "ლიდერბორდი" },
-  { href: "/sky-tools/conditions", label: "ცა" },
+  { href: "/sky-tools/conditions", label: "ცის პირობები" },
 ] as const;
 
 function isUtilityRoute(pathname: string) {

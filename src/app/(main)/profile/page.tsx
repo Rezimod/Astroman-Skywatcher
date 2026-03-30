@@ -1,44 +1,118 @@
 import { checkNewBadges, getLevelForPoints, getProgressToNextLevel } from "@/lib/gamification";
 import { observations } from "@/lib/mock-data";
+import { Badge } from "@/components/ui/badge";
+import { ButtonLink } from "@/components/ui/button";
+
+// Demo profile — replace with Supabase auth user in production
+const DEMO = {
+  username: "ნიკა",
+  points: 1420,
+  observationsCount: 12,
+  missionsCompleted: 5,
+  streakDays: 3,
+  joinedAt: "2026-01-15",
+};
 
 export default function ProfilePage() {
-  const points = 1420;
-  const level = getLevelForPoints(points);
-  const progress = getProgressToNextLevel(points);
-  const earnedBadges = checkNewBadges(points, 12, 5);
+  const level = getLevelForPoints(DEMO.points);
+  const progress = getProgressToNextLevel(DEMO.points);
+  const earnedBadges = checkNewBadges(DEMO.points, DEMO.observationsCount, DEMO.missionsCompleted);
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[1fr,1.2fr]">
-      <section className="card p-6">
-        <div className="flex items-center gap-4">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-accent/20 text-2xl text-white">ნ</div>
-          <div>
-            <h1 className="text-3xl font-semibold text-white">ნიკა</h1>
-            <p className="text-text-secondary">{level.titleKa}</p>
+    <div className="mx-auto max-w-3xl space-y-5">
+      {/* Header card */}
+      <div className="rounded-2xl border border-white/8 bg-[#0A0F1E] p-6">
+        <div className="flex items-start gap-5">
+          <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-full bg-indigo-500/20 text-3xl font-bold text-indigo-200">
+            {DEMO.username.slice(0, 1)}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-2xl font-semibold text-white">{DEMO.username}</h1>
+              <Badge tone="accent">{level.titleKa}</Badge>
+            </div>
+            <p className="mt-1 text-sm text-slate-400">თბილისი, საქართველო</p>
+            <div className="mt-4">
+              <div className="mb-1 flex items-center justify-between text-xs">
+                <span className="text-slate-500">LVL {level.level} → {level.level + 1}</span>
+                <span className="font-mono text-amber-400">{progress.current} / {progress.needed} XP</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-white/6">
+                <div
+                  className="h-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-400 transition-all"
+                  style={{ width: `${progress.percentage}%` }}
+                />
+              </div>
+            </div>
           </div>
         </div>
-        <div className="mt-6 h-2 rounded-full bg-white/5">
-          <div className="h-2 rounded-full bg-accent" style={{ width: `${progress.percentage}%` }} />
+      </div>
+
+      {/* Stats grid */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {[
+          { label: "XP ქულა", value: DEMO.points.toLocaleString(), color: "text-amber-400" },
+          { label: "დაკვირვება", value: DEMO.observationsCount, color: "text-indigo-300" },
+          { label: "მისია", value: DEMO.missionsCompleted, color: "text-emerald-400" },
+          { label: "სერია", value: `${DEMO.streakDays}🔥`, color: "text-orange-400" },
+        ].map((stat) => (
+          <div key={stat.label} className="rounded-2xl border border-white/8 bg-[#0A0F1E] p-4 text-center">
+            <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+            <p className="mt-1 text-[10px] uppercase tracking-wider text-slate-500">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Badges */}
+      {earnedBadges.length > 0 && (
+        <div className="rounded-2xl border border-white/8 bg-[#0A0F1E] p-5">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">ბეჯები</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {earnedBadges.map((badge) => (
+              <span
+                key={badge}
+                className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1.5 text-sm font-medium text-amber-300"
+              >
+                {badge}
+              </span>
+            ))}
+          </div>
         </div>
-        <p className="mt-2 text-sm text-text-muted">{progress.current} / {progress.needed} XP</p>
-      </section>
-      <section className="card p-6">
-        <h2 className="text-xl font-medium text-white">ბოლო დაკვირვებები</h2>
+      )}
+
+      {/* Recent observations */}
+      <div className="rounded-2xl border border-white/8 bg-[#0A0F1E] p-5">
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">ბოლო დაკვირვებები</p>
+          <ButtonLink href="/gallery" variant="secondary" size="sm">ყველა</ButtonLink>
+        </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {observations.slice(0, 2).map((item) => (
-            <div key={item.id} className="rounded-2xl border border-white/10 bg-space p-4">
-              <p className="text-white">{item.objectName}</p>
-              <p className="mt-1 text-sm text-text-secondary">{item.submittedAt.slice(0, 10)}</p>
+          {observations.slice(0, 4).map((obs) => (
+            <div key={obs.id} className="flex items-center gap-3 rounded-xl border border-white/6 bg-white/3 p-3">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-500/12 text-lg">
+                🌌
+              </div>
+              <div className="min-w-0">
+                <p className="truncate font-medium text-white">{obs.objectName}</p>
+                <p className="text-xs text-slate-400">{obs.submittedAt.slice(0, 10)} · <span className="text-amber-400">+{obs.pointsEarned} ✦</span></p>
+              </div>
             </div>
           ))}
         </div>
-        <h3 className="mt-6 text-lg font-medium text-white">ბეჯები</h3>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {earnedBadges.slice(0, 6).map((badge) => (
-            <span key={badge} className="rounded-full bg-gold/15 px-3 py-2 text-sm text-gold">{badge}</span>
-          ))}
-        </div>
-      </section>
+      </div>
+
+      {/* Actions */}
+      <div className="flex flex-wrap gap-3">
+        <ButtonLink href="/missions" size="lg">
+          ახალი მისია
+        </ButtonLink>
+        <ButtonLink href="/leaderboard" variant="secondary" size="lg">
+          ლიდერბორდი
+        </ButtonLink>
+        <button className="rounded-full border border-rose-500/25 bg-rose-500/10 px-5 py-2.5 text-sm font-medium text-rose-400 transition-colors hover:bg-rose-500/15">
+          გამოსვლა
+        </button>
+      </div>
     </div>
   );
 }
