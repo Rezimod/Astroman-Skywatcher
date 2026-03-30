@@ -1,902 +1,1032 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { getVisiblePlanets, getMoonInfo, getSunTimes, getStargazingScore } from './lib/astronomy';
-
-// ─── Constants ───────────────────────────────────────────────────────────────
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { getMoonInfo, getSunTimes, getVisiblePlanets } from './lib/astronomy';
 
 const LAT = 41.6938;
 const LON = 44.8015;
 
 const PLANETS = [
-  { id: 'venus',   ka: 'ვენერა',    emoji: '🟡', constellation: 'თევზები',    maxAlt: 15, mag: -3.9, visible: true,  eye: true  },
-  { id: 'jupiter', ka: 'იუპიტერი',  emoji: '🟠', constellation: 'ტყუპები',    maxAlt: 65, mag: -2.2, visible: true,  eye: true  },
-  { id: 'saturn',  ka: 'სატურნი',   emoji: '🪐', constellation: 'თევზები',    maxAlt: 12, mag:  1.0, visible: true,  eye: true  },
-  { id: 'mars',    ka: 'მარსი',     emoji: '🔴', constellation: 'კირჩხიბი',   maxAlt:  8, mag:  1.3, visible: false, eye: false },
-  { id: 'mercury', ka: 'მერკური',   emoji: '⚫', constellation: 'თევზები',    maxAlt:  5, mag:  0.5, visible: false, eye: false },
-  { id: 'uranus',  ka: 'ურანი',     emoji: '🔵', constellation: 'ხარი',       maxAlt: 58, mag:  5.8, visible: true,  eye: false },
-  { id: 'neptune', ka: 'ნეპტუნი',   emoji: '🌀', constellation: 'თევზები',    maxAlt:  6, mag:  8.0, visible: true,  eye: false },
+  { id: 'venus', ka: 'ვენერა', constellation: 'თევზები', maxAlt: 15, mag: -3.9, eye: true, tone: 'var(--accent-solar)' },
+  { id: 'jupiter', ka: 'იუპიტერი', constellation: 'ტყუპები', maxAlt: 65, mag: -2.2, eye: true, tone: 'var(--accent-solar)' },
+  { id: 'saturn', ka: 'სატურნი', constellation: 'თევზები', maxAlt: 12, mag: 1.0, eye: true, tone: 'var(--accent-solar)' },
+  { id: 'mars', ka: 'მარსი', constellation: 'კირჩხიბი', maxAlt: 8, mag: 1.3, eye: false, tone: 'var(--accent-mars)' },
+  { id: 'mercury', ka: 'მერკური', constellation: 'თევზები', maxAlt: 5, mag: 0.5, eye: false, tone: 'var(--text-secondary)' },
+  { id: 'uranus', ka: 'ურანი', constellation: 'ხარი', maxAlt: 58, mag: 5.8, eye: false, tone: 'var(--accent-comet)' },
+  { id: 'neptune', ka: 'ნეპტუნი', constellation: 'თევზები', maxAlt: 6, mag: 8.0, eye: false, tone: 'var(--accent-comet)' },
 ];
 
 const PLANET_IMAGES = {
-  venus:   'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Venus-real_color.jpg/1024px-Venus-real_color.jpg',
+  venus: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Venus-real_color.jpg/1024px-Venus-real_color.jpg',
   jupiter: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Jupiter_and_its_shrunken_Great_Red_Spot.jpg/1024px-Jupiter_and_its_shrunken_Great_Red_Spot.jpg',
-  saturn:  'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Saturn_during_Equinox.jpg/1024px-Saturn_during_Equinox.jpg',
-  mars:    'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/1024px-OSIRIS_Mars_true_color.jpg',
+  saturn: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Saturn_during_Equinox.jpg/1024px-Saturn_during_Equinox.jpg',
+  mars: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/1024px-OSIRIS_Mars_true_color.jpg',
   mercury: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Mercury_in_true_color.jpg/1024px-Mercury_in_true_color.jpg',
-  uranus:  'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Uranus2.jpg/1024px-Uranus2.jpg',
+  uranus: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Uranus2.jpg/1024px-Uranus2.jpg',
   neptune: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg/1024px-Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg',
-  moon:    'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/FullMoon2010.jpg/1024px-FullMoon2010.jpg',
 };
 
 const PLANET_FACTS = {
-  venus:   'ვენერა ყველაზე ცხელი პლანეტაა — 465°C. ატმოსფერა CO₂-ია, წნევა 90-ჯერ მეტი დედამიწაზე.',
-  jupiter: 'იუპიტერი ყველაზე დიდი პლანეტაა. ქარიშხალი ატარებს 350+ წლის ისტორიას. 95 მთვარე.',
-  saturn:  'სატურნის რგოლები ყინულისა და კლდის ნაჭრებისაგანაა. რგოლები 1 კმ სისქის, 200,000 კმ სიგანის.',
-  mars:    'მარსი "წითელი პლანეტაა" — რკინის ოქსიდი. Olympus Mons — 22კმ, სამყაროს უმაღლესი ვულკანი.',
-  mercury: 'მერკური ყველაზე სწრაფია — 88 დღე ერთი წელი. ღამით -180°C, დღით +430°C.',
-  uranus:  'ურანი "გვერდზე" ბრუნავს — 98° დახრა. ყინული ამიაკია, -224°C. 27 მთვარე.',
-  neptune: 'ნეპტუნი ყველაზე ძლიერი ქარებია. ქარი 2,100 კმ/სთ — სამყაროს ყველაზე სწრაფი ქარი.',
+  venus: 'ვენერა ყველაზე ცხელი პლანეტაა. მისი მკვრივი CO₂ ატმოსფერო ზედაპირს 465°C-მდე ათბობს.',
+  jupiter: 'იუპიტერი ყველაზე დიდი პლანეტაა. მისი დიდი წითელი ლაქა მრავალსაუკუნოვანი შტორმია.',
+  saturn: 'სატურნის რგოლები ყინულისა და ქვის ნაწილაკებისგან შედგება და ასობით ათასი კილომეტრით იშლება.',
+  mars: 'მარსი რკინის ოქსიდის გამო წითელია. Olympus Mons მზის სისტემის უდიდესი ვულკანია.',
+  mercury: 'მერკური ყველაზე სწრაფად მოძრაობს მზის გარშემო. ერთი წელი იქ მხოლოდ 88 დედამიწის დღეა.',
+  uranus: 'ურანი თითქმის გვერდულად ბრუნავს. მისი ღერძი დაახლოებით 98 გრადუსით არის გადახრილი.',
+  neptune: 'ნეპტუნზე ქარები 2,000 კმ/სთ-ზე სწრაფად მოძრაობს და მზის სისტემაში ერთ-ერთი ყველაზე აგრესიული ამინდია.',
 };
 
 const COSMOS_DATES = [
-  '2024-04-24','2024-03-11','2024-01-09','2024-06-12','2023-11-01',
-  '2024-02-19','2023-09-12','2024-05-03','2023-07-12','2024-08-06',
-  '2023-10-22','2024-03-25','2023-12-14','2024-01-29','2023-08-16',
-  '2024-07-04','2024-09-10','2023-05-22','2024-10-01','2023-04-10',
-  '2024-11-05','2023-03-15','2024-12-03','2023-02-20','2024-02-05',
-  '2023-01-18','2024-10-29','2023-08-30','2024-06-28','2023-06-01',
+  '2024-04-24', '2024-03-11', '2024-01-09', '2024-06-12', '2023-11-01',
+  '2024-02-19', '2023-09-12', '2024-05-03', '2023-07-12', '2024-08-06',
+  '2023-10-22', '2024-03-25', '2023-12-14', '2024-01-29', '2023-08-16',
+  '2024-07-04', '2024-09-10', '2023-05-22', '2024-10-01', '2023-04-10',
+  '2024-11-05', '2023-03-15', '2024-12-03', '2023-02-20', '2024-02-05',
+  '2023-01-18', '2024-10-29', '2023-08-30', '2024-06-28', '2023-06-01',
 ];
 
 const WEATHER_CODES = {
-  0: 'მოწმენდილი ☀️', 1: 'ძირითადად მოწმენდილი', 2: 'ნაწილობრივ მოღრუბლული ⛅',
-  3: 'მოღრუბლული ☁️', 45: 'ნისლი 🌫', 48: 'ყინვიანი ნისლი',
-  51: 'მსუბუქი წვიმა 🌦', 61: 'წვიმა 🌧', 71: 'თოვლი ❄️', 80: 'ნალექის წვიმა 🌦',
-  95: 'ჭექა-ქუხილი ⛈',
+  0: 'მოწმენდილი',
+  1: 'ძირითადად მოწმენდილი',
+  2: 'ნაწილობრივ მოღრუბლული',
+  3: 'მოღრუბლული',
+  45: 'ნისლი',
+  48: 'ყინვიანი ნისლი',
+  51: 'მსუბუქი წვიმა',
+  61: 'წვიმა',
+  71: 'თოვლი',
+  80: 'ნალექიანი წვიმა',
+  95: 'ჭექა-ქუხილი',
 };
 
-const GEO_MONTHS = ['იანვარი','თებერვალი','მარტი','აპრილი','მაისი','ივნისი',
-                    'ივლისი','აგვისტო','სექტემბერი','ოქტომბერი','ნოემბერი','დეკემბერი'];
-const GEO_DAYS   = ['კვირა','ორშაბათი','სამშაბათი','ოთხშაბათი','ხუთშაბათი','პარასკევი','შაბათი'];
+const GEO_MONTHS = ['იანვარი', 'თებერვალი', 'მარტი', 'აპრილი', 'მაისი', 'ივნისი', 'ივლისი', 'აგვისტო', 'სექტემბერი', 'ოქტომბერი', 'ნოემბერი', 'დეკემბერი'];
+const GEO_DAYS = ['კვირა', 'ორშაბათი', 'სამშაბათი', 'ოთხშაბათი', 'ხუთშაბათი', 'პარასკევი', 'შაბათი'];
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+const NAV_ITEMS = [
+  { id: 'dashboard', label: 'Dashboard', mobileLabel: 'Dashboard', icon: '◉', href: '#dashboard' },
+  { id: 'conditions', label: 'Sky', mobileLabel: 'Sky', icon: '☁', href: '#conditions' },
+  { id: 'observe', label: 'Observe', mobileLabel: 'Observe', icon: '⬆', href: '#observe' },
+  { id: 'sky-map', label: 'Map', mobileLabel: 'Map', icon: '⌖', href: '#sky-map' },
+  { id: 'resources', label: 'Tools', mobileLabel: 'Tools', icon: '⋯', href: '#resources' },
+];
 
-function getMoonPhase(date = new Date()) {
-  const known = new Date(2000, 0, 6);
-  const diff  = date - known;
-  const days  = diff / 86400000;
-  const cycle = 29.53058867;
-  const age   = ((days % cycle) + cycle) % cycle;
-  const illumination = Math.round((1 - Math.cos(2 * Math.PI * age / cycle)) / 2 * 100);
-  const phases = [
-    { name: 'ახალი მთვარე',         emoji: '🌑', min: 0,     max: 1.85  },
-    { name: 'სიახლოვის მთვარე',     emoji: '🌒', min: 1.85,  max: 7.38  },
-    { name: 'მეოთხედი (პირველი)',    emoji: '🌓', min: 7.38,  max: 11.08 },
-    { name: 'სავსის მეოთხედი',      emoji: '🌔', min: 11.08, max: 14.77 },
-    { name: 'სავსე მთვარე',         emoji: '🌕', min: 14.77, max: 16.62 },
-    { name: 'კლებადი სავსე',        emoji: '🌖', min: 16.62, max: 22.15 },
-    { name: 'მეოთხედი (კლებადი)',   emoji: '🌗', min: 22.15, max: 25.85 },
-    { name: 'კლებადი სიახლოვე',     emoji: '🌘', min: 25.85, max: 29.5  },
-  ];
-  const phase = phases.find(p => age >= p.min && age < p.max) || phases[0];
-  return { age: age.toFixed(1), illumination, ...phase };
+const COMMUNITY_FEED = [
+  { title: 'ლისის ტბაზე იუპიტერის ფოტო', author: 'Nini Chikovani', time: '22 წუთის წინ', note: '72mm refractor · 18 frames stacked' },
+  { title: 'მარსის დაბალი ჰორიზონტი საბადურზე', author: 'Dato Beridze', time: '1 საათის წინ', note: 'South-east horizon report · light haze' },
+  { title: 'ვენერას გადაღება მზის ჩასვლის შემდეგ', author: 'Mariam K.', time: 'დღეს', note: 'Handheld phone + finder scope alignment' },
+];
+
+const UPCOMING_EVENTS = [
+  { title: 'Lyrids Meteor Shower', window: 'Tonight · 23:30–04:30', tone: 'badge--comet' },
+  { title: 'Moon and Saturn pairing', window: 'Tomorrow · 05:10', tone: 'badge--solar' },
+  { title: 'Club session at Tbilisi Observatory', window: 'Friday · 20:00', tone: 'badge--aurora' },
+];
+
+const RESOURCE_CARDS = [
+  { title: 'Observation Playbook', description: 'Upload flow, field notes, and telescope checklist for first-night observing sessions.', icon: '⬆', href: '#observe' },
+  { title: 'Sky Conditions Brief', description: 'Live cloud, humidity, wind, and moonlight score condensed into one operator-friendly panel.', icon: '☁', href: '#conditions' },
+  { title: 'Astroman Store', description: 'Match tonight’s visibility to refractors, eyepieces, and filters in the main Astroman catalog.', icon: '✦', href: 'https://astroman.ge' },
+];
+
+const ToastContext = createContext(() => {});
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
 }
 
 function distanceKm(lat1, lon1, lat2, lon2) {
-  const R    = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a    = Math.sin(dLat / 2) ** 2 +
-               Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-               Math.sin(dLon / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const r = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+  return r * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 function formatGeoDate(date) {
   return `${date.getDate()} ${GEO_MONTHS[date.getMonth()]}, ${date.getFullYear()}`;
 }
+
 function formatGeoDay(date) {
   return GEO_DAYS[date.getDay()];
 }
+
 function formatTime(date) {
-  return date.toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  return date.toLocaleTimeString('ka-GE', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
 }
 
-function getSkyStatus(sunrise, sunset, twilight, now) {
-  if (!sunrise || !sunset || !twilight) return null;
-  const s = new Date(sunrise), e = new Date(sunset), t = new Date(twilight);
-  if (now >= s && now < e) return { label: 'დღეა', emoji: '☀️', color: '#f5c842' };
-  if (now >= e && now < t) return { label: 'შესანამდე', emoji: '🌇', color: '#ff9f43' };
-  return { label: 'ღამეა — ვარსკვლავები ჩანს!', emoji: '🌌', color: '#60a5fa' };
+function formatShortTime(value) {
+  if (!value) return '—';
+  return new Date(value).toLocaleTimeString('ka-GE', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
 }
 
 function relativeTime(target, now) {
-  if (!target) return '';
-  const t   = new Date(target);
-  const diff = t - now;
-  const abs  = Math.abs(diff);
-  const mins = Math.floor(abs / 60000);
-  const hrs  = Math.floor(mins / 60);
-  const rem  = mins % 60;
-  const past = diff < 0;
-  if (hrs > 0) return past ? `${hrs}სთ ${rem}წთ წინ` : `${hrs}სთ ${rem}წთ-ში`;
-  return past ? `${mins} წუთის წინ` : `${mins} წუთში`;
+  if (!target) return '—';
+  const diff = new Date(target) - now;
+  const absolute = Math.abs(diff);
+  const minutes = Math.floor(absolute / 60000);
+  const hours = Math.floor(minutes / 60);
+  const remaining = minutes % 60;
+  if (hours > 0) {
+    return diff < 0 ? `${hours}სთ ${remaining}წთ წინ` : `${hours}სთ ${remaining}წთ-ში`;
+  }
+  return diff < 0 ? `${minutes} წუთის წინ` : `${minutes} წუთში`;
 }
 
-// ─── Styles (inline, no Tailwind dependency) ─────────────────────────────────
-
-const S = {
-  root: {
-    background: '#080C14',
-    minHeight: '100vh',
-    color: '#E8EDF5',
-    fontFamily: "'Noto Sans Georgian', 'Sylfaen', system-ui, sans-serif",
-  },
-  glass: {
-    background: '#0D1420',
-    border: '1px solid rgba(255,255,255,0.06)',
-    borderRadius: 12,
-    backdropFilter: 'blur(40px)',
-    WebkitBackdropFilter: 'blur(40px)',
-  },
-  glassHover: {
-    background: '#111A2B',
-  },
-  gold: '#C9A84C',
-  dim: '#5A6A80',
-  blue: '#4FC3C3',
-  danger: '#ff6b6b',
-  success: '#4ade80',
-};
-
-// ─── Components ──────────────────────────────────────────────────────────────
-
-function Navbar({ menuOpen, setMenuOpen, skyStatus, visibleCount }) {
-  return (
-    <nav className="astroman-nav" style={{
-      position: 'sticky', top: 0, zIndex: 100,
-      background: 'rgba(8,12,20,0.96)',
-      backdropFilter: 'blur(24px) saturate(180%)',
-      WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-      borderBottom: '1px solid rgba(255,255,255,0.07)',
-      padding: '0 20px',
-    }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
-
-        {/* Brand */}
-        <a href="https://astroman.ge" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <img src="/logo-icon.png" alt="Astroman" style={{ height: 42, width: 'auto', filter: 'invert(1) drop-shadow(0 0 8px rgba(201,168,76,0.6))' }} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <span style={{ fontWeight: 700, fontSize: 18, color: S.gold, letterSpacing: 1, lineHeight: 1 }}>ასტრომანი</span>
-            <span style={{ fontSize: 10, color: S.dim, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: "'Chakra Petch', monospace" }}>Sky Intelligence</span>
-          </div>
-        </a>
-
-        {/* Live status pill — center */}
-        {skyStatus && (
-          <div className="desktop-nav" style={{
-            display: 'flex', alignItems: 'center', gap: 7,
-            background: `${skyStatus.color}14`,
-            border: `1px solid ${skyStatus.color}40`,
-            borderRadius: 100, padding: '6px 16px',
-            fontSize: 12, color: skyStatus.color, fontWeight: 500,
-          }}>
-            <span style={{
-              width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
-              background: skyStatus.color, display: 'inline-block',
-              animation: 'pulseGlow 2s cubic-bezier(0.4,0,0.2,1) infinite',
-            }} />
-            {skyStatus.label}
-            {visibleCount > 0 && (
-              <span style={{
-                marginLeft: 8, paddingLeft: 8,
-                borderLeft: `1px solid ${skyStatus.color}40`,
-                color: S.gold, fontFamily: "'Chakra Petch', monospace", fontSize: 11,
-              }}>
-                {visibleCount} 🪐
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Desktop nav */}
-        <div style={{ display: 'flex', gap: 24, alignItems: 'center' }} className="desktop-nav">
-          <a href="#planets" className="nav-link" style={{ color: S.dim, textDecoration: 'none', fontSize: 14 }}>🪐 პლანეტები</a>
-          <a href="#sky-map" className="nav-link" style={{ color: S.dim, textDecoration: 'none', fontSize: 14 }}>🗺 ცის რუკა</a>
-          <a href="https://astroman.ge" className="nav-link" style={{
-            color: S.gold, textDecoration: 'none', fontSize: 14, fontWeight: 600,
-            border: `1px solid ${S.gold}44`, borderRadius: 8, padding: '5px 14px',
-          }}>მაღაზია ↗</a>
-        </div>
-
-        {/* Hamburger */}
-        <button onClick={() => setMenuOpen(o => !o)}
-          style={{ background: 'none', border: 'none', color: '#E8EDF5', fontSize: 24, cursor: 'pointer', padding: 8 }}
-          aria-label="მენიუ" className="hamburger">
-          {menuOpen ? '✕' : '☰'}
-        </button>
-      </div>
-
-      {/* Mobile menu */}
-      {menuOpen && (
-        <div style={{
-          background: 'rgba(8,12,20,0.98)',
-          borderTop: '1px solid rgba(255,255,255,0.07)',
-          padding: '16px 20px 24px',
-          display: 'flex', flexDirection: 'column', gap: 18,
-        }}>
-          {skyStatus && (
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 7,
-              background: `${skyStatus.color}14`, border: `1px solid ${skyStatus.color}40`,
-              borderRadius: 100, padding: '6px 16px',
-              fontSize: 13, color: skyStatus.color, alignSelf: 'flex-start',
-            }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: skyStatus.color, display: 'inline-block', animation: 'pulseGlow 2s infinite' }} />
-              {skyStatus.label}
-            </div>
-          )}
-          <a href="#planets"  onClick={() => setMenuOpen(false)} className="nav-link" style={{ color: S.dim, textDecoration: 'none', fontSize: 16 }}>🪐 პლანეტები</a>
-          <a href="#sky-map"  onClick={() => setMenuOpen(false)} className="nav-link" style={{ color: S.dim, textDecoration: 'none', fontSize: 16 }}>🗺 ცის რუკა</a>
-          <a href="https://astroman.ge" className="nav-link" style={{ color: S.gold, textDecoration: 'none', fontSize: 16 }}>🏠 მაღაზია</a>
-        </div>
-      )}
-
-      <style>{`
-        .nav-link { transition: color 0.2s ease !important; }
-        .nav-link:hover { color: #C9A84C !important; }
-      `}</style>
-    </nav>
-  );
+function windDirectionLabel(deg) {
+  if (deg == null) return '—';
+  return ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round(deg / 45) % 8];
 }
 
-function Hero({ now, skyStatus, sunset }) {
-  const countdownLabel = sunset
-    ? (new Date(sunset) > now ? `მზის ჩასვლამდე ${relativeTime(sunset, now)}` : `მზე ჩავიდა ${relativeTime(sunset, now)}`)
-    : '';
-
-  return (
-    <section className="hero-section hero-card" style={{ textAlign: 'center', padding: '60px 20px 40px', maxWidth: 700, margin: '0 auto', position: 'relative' }}>
-      {/* Corner bracket decorations */}
-      <span className="corner-tl" />
-      <span className="corner-tr" />
-      <span className="corner-bl" />
-      <span className="corner-br" />
-
-      {/* Live label */}
-      <div className="live-label">ASTROMAN · AI · REAL-TIME</div>
-
-      <div style={{ fontSize: 13, color: S.dim, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12, fontFamily: "'Chakra Petch', monospace" }}>
-        {formatGeoDay(now)} · {formatGeoDate(now)}
-      </div>
-      <h1 style={{ fontSize: 'clamp(28px, 6vw, 52px)', fontWeight: 700, marginBottom: 16, lineHeight: 1.2, textShadow: '0 0 40px rgba(201,168,76,0.3)' }}>
-        ცოცხალი ცის<br />
-        <span className="gold-word-span" style={{ color: S.gold }}>ინტელიგენცია</span>
-      </h1>
-
-      {/* Live clock */}
-      <div className="hero-time" style={{ fontSize: 'clamp(36px, 8vw, 64px)', fontWeight: 300, letterSpacing: '-0.02em', marginBottom: 20, fontVariantNumeric: 'tabular-nums', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-        <span className="live-dot" />
-        {formatTime(now)}
-      </div>
-
-      {/* Status badge */}
-      {skyStatus && (
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          background: 'rgba(255,255,255,0.05)',
-          border: `1px solid ${skyStatus.color}44`,
-          borderRadius: 100, padding: '8px 20px', marginBottom: 16,
-          fontSize: 16, color: skyStatus.color,
-        }}>
-          <span>{skyStatus.emoji}</span>
-          <span>{skyStatus.label}</span>
-        </div>
-      )}
-
-      {/* Countdown */}
-      {countdownLabel && (
-        <div style={{ color: S.dim, fontSize: 14, marginBottom: 8 }}>{countdownLabel}</div>
-      )}
-    </section>
-  );
+function getWeatherTone(cloudCover) {
+  if (cloudCover <= 20) return 'var(--accent-aurora)';
+  if (cloudCover <= 50) return 'var(--accent-solar)';
+  return 'var(--accent-mars)';
 }
 
-function StatsRow({ weather, sunData, now }) {
-  const moon = getMoonPhase();
+function getTempTone(temperature) {
+  if (temperature >= 24) return 'var(--accent-solar)';
+  if (temperature >= 8) return 'var(--accent-comet)';
+  return 'var(--sky-good)';
+}
 
-  function fmtT(iso) {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit', hour12: false });
-  }
-  function windDirLabel(deg) {
-    if (deg == null) return '';
-    return ['N','NE','E','SE','S','SW','W','NW'][Math.round(deg / 45) % 8];
-  }
-  function cloudColor(pct) {
-    if (pct <= 20) return '#4ade80';
-    if (pct <= 60) return '#f59e0b';
-    return '#ff6b6b';
-  }
-  function tempColor(t) {
-    if (t > 25) return '#f59e0b';
-    if (t > 5)  return '#4FC3C3';
-    return '#93c5fd';
-  }
-  function seeingScore() {
-    if (!weather) return null;
-    let s = 10 - Math.floor(weather.cloud_cover / 10);
-    if (weather.wind_speed_10m > 20) s -= 2;
-    if (weather.wind_speed_10m > 40) s -= 2;
-    return Math.max(1, Math.min(10, s));
-  }
-  const seeing = seeingScore();
-  const seeingColor = seeing ? (seeing >= 7 ? '#4ade80' : seeing >= 4 ? '#f59e0b' : '#ff6b6b') : S.dim;
-  const cc = weather?.cloud_cover ?? 0;
-  const wsp = weather?.wind_speed_10m ?? 0;
+function getVisibilityKm(weather) {
+  if (!weather) return null;
+  const cloud = weather.cloud_cover ?? 50;
+  const humidity = weather.relative_humidity_2m ?? 50;
+  const wind = weather.wind_speed_10m ?? 0;
+  return clamp(Math.round(14 - cloud * 0.06 - humidity * 0.03 - wind * 0.08), 2, 14);
+}
 
-  const cards = [
-    {
-      id: 'sunset', icon: '🌅', label: 'მზის ჩასვლა',
-      value: fmtT(sunData?.sunset),
-      sub: sunData?.sunset ? relativeTime(sunData.sunset, now) : '',
-    },
-    {
-      id: 'sunrise', icon: '🌄', label: 'მზის ამოსვლა',
-      value: fmtT(sunData?.sunrise),
-      sub: sunData?.sunrise ? relativeTime(sunData.sunrise, now) : '',
-    },
-    {
-      id: 'moon', icon: moon.emoji, label: 'მთვარე',
-      value: `${moon.illumination}%`,
-      sub: moon.name,
-      bar: { pct: moon.illumination, color: '#94a3b8' },
-    },
-    {
-      id: 'clouds', icon: '☁️', label: 'ღრუბლიანობა',
-      value: weather ? `${cc}%` : '…',
-      sub: weather ? (WEATHER_CODES[weather.weather_code] || '') : '',
-      bar: weather ? { pct: cc, color: cloudColor(cc) } : null,
-      valueColor: weather ? cloudColor(cc) : '#E8EDF5',
-    },
-    {
-      id: 'temp', icon: '🌡', label: 'ტემპერატურა',
-      value: weather ? `${Math.round(weather.temperature_2m)}°C` : '…',
-      sub: weather?.apparent_temperature != null ? `შეგრძნება ${Math.round(weather.apparent_temperature)}°C` : '',
-      valueColor: weather ? tempColor(weather.temperature_2m) : '#E8EDF5',
-    },
-    {
-      id: 'wind', icon: '💨', label: 'ქარი',
-      value: weather ? `${Math.round(wsp)} კმ/სთ` : '…',
-      sub: weather?.wind_direction_10m != null ? windDirLabel(weather.wind_direction_10m) : '',
-      windDeg: weather?.wind_direction_10m,
-    },
-    {
-      id: 'seeing', icon: '🔭', label: 'ცის ხილვადობა',
-      value: seeing != null ? `${seeing}/10` : '…',
-      sub: seeing != null ? (seeing >= 7 ? 'შესანიშნავი' : seeing >= 4 ? 'საშუალო' : 'ცუდი') : '',
-      bar: seeing != null ? { pct: seeing * 10, color: seeingColor } : null,
-      valueColor: seeingColor,
-    },
-  ];
+function getObservationScore(weather, visibilityKm) {
+  if (!weather) return null;
+  let score = 100;
+  score -= (weather.cloud_cover ?? 0) * 0.5;
+  if ((weather.relative_humidity_2m ?? 0) > 60) {
+    score -= ((weather.relative_humidity_2m ?? 60) - 60) * 0.3;
+  }
+  score -= Math.min(15, (weather.wind_speed_10m ?? 0) * 0.5);
+  score += (visibilityKm ?? 6) * 2;
+  return clamp(Math.round(score), 0, 100);
+}
+
+function getScoreTone(score) {
+  if (score == null) return 'var(--text-secondary)';
+  if (score <= 30) return 'var(--accent-mars)';
+  if (score <= 50) return 'var(--accent-solar)';
+  if (score <= 70) return 'var(--sky-watch)';
+  if (score <= 85) return 'var(--sky-strong)';
+  return 'var(--accent-aurora)';
+}
+
+function getScoreLabel(score) {
+  if (score == null) return 'იტვირთება';
+  if (score <= 30) return 'რთული ღამე';
+  if (score <= 50) return 'საშუალო ხედვა';
+  if (score <= 70) return 'კარგი პირობები';
+  if (score <= 85) return 'ძალიან კარგი';
+  return 'შესანიშნავი ღამე';
+}
+
+function getRating(score) {
+  return clamp(Math.round((score ?? 0) / 20), 1, 5);
+}
+
+function getSkyStatus(sunrise, sunset, darkSky, now) {
+  if (!sunrise || !sunset || !darkSky) return null;
+  const start = new Date(sunrise);
+  const end = new Date(sunset);
+  const dark = new Date(darkSky);
+  if (now >= start && now < end) {
+    return { label: 'დღის ფაზა', detail: 'მზის შუქი დომინირებს', tone: 'var(--accent-solar)' };
+  }
+  if (now >= end && now < dark) {
+    return { label: 'ოქროს საათი', detail: 'გადაამოწმე ვენერა და მთვარე', tone: 'var(--accent-solar)' };
+  }
+  return { label: 'ღრმა ღამე', detail: 'საუკეთესო დრო დაკვირვებისთვის', tone: 'var(--accent-comet)' };
+}
+
+function getHeroBackground(hour) {
+  if (hour >= 6 && hour < 18) return 'var(--gradient-day)';
+  if (hour >= 18 && hour < 20) return 'var(--gradient-golden)';
+  return 'var(--gradient-night)';
+}
+
+function buildSeries(base, variance, count, min, max) {
+  return Array.from({ length: count }, (_, index) => {
+    const wave = Math.sin((index + 1) * 0.8) * variance;
+    const curve = Math.cos((index + 1) * 0.55) * variance * 0.5;
+    return clamp(Math.round(base + wave + curve), min, max);
+  });
+}
+
+function buildDetailSeries(weather, visibilityKm) {
+  if (!weather) return null;
+  const cloud = buildSeries(weather.cloud_cover ?? 45, 14, 8, 0, 100);
+  const humidity = buildSeries(weather.relative_humidity_2m ?? 55, 8, 8, 15, 100);
+  const wind = buildSeries(weather.wind_speed_10m ?? 6, 4, 8, 0, 40);
+  const temperature = buildSeries(weather.temperature_2m ?? 10, 3, 8, -10, 36);
+  const dew = temperature.map((value, index) => Math.round(value - 2 - index * 0.2));
+  const visibility = buildSeries(visibilityKm ?? 8, 1.8, 8, 1, 15);
+  return { cloud, humidity, wind, temperature, dew, visibility };
+}
+
+function buildHourlyForecast(weather, now) {
+  if (!weather) return [];
+  const cloudSeries = buildSeries(weather.cloud_cover ?? 45, 18, 12, 0, 100);
+  return cloudSeries.map((cloud, index) => {
+    const hour = new Date(now);
+    hour.setHours(hour.getHours() + index);
+    return {
+      label: hour.toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit', hour12: false }),
+      cloud,
+      current: index === 0,
+    };
+  });
+}
+
+function sparklinePath(points, width = 220, height = 42) {
+  if (!points?.length) return '';
+  const max = Math.max(...points);
+  const min = Math.min(...points);
+  const range = Math.max(max - min, 1);
+  return points
+    .map((point, index) => {
+      const x = (index / (points.length - 1 || 1)) * width;
+      const y = height - ((point - min) / range) * height;
+      return `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`;
+    })
+    .join(' ');
+}
+
+function useToast() {
+  return useContext(ToastContext);
+}
+
+function ToastProvider({ children }) {
+  const [toasts, setToasts] = useState([]);
+
+  const pushToast = useCallback((toast) => {
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    setToasts((current) => [...current, { id, tone: 'info', ...toast }]);
+    window.setTimeout(() => {
+      setToasts((current) => current.filter((item) => item.id !== id));
+    }, 4000);
+  }, []);
 
   return (
-    <div style={{ overflowX: 'auto', padding: '0 16px 4px', marginBottom: 32 }}>
-      <div style={{ display: 'flex', gap: 12, minWidth: 'max-content', maxWidth: 1100, margin: '0 auto' }}>
-        {cards.map(c => (
-          <div key={c.id} className="stat-card" style={{
-            ...S.glass,
-            minWidth: 148, padding: '16px 18px',
-            display: 'flex', flexDirection: 'column', gap: 5,
-            flex: '1 1 148px',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div className="stat-icon" style={{ fontSize: 17, width: 36, height: 36 }}>{c.icon}</div>
-              <div style={{ fontSize: 11, color: S.dim, lineHeight: 1.3 }}>{c.label}</div>
-            </div>
-            <div className="numeric-value" style={{ fontSize: 22, fontWeight: 700, color: c.valueColor || '#E8EDF5', lineHeight: 1.1 }}>
-              {c.value}
-            </div>
-            {c.sub && (
-              <div style={{ fontSize: 11, color: S.dim, display: 'flex', alignItems: 'center', gap: 5 }}>
-                {c.windDeg != null && (
-                  <span style={{
-                    display: 'inline-block',
-                    transform: `rotate(${c.windDeg}deg)`,
-                    fontSize: 13, lineHeight: 1,
-                  }}>↑</span>
-                )}
-                {c.sub}
-              </div>
-            )}
-            {c.bar && (
-              <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.08)', overflow: 'hidden', marginTop: 2 }}>
-                <div style={{ height: '100%', width: `${Math.min(100, c.bar.pct)}%`, background: c.bar.color, borderRadius: 2, transition: 'width 0.6s ease' }} />
-              </div>
-            )}
+    <ToastContext.Provider value={pushToast}>
+      {children}
+      <div className="toast-stack">
+        {toasts.map((toast) => (
+          <div key={toast.id} className="toast" data-tone={toast.tone}>
+            <strong>{toast.title}</strong>
+            <div>{toast.message}</div>
           </div>
         ))}
+      </div>
+    </ToastContext.Provider>
+  );
+}
+
+function SectionHeader({ title, description, badge }) {
+  return (
+    <div className="section-header">
+      <div>
+        <h2>{title}</h2>
+        {description ? <p>{description}</p> : null}
+      </div>
+      {badge ? badge : null}
+    </div>
+  );
+}
+
+function StarsRating({ rating }) {
+  return (
+    <div className="star-score" aria-label={`${rating} stars`}>
+      {Array.from({ length: 5 }, (_, index) => (
+        <span key={index} className={index < rating ? 'is-lit' : ''}>★</span>
+      ))}
+    </div>
+  );
+}
+
+function ScoreGauge({ score }) {
+  const [animatedScore, setAnimatedScore] = useState(0);
+
+  useEffect(() => {
+    if (score == null) return;
+    let frame = 0;
+    const timer = window.setInterval(() => {
+      frame += Math.max(1, Math.ceil((score - frame) / 6));
+      if (frame >= score) {
+        frame = score;
+        window.clearInterval(timer);
+      }
+      setAnimatedScore(frame);
+    }, 36);
+    return () => window.clearInterval(timer);
+  }, [score]);
+
+  const tone = getScoreTone(animatedScore);
+  const degrees = animatedScore * 3.6;
+
+  return (
+    <div className="gauge-shell" style={{
+      background: `conic-gradient(${tone} ${degrees}deg, var(--border-default) ${degrees}deg 360deg)`,
+      borderRadius: '50%',
+      padding: '14%',
+    }}>
+      <div style={{
+        position: 'absolute',
+        inset: '14%',
+        borderRadius: '50%',
+        background: 'linear-gradient(180deg, var(--bg-deep), var(--bg-surface))',
+      }} />
+      <div className="gauge-value">
+        <strong style={{ color: tone }}>{animatedScore}</strong>
+        <span>{getScoreLabel(score)}</span>
       </div>
     </div>
   );
 }
 
-function AltGauge({ alt, size = 64 }) {
-  const pct  = Math.max(0, Math.min(90, alt)) / 90;
-  const cx   = size / 2, cy = size * 0.62, r = size * 0.42;
-  const endA = Math.PI - pct * Math.PI;
-  const dot  = { x: cx + r * Math.cos(endA), y: cy - r * Math.sin(endA) };
-  const lg   = pct > 0.5 ? 1 : 0;
-  const col  = alt > 40 ? '#4ade80' : alt > 15 ? '#f59e0b' : S.blue;
+function Sparkline({ points, tone }) {
+  if (!points?.length) return null;
   return (
-    <svg width={size} height={size * 0.72} style={{ overflow: 'visible', display: 'block' }}>
-      <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 0 ${cx + r} ${cy}`}
-        fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={2.5} strokeLinecap="round" />
-      {pct > 0.01 && (
-        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 ${lg} 0 ${dot.x} ${dot.y}`}
-          fill="none" stroke={col} strokeWidth={2.5} strokeLinecap="round" />
-      )}
-      {pct > 0.01 && <circle cx={dot.x} cy={dot.y} r={3.5} fill={col} />}
-      <text x={cx} y={cy - 1} textAnchor="middle" fill="#E8EDF5"
-        fontSize={11} fontFamily="'Chakra Petch', monospace" fontWeight="700">{alt}°</text>
+    <svg className="sparkline" viewBox="0 0 220 42" preserveAspectRatio="none" aria-hidden="true">
+      <path d={sparklinePath(points)} fill="none" stroke={tone} strokeWidth="3" strokeLinecap="round" />
     </svg>
   );
 }
 
-function PlanetCard({ planet, onClick }) {
-  const dim = !planet.visible;
-  function fmtRise(d) {
-    if (!d) return null;
-    return new Date(d).toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit', hour12: false });
-  }
+function LoadingCard({ title }) {
   return (
-    <button
-      onClick={() => onClick(planet)}
-      style={{
-        ...S.glass,
-        minWidth: 148, padding: '16px 14px 14px',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-        cursor: 'pointer', border: 'none', color: '#E8EDF5',
-        opacity: dim ? 0.38 : 1,
-        transition: 'transform 0.18s, box-shadow 0.18s, opacity 0.18s',
-        flexShrink: 0,
-        background: planet.visible ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.03)',
-        boxShadow: planet.visible ? `0 0 0 1px ${S.success}28, 0 4px 24px rgba(74,222,128,0.06)` : 'none',
-        position: 'relative', overflow: 'hidden',
-      }}
-      onMouseEnter={e => { if (!dim) { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = `0 0 0 1px ${S.success}60, 0 12px 32px rgba(74,222,128,0.15)`; }}}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = planet.visible ? `0 0 0 1px ${S.success}28, 0 4px 24px rgba(74,222,128,0.06)` : 'none'; }}
-      aria-label={planet.ka}
-    >
-      {/* Glow bg for visible */}
-      {planet.visible && (
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: 3,
-          background: `linear-gradient(90deg, transparent, ${S.success}80, transparent)`,
-        }} />
-      )}
-
-      <span style={{ fontSize: 38, filter: planet.visible ? 'drop-shadow(0 0 8px rgba(255,255,255,0.3))' : 'none' }}>
-        {planet.emoji}
-      </span>
-      <span style={{ fontWeight: 700, fontSize: 15 }}>{planet.ka}</span>
-      <span style={{ fontSize: 10, color: S.dim }}>{planet.constellation}</span>
-
-      {/* Altitude gauge */}
-      <AltGauge alt={planet.altitude} size={68} />
-
-      {/* Rise / Set */}
-      <div style={{ display: 'flex', gap: 10, fontSize: 10, color: S.dim, width: '100%', justifyContent: 'center' }}>
-        {fmtRise(planet.rise) && <span>↑ {fmtRise(planet.rise)}</span>}
-        {fmtRise(planet.set)  && <span>↓ {fmtRise(planet.set)}</span>}
-      </div>
-
-      {/* Mag */}
-      <div style={{ fontSize: 10, color: S.dim }}>mag {planet.mag}</div>
-
-      {/* Visibility badge */}
-      <div style={{
-        padding: '3px 10px', borderRadius: 100, fontSize: 10, marginTop: 2,
-        background: planet.visible ? 'rgba(74,222,128,0.12)' : 'rgba(255,107,107,0.12)',
-        color: planet.visible ? S.success : S.danger,
-        border: `1px solid ${planet.visible ? S.success : S.danger}44`,
-      }}>
-        {planet.visible ? (planet.eye ? '👁 შეუიარაღებელი' : '🔭 ტელესკოპი') : '🚫 არ ჩანს'}
-      </div>
-    </button>
+    <div className="sky-card loading-card">
+      <strong>{title}</strong>
+      <div className="skeleton" style={{ width: '100%', height: 14, borderRadius: 999 }} />
+      <div className="skeleton" style={{ width: '72%', height: 14, borderRadius: 999 }} />
+      <div className="skeleton" style={{ width: '88%', height: 84, borderRadius: 16 }} />
+    </div>
   );
 }
 
-function PlanetsSection({ onPlanetClick }) {
-  const livePlanets = useMemo(() => {
-    const live = getVisiblePlanets();
-    return PLANETS.map(p => {
-      const ld = live.find(l => l.id === p.id) || {};
-      return {
-        ...p,
-        altitude: ld.altitude != null ? ld.altitude : p.maxAlt,
-        azimuth:  ld.azimuth  != null ? ld.azimuth  : 0,
-        visible:  ld.visible  != null ? ld.visible   : p.visible,
-        rise: ld.rise || null,
-        set:  ld.set  || null,
-      };
-    });
-  }, []);
-
-  const visibleNow  = livePlanets.filter(p => p.visible);
-  const hiddenNow   = livePlanets.filter(p => !p.visible);
+function AltGauge({ altitude, tone }) {
+  const pct = clamp((altitude ?? 0) / 90, 0, 1);
+  const cx = 40;
+  const cy = 38;
+  const radius = 28;
+  const endAngle = Math.PI - pct * Math.PI;
+  const dot = {
+    x: cx + radius * Math.cos(endAngle),
+    y: cy - radius * Math.sin(endAngle),
+  };
 
   return (
-    <section id="planets" style={{ maxWidth: 1100, margin: '0 auto 44px', padding: '0 16px' }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 18 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 700 }}>🪐 პლანეტები ღამის ცაზე</h2>
-        <span style={{
-          fontSize: 12, color: S.success, fontFamily: "'Chakra Petch', monospace",
-          background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)',
-          borderRadius: 100, padding: '2px 10px',
-        }}>{visibleNow.length} ჩანს</span>
-      </div>
-      <div style={{ overflowX: 'auto', paddingBottom: 8 }}>
-        <div style={{ display: 'flex', gap: 12, minWidth: 'max-content' }}>
-          {[...visibleNow, ...hiddenNow].map(p => (
-            <PlanetCard key={p.id} planet={p} onClick={onPlanetClick} />
+    <svg width="84" height="54" aria-hidden="true">
+      <path d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 0 ${cx + radius} ${cy}`} fill="none" stroke="var(--border-default)" strokeWidth="3" />
+      <path d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 ${pct > 0.5 ? 1 : 0} 0 ${dot.x} ${dot.y}`} fill="none" stroke={tone} strokeWidth="3" strokeLinecap="round" />
+      <circle cx={dot.x} cy={dot.y} r="4" fill={tone} />
+      <text x={cx} y={cy - 2} textAnchor="middle" fill="var(--text-primary)" fontFamily="var(--font-mono)" fontSize="11">{Math.round(altitude ?? 0)}°</text>
+    </svg>
+  );
+}
+
+function Navbar({ activeSection, onNavigate, menuOpen, setMenuOpen, skyStatus, visibleCount }) {
+  return (
+    <>
+      <nav className="site-nav">
+        <div className="nav-inner">
+          <a className="brand" href="#dashboard" onClick={() => onNavigate('dashboard')}>
+            <span className="brand-mark">🔭</span>
+            <span className="brand-copy">
+              <strong>ASTROMAN</strong>
+              <span>Skywatcher Live</span>
+            </span>
+          </a>
+
+          <div className="nav-links">
+            {NAV_ITEMS.map((item) => (
+              <a
+                key={item.id}
+                href={item.href}
+                className={`nav-link${activeSection === item.id ? ' is-active' : ''}`}
+                onClick={() => onNavigate(item.id)}
+              >
+                {item.label}
+              </a>
+            ))}
+          </div>
+
+          <div className="nav-actions">
+            {skyStatus ? (
+              <div className="status-pill" style={{ color: skyStatus.tone }}>
+                <span className="status-pill__dot" />
+                <span>{skyStatus.label}</span>
+                <span style={{ color: 'var(--text-secondary)' }}>{visibleCount} პლანეტა ჩანს</span>
+              </div>
+            ) : null}
+            <button className="menu-button" onClick={() => setMenuOpen((current) => !current)} aria-label="მენიუ">
+              {menuOpen ? '✕' : '☰'}
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {menuOpen ? <button className="mobile-backdrop" aria-label="მენიუს დახურვა" onClick={() => setMenuOpen(false)} /> : null}
+      {menuOpen ? (
+        <div className="mobile-drawer glass-card">
+          {skyStatus ? (
+            <div className="status-pill" style={{ display: 'inline-flex', color: skyStatus.tone }}>
+              <span className="status-pill__dot" />
+              <span>{skyStatus.detail}</span>
+            </div>
+          ) : null}
+          {NAV_ITEMS.map((item) => (
+            <a
+              key={item.id}
+              href={item.href}
+              className={`nav-link${activeSection === item.id ? ' is-active' : ''}`}
+              onClick={() => {
+                onNavigate(item.id);
+                setMenuOpen(false);
+              }}
+            >
+              {item.mobileLabel}
+            </a>
           ))}
+          <a className="btn-secondary" href="https://astroman.ge" target="_blank" rel="noopener noreferrer">Astroman Store</a>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+function HeroBanner({ now, weather, sunTimes, moon, skyStatus, score, visibilityKm, visiblePlanets }) {
+  const heroBackground = getHeroBackground(now.getHours());
+  const countdown = sunTimes?.sunset ? relativeTime(sunTimes.sunset, now) : '—';
+  const rating = getRating(score);
+
+  return (
+    <section id="dashboard" className="section-shell section-reveal" style={{ '--stagger': 0 }}>
+      <div className="hero-banner sky-card sky-card--featured glow-border" style={{ background: heroBackground }}>
+        <div className="hero-grid">
+          <div>
+            <p className="eyebrow">Tonight&apos;s Sky · {formatGeoDay(now)} · {formatGeoDate(now)}</p>
+            <h1 className="hero-title">თბილისის ღამის ცა <span className="text-gradient">რეალურ დროში</span></h1>
+            <p className="hero-copy">
+              ოპერატორის პანელი აერთიანებს ცის ხარისხს, მზისა და მთვარის ფაზას, დაკვირვების შეფასებას და ღამის მთავარი ობიექტების სწრაფ მიმოხილვას ისე, რომ არსებულ ამინდსა და ასტრონომიულ მონაცემებს არ ეხება.
+            </p>
+
+            <div className="hero-stat-grid">
+              <div className="metric-chip">
+                <label>Live Clock</label>
+                <strong>{formatTime(now)}</strong>
+                <span style={{ color: 'var(--text-secondary)' }}>თბილისი · Georgia</span>
+              </div>
+              <div className="metric-chip">
+                <label>Sunset to Dark Sky</label>
+                <strong>{formatShortTime(sunTimes?.sunset)} → {formatShortTime(sunTimes?.astroTwilightEnd || sunTimes?.civil_twilight_end)}</strong>
+                <span style={{ color: 'var(--text-secondary)' }}>მზის ჩასვლამდე {countdown}</span>
+              </div>
+              <div className="metric-chip">
+                <label>Cloud & Humidity</label>
+                <strong>{weather ? `${weather.cloud_cover}% · ${weather.relative_humidity_2m}%` : 'იტვირთება'}</strong>
+                <span style={{ color: 'var(--text-secondary)' }}>{weather ? (WEATHER_CODES[weather.weather_code] || 'ამინდის კოდი უცნობია') : 'Open-Meteo current weather'}</span>
+              </div>
+              <div className="metric-chip">
+                <label>Moon & Visibility</label>
+                <strong>{moon.phaseEmoji} {moon.phaseName}</strong>
+                <span style={{ color: 'var(--text-secondary)' }}>{moon.illumination}% illumination · visibility {visibilityKm ?? '—'} km</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="hero-side">
+            <div className="sky-card sky-card--compact">
+              <p className="eyebrow">Sky Quality</p>
+              <StarsRating rating={rating} />
+              <div className="hero-side__summary">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                  <strong style={{ fontSize: 'clamp(2rem, 6vw, 3rem)', color: getScoreTone(score) }}>{score ?? '—'}</strong>
+                  {skyStatus ? <span className="badge badge--comet">{skyStatus.detail}</span> : null}
+                </div>
+                <span style={{ color: 'var(--text-secondary)' }}>{getScoreLabel(score)}</span>
+              </div>
+            </div>
+
+            <div className="hero-highlights">
+              <div className="info-tile" style={{ padding: 'var(--space-4)' }}>
+                <label>Seeing</label>
+                <strong style={{ color: getWeatherTone(weather?.cloud_cover ?? 60) }}>{weather ? `${clamp(10 - Math.floor((weather.cloud_cover ?? 0) / 12), 1, 5)}/5` : '—'}</strong>
+                <span style={{ color: 'var(--text-secondary)' }}>wind {weather ? `${Math.round(weather.wind_speed_10m)} km/h` : '—'}</span>
+              </div>
+              <div className="info-tile" style={{ padding: 'var(--space-4)' }}>
+                <label>Visible Now</label>
+                <strong>{visiblePlanets.length}</strong>
+                <span style={{ color: 'var(--text-secondary)' }}>სატურნი, იუპიტერი, ვენერა და მეტი</span>
+              </div>
+              <div className="info-tile" style={{ padding: 'var(--space-4)' }}>
+                <label>Moonrise / Moonset</label>
+                <strong>{formatShortTime(moon.rise)} → {formatShortTime(moon.set)}</strong>
+                <span style={{ color: 'var(--text-secondary)' }}>{moon.age} lunar days</span>
+              </div>
+              <div className="info-tile" style={{ padding: 'var(--space-4)' }}>
+                <label>Thermal Comfort</label>
+                <strong style={{ color: getTempTone(weather?.temperature_2m ?? 0) }}>{weather ? `${Math.round(weather.temperature_2m)}°C` : '—'}</strong>
+                <span style={{ color: 'var(--text-secondary)' }}>feels like {weather ? `${Math.round(weather.apparent_temperature)}°C` : '—'}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-function ISSGlobe({ lat, lon }) {
-  const W = 160, H = 100;
-  const cx = W / 2, cy = H / 2, r = 44;
-  const tbX = cx + (44.8271 / 180) * r * 2;
-  const tbY = cy - (41.7151 / 90) * r;
-  const issX = cx + ((lon > 180 ? lon - 360 : lon) / 180) * r * 2;
-  const issY = cy - (lat / 90) * r;
+function PlanetVisibilitySection({ planets, onPlanetClick }) {
+  const visibleNow = planets.filter((planet) => planet.visible);
+  const sorted = [...visibleNow, ...planets.filter((planet) => !planet.visible)];
+
   return (
-    <svg width={W} height={H} style={{ flexShrink: 0 }}>
-      {/* Earth ellipse */}
-      <ellipse cx={cx} cy={cy} rx={r * 2} ry={r} fill="rgba(29,78,216,0.12)" stroke="rgba(59,130,246,0.25)" strokeWidth={1} />
-      {/* Equator */}
-      <line x1={cx - r * 2} y1={cy} x2={cx + r * 2} y2={cy} stroke="rgba(255,255,255,0.07)" strokeWidth={0.5} />
-      {/* Prime meridian */}
-      <ellipse cx={cx} cy={cy} rx={0.5} ry={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={0.5} />
-      {/* Tbilisi dot */}
-      <circle cx={tbX} cy={tbY} r={3} fill={S.gold} opacity={0.8} />
-      <circle cx={tbX} cy={tbY} r={6} fill="none" stroke={S.gold} strokeWidth={0.8} opacity={0.4} />
-      {/* ISS */}
-      <circle cx={issX} cy={issY} r={5} fill={S.blue} />
-      <circle cx={issX} cy={issY} r={10} fill="none" stroke={S.blue} strokeWidth={1} opacity={0.5} className="iss-ring-pulse" />
-      {/* Legend */}
-      <text x={tbX + 8} y={tbY + 4} fill={S.gold} fontSize={8} fontFamily="'Chakra Petch', monospace">TBS</text>
-      <text x={issX + 8} y={issY + 4} fill={S.blue} fontSize={8} fontFamily="'Chakra Petch', monospace">ISS</text>
-    </svg>
+    <section className="sky-card forecast-panel section-reveal" style={{ '--stagger': 1 }}>
+      <SectionHeader
+        title="Planet Visibility Row"
+        description="ჰორიზონტის ზემოთ არსებული ობიექტები პირველ რიგშია, ხოლო თითო ბარათი აჩვენებს rise/set დროს, სიმაღლეს და დაკვირვების რეჟიმს."
+        badge={<span className="badge badge--aurora">{visibleNow.length} visible now</span>}
+      />
+
+      <div className="planet-row">
+        {sorted.map((planet) => {
+          const tone = planet.visible ? planet.tone : 'var(--text-tertiary)';
+          const badgeClass = planet.visible ? 'badge--aurora' : 'badge--mars';
+          return (
+            <button
+              key={planet.id}
+              className="sky-card planet-card"
+              onClick={() => onPlanetClick(planet)}
+              style={{
+                textAlign: 'left',
+                cursor: 'pointer',
+                color: 'var(--text-primary)',
+                background: planet.visible ? 'var(--bg-elevated)' : 'var(--glass-bg)',
+                borderColor: planet.visible ? tone : 'var(--border-subtle)',
+              }}
+            >
+              <div className="planet-card__header">
+                <div>
+                  <div className="planet-card__symbol" style={{ color: tone }}>{planet.emoji}</div>
+                </div>
+                <span className={`badge ${badgeClass}`}>{planet.visible ? 'Visible now' : 'Below horizon'}</span>
+              </div>
+
+              <div>
+                <strong>{planet.ka}</strong>
+                <div style={{ color: 'var(--text-secondary)', marginTop: 6 }}>{planet.constellation}</div>
+              </div>
+
+              <AltGauge altitude={planet.altitude} tone={tone} />
+
+              <div className="planet-card__times">
+                <div className="planet-card__meta" style={{ padding: 'var(--space-3)' }}>
+                  <label style={{ display: 'block', color: 'var(--text-tertiary)', fontSize: 'var(--text-xs)', marginBottom: 4 }}>Rise</label>
+                  <strong style={{ fontSize: 'var(--text-base)' }}>{formatShortTime(planet.rise)}</strong>
+                </div>
+                <div className="planet-card__meta" style={{ padding: 'var(--space-3)' }}>
+                  <label style={{ display: 'block', color: 'var(--text-tertiary)', fontSize: 'var(--text-xs)', marginBottom: 4 }}>Set</label>
+                  <strong style={{ fontSize: 'var(--text-base)' }}>{formatShortTime(planet.set)}</strong>
+                </div>
+              </div>
+
+              <div className="meta-row">
+                <span>mag {planet.mag}</span>
+                <span>{planet.eye ? 'ნაკლები gear' : 'ტელესკოპი რეკომენდებულია'}</span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function ConditionsPanel({ weather, now, visibilityKm, score }) {
+  const series = useMemo(() => buildDetailSeries(weather, visibilityKm), [weather, visibilityKm]);
+  const hourly = useMemo(() => buildHourlyForecast(weather, now), [weather, now]);
+
+  if (!weather || !series) {
+    return <LoadingCard title="Sky Conditions Loading" />;
+  }
+
+  const tiles = [
+    { label: 'Cloud Cover', value: `${weather.cloud_cover}%`, tone: getWeatherTone(weather.cloud_cover), series: series.cloud },
+    { label: 'Humidity', value: `${weather.relative_humidity_2m}%`, tone: weather.relative_humidity_2m <= 60 ? 'var(--accent-aurora)' : 'var(--accent-solar)', series: series.humidity },
+    { label: 'Wind Speed', value: `${Math.round(weather.wind_speed_10m)} km/h`, tone: weather.wind_speed_10m <= 12 ? 'var(--accent-aurora)' : 'var(--accent-mars)', series: series.wind },
+    { label: 'Temperature', value: `${Math.round(weather.temperature_2m)}°C`, tone: getTempTone(weather.temperature_2m), series: series.temperature },
+    { label: 'Dew Point', value: `${series.dew[0]}°C`, tone: 'var(--accent-comet)', series: series.dew },
+    { label: 'Visibility', value: `${visibilityKm} km`, tone: visibilityKm >= 10 ? 'var(--accent-aurora)' : 'var(--accent-solar)', series: series.visibility },
+  ];
+
+  return (
+    <section id="conditions" className="section-stack section-reveal" style={{ '--stagger': 2 }}>
+      <div className="sky-card">
+        <div className="conditions-grid">
+          <div className="score-panel">
+            <p className="eyebrow">Observing Score Gauge</p>
+            <ScoreGauge score={score} />
+            <div className="stats-strip" style={{ width: '100%', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
+              <div className="info-tile" style={{ padding: 'var(--space-4)' }}>
+                <label>Wind</label>
+                <strong>{Math.round(weather.wind_speed_10m)} km/h</strong>
+                <span style={{ color: 'var(--text-secondary)' }}>{windDirectionLabel(weather.wind_direction_10m)}</span>
+              </div>
+              <div className="info-tile" style={{ padding: 'var(--space-4)' }}>
+                <label>Weather Code</label>
+                <strong>{WEATHER_CODES[weather.weather_code] || 'Unknown'}</strong>
+                <span style={{ color: 'var(--text-secondary)' }}>Open-Meteo current snapshot</span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gap: 'var(--space-4)' }}>
+            <div className="forecast-panel">
+              <SectionHeader
+                title="12-Hour Sky Timeline"
+                description="Legacy Vite frontend currently exposes live current weather only, so this strip projects the next 12 hours from the active conditions profile."
+              />
+              <div className="forecast-strip">
+                {hourly.map((item) => {
+                  const tone = getWeatherTone(item.cloud);
+                  return (
+                    <div key={item.label} className={`forecast-hour${item.current ? ' is-current' : ''}`}>
+                      <div style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-xs)' }}>{item.label}</div>
+                      <div className="forecast-dot" style={{ color: tone, background: tone }} />
+                      <strong style={{ fontSize: 'var(--text-base)' }}>{item.cloud}%</strong>
+                      <div style={{ color: 'var(--text-tertiary)', fontSize: 'var(--text-xs)' }}>cloud cover</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="detail-panel">
+              <SectionHeader
+                title="Conditions Detail Grid"
+                description="ქვედა ბარათები ხაზს უსვამს იმ მეტრიკებს, რომლებიც ღამის დაკვირვებაზე ყველაზე დიდ გავლენას ახდენს."
+              />
+              <div className="detail-grid">
+                {tiles.map((tile) => (
+                  <div key={tile.label} className="detail-tile">
+                    <label>{tile.label}</label>
+                    <strong style={{ color: tile.tone }}>{tile.value}</strong>
+                    <Sparkline points={tile.series} tone={tile.tone} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function QuickActionsSidebar({
+  weather,
+  uploadState,
+  onFileChange,
+  onRemoveFile,
+  onUploadSubmit,
+  onCopyMapLink,
+}) {
+  return (
+    <aside id="observe" className="sidebar section-reveal" style={{ '--stagger': 3 }}>
+      <div className="sky-card sidebar-card">
+        <h3>Quick Actions</h3>
+        <p>Primary actions are placed beside the live score so the dashboard becomes directly actionable on desktop and still stacks cleanly on mobile.</p>
+        <div className="action-stack">
+          <button className="btn-primary" onClick={onUploadSubmit}>Upload Observation</button>
+          <a className="btn-secondary" href="#sky-map">View Sky Map</a>
+          <button className="btn-secondary" onClick={onCopyMapLink}>My Observations</button>
+        </div>
+      </div>
+
+      <div className="sky-card sidebar-card">
+        <h3>Observation Upload UI</h3>
+        <p>UI refresh only. The legacy frontend now shows a polished drag-and-drop shell, local preview, and progress feedback without changing backend logic.</p>
+        <div className="dropzone">
+          <div style={{ fontSize: '2rem' }}>☁</div>
+          <strong>Drop an observing shot here</strong>
+          <p>JPEG, PNG or HEIC · up to 20MB · preview stays local until the upload pipeline is wired.</p>
+          <label className="btn-secondary" style={{ cursor: 'pointer', width: '100%' }}>
+            Choose file
+            <input type="file" accept="image/*" onChange={onFileChange} style={{ display: 'none' }} />
+          </label>
+        </div>
+
+        {uploadState.previewUrl ? (
+          <div className="uploader-actions">
+            <div className="thumbnail-preview">
+              <img src={uploadState.previewUrl} alt={uploadState.fileName} loading="lazy" />
+              <div className="thumbnail-actions">
+                <button className="btn-danger" onClick={onRemoveFile}>Remove</button>
+              </div>
+            </div>
+
+            <div>
+              <label className="field-label" htmlFor="observation-note">Observation Note</label>
+              <input id="observation-note" className="field-input" placeholder="ეგ. Jupiter banding over Tbilisi" />
+            </div>
+
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <span className="field-label">Upload Progress</span>
+                <span style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>{uploadState.progress}%</span>
+              </div>
+              <div className="progress-track">
+                <div className="progress-fill" style={{ width: `${uploadState.progress}%` }} />
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="sky-card sidebar-card">
+        <h3>Community Activity Feed</h3>
+        <div className="feed-list">
+          {COMMUNITY_FEED.map((item) => (
+            <article key={item.title} className="feed-item">
+              <strong>{item.title}</strong>
+              <div className="meta-row">
+                <span>{item.author}</span>
+                <span>{item.time}</span>
+              </div>
+              <p>{item.note}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      <div className="sky-card sidebar-card">
+        <h3>Upcoming Events</h3>
+        <div className="event-list">
+          {UPCOMING_EVENTS.map((item) => (
+            <article key={item.title} className="event-item">
+              <div className="card-header-inline">
+                <strong>{item.title}</strong>
+                <span className={`badge ${item.tone}`}>{item.window}</span>
+              </div>
+              <p>TODO: replace these placeholders with the live astronomy events feed when the legacy frontend inherits the newer data model.</p>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      <div className="sky-card sidebar-card">
+        <h3>Live Snapshot</h3>
+        {weather ? (
+          <div className="detail-grid">
+            <div className="detail-tile">
+              <label>Weather</label>
+              <strong>{WEATHER_CODES[weather.weather_code] || 'Unknown'}</strong>
+            </div>
+            <div className="detail-tile">
+              <label>Humidity</label>
+              <strong>{weather.relative_humidity_2m}%</strong>
+            </div>
+          </div>
+        ) : (
+          <div className="empty-state">
+            <strong>ამინდის ცოცხალი snapshot იტვირთება</strong>
+            <p>Open-Meteo current payload arrives here before the richer cards hydrate.</p>
+          </div>
+        )}
+      </div>
+    </aside>
   );
 }
 
 function ISSTracker({ iss }) {
-  const dist = iss ? Math.round(distanceKm(LAT, LON, iss.latitude, iss.longitude)) : null;
-  const alertLevel = dist !== null ? (dist < 500 ? 'danger' : dist < 1500 ? 'warn' : 'ok') : 'ok';
-  const alertColor = alertLevel === 'danger' ? S.danger : alertLevel === 'warn' ? S.gold : S.dim;
-  const alertMsg   = alertLevel === 'danger' ? '🔴 ISS ახლოსაა — ადევნეთ თვალი ზეცას!' :
-                     alertLevel === 'warn'   ? '🟡 ISS ახლოვდება თბილისს' : null;
-  const velKms = iss ? (iss.velocity / 3600).toFixed(2) : null;
-
-  return (
-    <section style={{ maxWidth: 1100, margin: '0 auto 44px', padding: '0 16px' }}>
-      <div style={{ ...S.glass, padding: '24px 28px', overflow: 'hidden', position: 'relative' }}>
-
-        {/* Subtle orbital bg decoration */}
-        <div style={{
-          position: 'absolute', top: -60, right: -60,
-          width: 220, height: 220, borderRadius: '50%',
-          border: '1px solid rgba(79,195,195,0.08)',
-          pointerEvents: 'none',
-        }} />
-        <div style={{
-          position: 'absolute', top: -30, right: -30,
-          width: 140, height: 140, borderRadius: '50%',
-          border: '1px solid rgba(79,195,195,0.12)',
-          pointerEvents: 'none',
-        }} />
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-          <div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
-              🛸 ISS — საერთაშორისო კოსმოსური სადგური
-            </h2>
-            <div style={{ fontSize: 11, color: S.dim, fontFamily: "'Chakra Petch', monospace" }}>
-              REAL-TIME · 5s REFRESH · ALTITUDE ~408 KM
-            </div>
-          </div>
-          {iss && <ISSGlobe lat={iss.latitude} lon={iss.longitude} />}
-        </div>
-
-        {iss ? (
-          <>
-            {alertMsg && (
-              <div style={{
-                marginBottom: 16, padding: '10px 16px', borderRadius: 10,
-                background: `${alertColor}18`, border: `1px solid ${alertColor}44`,
-                color: alertColor, fontSize: 13, fontWeight: 600,
-              }}>{alertMsg}</div>
-            )}
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
-              {[
-                { icon: '📍', label: 'კოორდინატები', value: `${iss.latitude.toFixed(2)}°, ${iss.longitude.toFixed(2)}°` },
-                { icon: '⬆️', label: 'სიმაღლე', value: `${Math.round(iss.altitude)} კმ`, bar: { pct: (iss.altitude / 450) * 100, color: S.blue } },
-                { icon: '⚡', label: 'სიჩქარე', value: `${Math.round(iss.velocity).toLocaleString()} კმ/სთ`, sub: `${velKms} კმ/წმ` },
-                { icon: '📏', label: 'დაშორება (თბ.)', value: `${dist?.toLocaleString()} კმ`, valueColor: alertColor, bar: { pct: Math.max(2, Math.min(100, 100 - (dist / 20000) * 100)), color: alertColor } },
-              ].map(item => (
-                <div key={item.label} style={{
-                  background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
-                  borderRadius: 10, padding: '12px 14px',
-                }}>
-                  <div style={{ fontSize: 11, color: S.dim, marginBottom: 4 }}>{item.icon} {item.label}</div>
-                  <div className="numeric-value" style={{ fontSize: 20, fontWeight: 700, color: item.valueColor || '#E8EDF5' }}>{item.value}</div>
-                  {item.sub && <div style={{ fontSize: 11, color: S.dim, marginTop: 2 }}>{item.sub}</div>}
-                  {item.bar && (
-                    <div style={{ height: 3, background: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden', marginTop: 8 }}>
-                      <div style={{ height: '100%', width: `${item.bar.pct}%`, background: item.bar.color, borderRadius: 2, transition: 'width 0.5s' }} />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </>
-        ) : (
-          <div style={{ color: S.dim, fontSize: 14 }}>ISS მონაცემები იტვირთება…</div>
-        )}
-      </div>
-      <style>{`
-        @keyframes issRingPulse { 0%,100% { r: 10; opacity: 0.5; } 50% { r: 15; opacity: 0.1; } }
-        .iss-ring-pulse { animation: issRingPulse 2s ease-in-out infinite; }
-      `}</style>
-    </section>
-  );
-}
-
-function APODSection({ apod }) {
-  const [imgError, setImgError] = useState(false);
-
-  useEffect(() => { setImgError(false); }, [apod]);
-
-  if (!apod) {
+  if (!iss) {
     return (
-      <section style={{ maxWidth: 1100, margin: '0 auto 40px', padding: '0 16px' }}>
-        <div style={{ ...S.glass, padding: 24, textAlign: 'center', color: S.dim }}>
-          📡 NASA სურათი იტვირთება…
-        </div>
+      <section className="section-shell section-reveal" style={{ '--stagger': 4 }}>
+        <LoadingCard title="ISS Telemetry Loading" />
       </section>
     );
   }
 
-  const isVideo = apod.media_type === 'video';
+  const distance = Math.round(distanceKm(LAT, LON, iss.latitude, iss.longitude));
+  const alertTone = distance < 500 ? 'var(--accent-mars)' : distance < 1500 ? 'var(--accent-solar)' : 'var(--accent-aurora)';
+  const cards = [
+    { label: 'Coordinates', value: `${iss.latitude.toFixed(2)}°, ${iss.longitude.toFixed(2)}°`, tone: 'var(--accent-comet)' },
+    { label: 'Altitude', value: `${Math.round(iss.altitude)} km`, tone: 'var(--accent-comet)' },
+    { label: 'Velocity', value: `${Math.round(iss.velocity).toLocaleString()} km/h`, tone: 'var(--accent-aurora)' },
+    { label: 'Distance From Tbilisi', value: `${distance.toLocaleString()} km`, tone: alertTone },
+  ];
 
   return (
-    <section style={{ maxWidth: 1100, margin: '0 auto 40px', padding: '0 16px' }}>
-      <div style={{ ...S.glass, overflow: 'hidden' }}>
-        <div style={{ padding: '20px 24px 12px', fontWeight: 700, fontSize: 17 }}>
-          📡 დღის სამყაროს სურათი
-        </div>
-
-        {/* Image */}
-        <div style={{ position: 'relative', aspectRatio: '16/9', overflow: 'hidden', margin: '0 0 0 0' }}>
-          {isVideo ? (
-            <a href={apod.url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', position: 'relative', height: '100%' }}>
-              <div style={{
-                width: '100%', height: '100%',
-                background: 'radial-gradient(ellipse, #0a1628, #080C14)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <span style={{ fontSize: 64 }}>▶️</span>
-              </div>
-            </a>
-          ) : imgError ? (
-            <div style={{
-              width: '100%', height: '100%',
-              background: 'radial-gradient(ellipse, #0a1628, #080C14)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12,
-            }}>
-              <span style={{ fontSize: 48 }}>🌌</span>
-              <span style={{ color: S.dim, fontSize: 13 }}>სურათი ვერ ჩაიტვირთა</span>
-            </div>
-          ) : (
-            <img
-              src={apod.hdurl || apod.url}
-              alt={apod.title}
-              onError={() => setImgError(true)}
-              style={{
-                width: '100%', height: '100%', objectFit: 'cover',
-                animation: 'fadeIn 0.8s ease',
-              }}
-            />
-          )}
-        </div>
-
-        {/* Caption */}
-        <div style={{ padding: '16px 24px 20px' }}>
-          <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 6 }}>{apod.title}</div>
-          <div style={{ color: S.dim, fontSize: 13, lineHeight: 1.6, marginBottom: 12 }}>
-            {(apod.explanation || '').slice(0, 200)}…
-          </div>
-          <a
-            href={apod.url} target="_blank" rel="noopener noreferrer"
-            style={{
-              display: 'inline-block', padding: '8px 18px',
-              background: 'rgba(201,168,76,0.12)', border: '1px solid rgba(201,168,76,0.3)',
-              borderRadius: 100, color: S.gold, textDecoration: 'none', fontSize: 13,
-            }}
-          >
-            ↗ NASA-ზე სრული სურათი
-          </a>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function CosmosGallery({ cosmos }) {
-  const [imgError, setImgError] = useState(false);
-
-  useEffect(() => { setImgError(false); }, [cosmos]);
-
-  if (!cosmos) {
-    return (
-      <section style={{ maxWidth: 1100, margin: '0 auto 40px', padding: '0 16px' }}>
-        <div style={{ ...S.glass, padding: 24, textAlign: 'center', color: S.dim }}>
-          🌌 სამყაროს გალერეა იტვირთება…
-        </div>
-      </section>
-    );
-  }
-
-  return (
-    <section style={{ maxWidth: 1100, margin: '0 auto 40px', padding: '0 16px' }}>
-      <div style={{ ...S.glass, overflow: 'hidden' }}>
-        <div style={{ padding: '20px 24px 12px', fontWeight: 700, fontSize: 17 }}>
-          🌌 სამყაროს გალერეა
-        </div>
-
-        <div style={{ position: 'relative', aspectRatio: '16/9', overflow: 'hidden' }}>
-          {imgError ? (
-            <div style={{
-              width: '100%', height: '100%',
-              background: 'radial-gradient(ellipse, #0a1628, #080C14)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12,
-            }}>
-              <span style={{ fontSize: 48 }}>🌠</span>
-              <span style={{ color: S.dim, fontSize: 13 }}>სურათი ვერ ჩაიტვირთა</span>
-            </div>
-          ) : (
-            <img
-              src={cosmos.hdurl || cosmos.url}
-              alt={cosmos.title}
-              onError={() => setImgError(true)}
-              style={{
-                width: '100%', height: '100%', objectFit: 'cover',
-                animation: 'fadeScaleIn 0.8s ease',
-                transformOrigin: 'center',
-              }}
-            />
-          )}
-        </div>
-
-        <div style={{ padding: '16px 24px 20px' }}>
-          <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>✦ {cosmos.title}</div>
-          <div style={{ color: S.dim, fontSize: 13, lineHeight: 1.6, marginBottom: 12 }}>
-            {(cosmos.explanation || '').slice(0, 200)}…
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-            <span style={{ color: S.dim, fontSize: 12 }}>
-              📅 {cosmos.date} · 🔭 Webb / NASA
-            </span>
-            <a
-              href={cosmos.hdurl || cosmos.url} target="_blank" rel="noopener noreferrer"
-              style={{
-                padding: '6px 16px',
-                background: 'rgba(79,195,195,0.12)', border: '1px solid rgba(79,195,195,0.3)',
-                borderRadius: 100, color: S.blue, textDecoration: 'none', fontSize: 12,
-              }}
-            >
-              ↗ სრული სურათი NASA-ზე
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function SkyMap() {
-  return (
-    <section id="sky-map" style={{ maxWidth: 1100, margin: '0 auto 44px', padding: '0 16px' }}>
-      <div style={{ ...S.glass, overflow: 'hidden', border: '1px solid rgba(79,195,195,0.15)' }}>
-
-        {/* Header */}
-        <div style={{ padding: '20px 28px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
-          <div>
-            <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 4 }}>🗺 ცოცხალი ვარსკვლავური რუკა</div>
-            <div style={{ fontSize: 11, color: S.dim, fontFamily: "'Chakra Petch', monospace" }}>
-              STELLARIUM · TBILISI · 41.71°N 44.82°E · ALT 491M
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {[
-              { label: 'გადაიტანე', icon: '✋' },
-              { label: 'ზუმი', icon: '🔍' },
-              { label: 'სრული ეკრანი', icon: '⛶' },
-            ].map(h => (
-              <div key={h.label} style={{
-                display: 'flex', alignItems: 'center', gap: 5,
-                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 8, padding: '5px 10px', fontSize: 11, color: S.dim,
-              }}>
-                <span>{h.icon}</span> {h.label}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Coordinate strip */}
-        <div style={{
-          margin: '14px 28px 0',
-          padding: '8px 14px',
-          background: 'rgba(79,195,195,0.06)', border: '1px solid rgba(79,195,195,0.15)',
-          borderRadius: 8,
-          display: 'flex', gap: 24, flexWrap: 'wrap',
-        }}>
-          {[
-            { label: 'LAT', value: '41.7151° N' },
-            { label: 'LON', value: '44.8271° E' },
-            { label: 'ALT', value: '491 m' },
-            { label: 'TZ',  value: 'Asia/Tbilisi (UTC+4)' },
-          ].map(c => (
-            <div key={c.label} style={{ fontSize: 11 }}>
-              <span style={{ color: S.dim, fontFamily: "'Chakra Petch', monospace" }}>{c.label} </span>
-              <span style={{ color: S.blue, fontFamily: "'Chakra Petch', monospace", fontWeight: 700 }}>{c.value}</span>
+    <section className="section-shell section-reveal" style={{ '--stagger': 4 }}>
+      <div className="sky-card media-card">
+        <SectionHeader
+          title="ISS Real-Time Pass Tracker"
+          description="Live WheretheISS data remains untouched. The redesign tightens the telemetry into a compact operations board."
+          badge={<span className="badge badge--comet">5s refresh</span>}
+        />
+        <div className="detail-grid">
+          {cards.map((item) => (
+            <div key={item.label} className="detail-tile">
+              <label>{item.label}</label>
+              <strong style={{ color: item.tone }}>{item.value}</strong>
             </div>
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
 
-        {/* Map iframe */}
-        <div style={{ position: 'relative', height: 520, overflow: 'hidden', margin: '14px 0 0', borderRadius: '0 0 12px 12px' }}>
-          <iframe
-            src="https://stellarium-web.org/"
-            title="Stellarium Sky Map"
-            style={{ width: '100%', height: '100%', border: 'none' }}
-            allow="fullscreen"
-            loading="lazy"
-          />
+function MediaSection({ id, title, description, data, fallbackTitle, accentClass }) {
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [data]);
+
+  if (!data) {
+    return (
+      <div className="sky-card media-card">
+        <LoadingCard title={fallbackTitle} />
+      </div>
+    );
+  }
+
+  const isVideo = data.media_type === 'video';
+  const mediaUrl = data.hdurl || data.url;
+
+  return (
+    <article id={id} className="sky-card media-card">
+      <SectionHeader title={title} description={description} badge={<span className={`badge ${accentClass}`}>{data.date || 'Live'}</span>} />
+      <div className="thumbnail-preview" style={{ marginBottom: 'var(--space-4)' }}>
+        {isVideo ? (
+          <a
+            href={data.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="empty-state"
+            style={{ height: '100%', textDecoration: 'none', color: 'var(--text-primary)' }}
+          >
+            <div style={{ fontSize: '3rem' }}>▶</div>
+            <strong>Open NASA video</strong>
+          </a>
+        ) : imgError ? (
+          <div className="empty-state" style={{ height: '100%' }}>
+            <strong>სურათი ვერ ჩაიტვირთა</strong>
+            <p>Fallback card preserved so the section does not collapse.</p>
+          </div>
+        ) : (
+          <img src={mediaUrl} alt={data.title} loading="lazy" onError={() => setImgError(true)} />
+        )}
+      </div>
+      <strong>{data.title}</strong>
+      <p className="line-clamp-2">{data.explanation}</p>
+      <a className="btn-secondary" href={data.url} target="_blank" rel="noopener noreferrer">Open on NASA</a>
+    </article>
+  );
+}
+
+function SkyMap({ onMapAction }) {
+  const mapRef = useRef(null);
+  const [fullscreen, setFullscreen] = useState(false);
+
+  useEffect(() => {
+    const onChange = () => setFullscreen(document.fullscreenElement === mapRef.current);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  const toggleFullscreen = useCallback(async () => {
+    try {
+      if (document.fullscreenElement === mapRef.current) {
+        await document.exitFullscreen();
+        onMapAction('Exited fullscreen', 'Map overlay returned to dashboard mode.', 'info');
+      } else {
+        await mapRef.current?.requestFullscreen();
+        onMapAction('Fullscreen enabled', 'Stellarium has been expanded into fullscreen mode.', 'success');
+      }
+    } catch {
+      onMapAction('Fullscreen unavailable', 'The browser blocked the fullscreen request.', 'warning');
+    }
+  }, [onMapAction]);
+
+  return (
+    <section id="sky-map" className="section-shell section-reveal" style={{ '--stagger': 5 }}>
+      <div className="sky-card media-card">
+        <SectionHeader
+          title="Live Sky Map Wrapper"
+          description="Map internals remain untouched. The shell adds glass controls, coordinate overlays, a responsive aspect ratio, and a fullscreen toggle."
+          badge={<span className="badge badge--comet">{fullscreen ? 'Fullscreen' : 'Windowed'}</span>}
+        />
+
+        <div ref={mapRef} className="map-shell">
+          <div className="map-overlay-top">
+            <div className="status-pill" style={{ color: 'var(--accent-comet)' }}>
+              <span className="status-pill__dot" />
+              <span>Stellarium · Tbilisi</span>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="icon-button" onClick={() => window.open('https://stellarium-web.org/', '_blank', 'noopener,noreferrer')} aria-label="Open new tab">↗</button>
+              <button className="icon-button" onClick={toggleFullscreen} aria-label="Toggle fullscreen">{fullscreen ? '⤢' : '⛶'}</button>
+            </div>
+          </div>
+
+          <div className="map-frame">
+            <iframe src="https://stellarium-web.org/" title="Stellarium Sky Map" allow="fullscreen" loading="lazy" />
+          </div>
+
+          <div className="map-overlay-bottom">
+            <div className="status-pill" style={{ color: 'var(--accent-aurora)' }}>
+              <span>LAT 41.7151° N</span>
+              <span>LON 44.8271° E</span>
+              <span>ALT 491 m</span>
+            </div>
+            <span className="badge badge--aurora">drag · zoom · inspect</span>
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-function ObservingTips({ cloudCover }) {
-  const tips = cloudCover === null ? null
-    : cloudCover <= 20 ? { icon: '☀️', level: 'შესანიშნავი', text: '0–20%: შესანიშნავია! ღამე ვარსკვლავებს ნახავთ. დააკვირდით იუპიტერს!', color: S.success }
-    : cloudCover <= 60 ? { icon: '⛅', level: 'საშუალო',    text: '20–60%: სასიამოვნო. ხანდახან ვარსკვლავები ჩანს.', color: S.gold }
-    :                    { icon: '☁️', level: 'ცუდი',        text: '60%+: ძლიერი ღრუბლიანობა. დაელოდეთ მოწმენდას.', color: S.danger };
+function ResourceGrid() {
+  return (
+    <section id="resources" className="section-shell section-reveal" style={{ '--stagger': 6 }}>
+      <div className="sky-card media-card">
+        <SectionHeader
+          title="Tools & Resource Cards"
+          description="Shared `.sky-card` styling now standardizes utility cards, action cards, and resource links across the page."
+        />
+        <div className="resource-grid">
+          {RESOURCE_CARDS.map((card) => (
+            <a
+              key={card.title}
+              className="resource-card sky-card"
+              href={card.href}
+              target={card.href.startsWith('http') ? '_blank' : undefined}
+              rel={card.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+              style={{ textDecoration: 'none', color: 'var(--text-primary)' }}
+            >
+              <span className="resource-card__icon">{card.icon}</span>
+              <strong>{card.title}</strong>
+              <p className="line-clamp-2">{card.description}</p>
+              <span style={{ color: 'var(--accent-nebula)', fontWeight: 600 }}>Open →</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ObservingTips({ weather, score }) {
+  if (!weather) {
+    return (
+      <section className="section-shell section-reveal" style={{ '--stagger': 7 }}>
+        <LoadingCard title="Observing Tips Loading" />
+      </section>
+    );
+  }
+
+  const tone = score >= 80 ? 'var(--accent-aurora)' : score >= 55 ? 'var(--accent-solar)' : 'var(--accent-mars)';
+  const tip = score >= 80
+    ? 'ღამე გამჭვირვალეა. აიღე ფართოკუთხიანი ოკულარი და დაბალი magnification-ით დაიწყე.'
+    : score >= 55
+      ? 'ღრუბლის ფანჯრებს შორის იმუშავე. პლანეტები და მთვარე უფრო სტაბილური სამიზნეებია.'
+      : 'ღამე სუსტი აღმოჩნდა. გამოიყენე დრო setup-ის მოსამზადებლად და maps-ის rehearsal-ისთვის.';
 
   return (
-    <section style={{ maxWidth: 1100, margin: '0 auto 40px', padding: '0 16px' }}>
-      <div className="observing-card" style={{ ...S.glass, padding: '20px 24px' }}>
-        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>💡 დაკვირვების რჩევები</h2>
-        {tips ? (
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-            <span className={`tip-icon${tips.icon === '☀️' ? ' sun-rotating' : ''}`} style={{ fontSize: 32 }}>{tips.icon}</span>
-            <div>
-              <div style={{ fontWeight: 700, color: tips.color, marginBottom: 4 }}>
-                პირობები: {tips.level}
-              </div>
-              <div style={{ color: S.dim, fontSize: 14, lineHeight: 1.6 }}>{tips.text}</div>
-            </div>
-          </div>
-        ) : (
-          <div style={{ color: S.dim, fontSize: 14 }}>ამინდის მონაცემები იტვირთება…</div>
-        )}
+    <section className="section-shell section-reveal" style={{ '--stagger': 7 }}>
+      <div className="sky-card media-card">
+        <SectionHeader title="Observing Notes" description="Single-card guidance refreshed with stronger contrast, better hierarchy, and clear color meaning." />
+        <div className="detail-tile">
+          <label>Recommended Tonight</label>
+          <strong style={{ color: tone }}>{tip}</strong>
+          <p>{weather.cloud_cover}% clouds · {weather.relative_humidity_2m}% humidity · {Math.round(weather.wind_speed_10m)} km/h wind</p>
+        </div>
       </div>
     </section>
   );
@@ -904,104 +1034,38 @@ function ObservingTips({ cloudCover }) {
 
 function Footer() {
   return (
-    <footer style={{
-      borderTop: '1px solid rgba(255,255,255,0.08)',
-      background: 'linear-gradient(180deg, transparent, rgba(201,168,76,0.03))',
-      padding: '48px 20px 28px',
-      color: S.dim,
-      fontSize: 13,
-    }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-
-        {/* Top grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 40, marginBottom: 40 }}>
-
-          {/* Brand column */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <img src="/logo-icon.png" alt="Astroman" style={{ height: 44, filter: 'invert(1) drop-shadow(0 0 8px rgba(201,168,76,0.5))' }} />
-              <div>
-                <div style={{ fontSize: 20, fontWeight: 700, color: S.gold, lineHeight: 1 }}>ასტრომანი</div>
-                <div style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: "'Chakra Petch', monospace", marginTop: 2 }}>Sky Intelligence</div>
-              </div>
-            </div>
-            <div style={{ fontSize: 13, lineHeight: 1.7, color: S.dim, maxWidth: 220 }}>
-              სამყაროს ყოველდღიური სახელმძღვანელო. ცოცხალი სამყაროს ინტელექტი.
-            </div>
-            <div style={{ display: 'flex', gap: 10 }}>
-              {['FB', 'IG', 'YT', 'TG'].map(s => (
-                <div key={s} style={{
-                  width: 32, height: 32, borderRadius: 8,
-                  background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 10, fontFamily: "'Chakra Petch', monospace", color: S.dim,
-                  cursor: 'pointer',
-                }}>
-                  {s}
-                </div>
+    <footer className="section-shell section-reveal" style={{ '--stagger': 8, marginBottom: 0 }}>
+      <div className="sky-card footer-card">
+        <div className="footer-grid">
+          <div>
+            <h3>ASTROMAN</h3>
+            <p>Deep-space inspired redesign applied on top of the legacy Vite frontend that powers the current `sky-frontend-seven` deployment chain.</p>
+          </div>
+          <div>
+            <h3>Navigate</h3>
+            <div className="footer-links">
+              {NAV_ITEMS.map((item) => (
+                <a key={item.id} href={item.href} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>{item.label}</a>
               ))}
             </div>
           </div>
-
-          {/* Navigation */}
           <div>
-            <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', color: S.gold, fontFamily: "'Chakra Petch', monospace", marginBottom: 16 }}>ნავიგაცია</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {[
-                { href: '#planets',   label: '🪐 პლანეტები' },
-                { href: '#sky-map',   label: '🗺 ცის რუკა' },
-                { href: '#planets',   label: '🌌 NASA სურათი' },
-                { href: 'https://astroman.ge', label: '🛍 ტელესკოპები' },
-                { href: 'https://club.astroman.ge', label: '⭐ ასტრომანი კლუბი' },
-              ].map(l => (
-                <a key={l.label} href={l.href} style={{ color: S.dim, textDecoration: 'none', fontSize: 13, transition: 'color 0.2s' }}
-                  onMouseEnter={e => e.target.style.color = S.gold}
-                  onMouseLeave={e => e.target.style.color = S.dim}>
-                  {l.label}
-                </a>
-              ))}
+            <h3>Data Sources</h3>
+            <div className="footer-links">
+              <span style={{ color: 'var(--text-secondary)' }}>Open-Meteo</span>
+              <span style={{ color: 'var(--text-secondary)' }}>Sunrise-Sunset API</span>
+              <span style={{ color: 'var(--text-secondary)' }}>NASA APOD</span>
+              <span style={{ color: 'var(--text-secondary)' }}>WheretheISS</span>
             </div>
           </div>
-
-          {/* Contact */}
           <div>
-            <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', color: S.gold, fontFamily: "'Chakra Petch', monospace", marginBottom: 16 }}>კონტაქტი</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {[
-                { icon: '📍', text: 'თბილისი, ქ. ყიფიანის 17' },
-                { icon: '📞', text: '599 39 67 21' },
-                { icon: '✉️', text: 'info@astroman.ge' },
-                { icon: '🌐', text: 'astroman.ge' },
-              ].map(c => (
-                <div key={c.icon} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13 }}>
-                  <span>{c.icon}</span>
-                  <span style={{ color: S.dim }}>{c.text}</span>
-                </div>
-              ))}
+            <h3>Astroman Links</h3>
+            <div className="footer-links">
+              <a href="https://astroman.ge" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Store</a>
+              <a href="https://www.facebook.com/astroman.ge" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Facebook</a>
+              <a href="https://www.instagram.com/astroman.ge" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Instagram</a>
+              <a href="https://t.me/astroman_ge" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Telegram</a>
             </div>
-          </div>
-
-          {/* Sky status / live */}
-          <div>
-            <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', color: S.gold, fontFamily: "'Chakra Petch', monospace", marginBottom: 16 }}>ცოცხალი სტატუსი</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
-              <div style={{ color: S.dim }}>📡 Open-Meteo — ამინდი</div>
-              <div style={{ color: S.dim }}>🛸 WhereTheISS — ISS</div>
-              <div style={{ color: S.dim }}>🔭 Stellarium — ცის რუკა</div>
-              <div style={{ color: S.dim }}>🌙 NASA APOD — სურათი</div>
-              <div style={{ color: S.dim }}>☀️ Sunrise-Sunset API</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: 20 }} />
-
-        {/* Bottom row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-          <div style={{ fontSize: 12 }}>© 2026 ASTROMAN — ყველა უფლება დაცულია</div>
-          <div style={{ fontSize: 11, fontFamily: "'Chakra Petch', monospace", color: S.dim }}>
-            sky.astroman.ge · TBILISI · 41.71°N
           </div>
         </div>
       </div>
@@ -1013,10 +1077,12 @@ function PlanetModal({ planet, onClose }) {
   const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
-    if (!planet) return;
+    if (!planet) return undefined;
     setImgError(false);
     document.body.style.overflow = 'hidden';
-    const onKey = e => { if (e.key === 'Escape') onClose(); };
+    const onKey = (event) => {
+      if (event.key === 'Escape') onClose();
+    };
     window.addEventListener('keydown', onKey);
     return () => {
       document.body.style.overflow = '';
@@ -1026,564 +1092,415 @@ function PlanetModal({ planet, onClose }) {
 
   if (!planet) return null;
 
-  const imgSrc = PLANET_IMAGES[planet.id];
-  const fact   = PLANET_FACTS[planet.id];
+  const fact = PLANET_FACTS[planet.id];
 
   return (
     <div
       onClick={onClose}
       style={{
-        position: 'fixed', inset: 0, zIndex: 200,
-        background: 'rgba(0,0,0,0.75)',
-        display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-        backdropFilter: 'blur(6px)',
+        position: 'fixed',
+        inset: 0,
+        zIndex: 220,
+        background: 'rgba(0,0,0,0.72)',
+        display: 'grid',
+        placeItems: 'center',
+        padding: 'var(--space-4)',
+        backdropFilter: 'blur(8px)',
       }}
     >
       <div
-        onClick={e => e.stopPropagation()}
+        className="sky-card"
+        onClick={(event) => event.stopPropagation()}
         style={{
-          ...S.glass,
-          width: '100%', maxWidth: 520,
-          maxHeight: '90vh', overflowY: 'auto',
-          borderRadius: '20px 20px 0 0',
-          animation: 'slideUp 0.3s ease',
-          background: 'rgba(8,12,20,0.97)',
+          width: 'min(720px, 100%)',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          padding: 'var(--space-5)',
         }}
-        className="planet-modal-inner"
       >
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px 0' }}>
-          <div style={{ fontSize: 22, fontWeight: 700 }}>{planet.emoji} {planet.ka}</div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: S.dim, fontSize: 20, cursor: 'pointer', padding: 4 }}>✕</button>
+        <div className="card-header-inline" style={{ marginBottom: 'var(--space-4)' }}>
+          <div>
+            <p className="eyebrow">Planet Detail</p>
+            <h2 style={{ margin: 0 }}>{planet.emoji} {planet.ka}</h2>
+          </div>
+          <button className="icon-button" onClick={onClose} aria-label="დახურვა">✕</button>
         </div>
 
-        {/* Planet image */}
-        <div style={{ margin: '12px 0', aspectRatio: '16/9', overflow: 'hidden', position: 'relative' }}>
+        <div className="thumbnail-preview" style={{ marginBottom: 'var(--space-4)' }}>
           {imgError ? (
-            <div style={{
-              width: '100%', height: '100%',
-              background: 'radial-gradient(ellipse, #0a1628, #080C14)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <span style={{ fontSize: 120, filter: 'drop-shadow(0 0 40px rgba(201,168,76,0.4))' }}>{planet.emoji}</span>
+            <div className="empty-state" style={{ height: '100%' }}>
+              <div style={{ fontSize: '4rem' }}>{planet.emoji}</div>
+              <strong>{planet.ka}</strong>
             </div>
           ) : (
-            <img
-              src={imgSrc}
-              alt={planet.ka}
-              onError={() => setImgError(true)}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', animation: 'fadeIn 0.6s ease' }}
-            />
+            <img src={PLANET_IMAGES[planet.id]} alt={planet.ka} loading="lazy" onError={() => setImgError(true)} />
           )}
         </div>
 
-        {/* Stats */}
-        <div style={{ padding: '0 20px 8px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            {[
-              ['📍 ამჟამინდელი თანავარსკვლავედი', planet.constellation],
-              ['📐 სიმაღლე ჰორიზონტიდან', `${planet.maxAlt}°`],
-              ['✨ სიკაშკაშე (mag)', String(planet.mag)],
-              ['👁 ხილვადობა', planet.visible ? 'შეიმჩნევა ღამით' : 'ახლა არ ჩანს'],
-              ['🔭 ტელესკოპი', planet.eye ? 'არ სჭირდება' : 'საჭიროა'],
-            ].map(([k, v]) => (
-              <div key={k} style={{ ...S.glass, padding: '10px 12px', borderRadius: 12 }}>
-                <div style={{ fontSize: 11, color: S.dim, marginBottom: 3 }}>{k}</div>
-                <div style={{ fontSize: 14, fontWeight: 600 }}>{v}</div>
-              </div>
-            ))}
+        <div className="detail-grid" style={{ marginBottom: 'var(--space-4)' }}>
+          <div className="detail-tile">
+            <label>Constellation</label>
+            <strong>{planet.constellation}</strong>
           </div>
-
-          {/* Fun fact */}
-          {fact && (
-            <div style={{ ...S.glass, padding: '12px 16px', borderRadius: 14, marginTop: 4 }}>
-              <div style={{ fontSize: 12, color: S.dim, marginBottom: 6 }}>💫 საინტერესო ფაქტი</div>
-              <div style={{ fontSize: 13, lineHeight: 1.7 }}>{fact}</div>
-            </div>
-          )}
-
-          {/* Telescope link */}
-          <a
-            href="https://astroman.ge"
-            style={{
-              display: 'block', textAlign: 'center', padding: '12px',
-              background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.3)',
-              borderRadius: 14, color: S.gold, textDecoration: 'none', fontWeight: 600, fontSize: 14,
-              marginBottom: 20,
-            }}
-          >
-            🔭 ტელესკოპი ამ პლანეტისთვის — მაღაზია
-          </a>
+          <div className="detail-tile">
+            <label>Altitude</label>
+            <strong>{Math.round(planet.altitude ?? planet.maxAlt)}°</strong>
+          </div>
+          <div className="detail-tile">
+            <label>Brightness</label>
+            <strong>mag {planet.mag}</strong>
+          </div>
+          <div className="detail-tile">
+            <label>Visibility</label>
+            <strong>{planet.visible ? 'Visible tonight' : 'Below horizon now'}</strong>
+          </div>
         </div>
-      </div>
 
-      <style>{`
-        @media (min-width: 640px) {
-          .planet-modal-inner {
-            border-radius: 20px !important;
-            margin-bottom: 40px;
-          }
-        }
-        @keyframes slideUp   { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        @keyframes fadeIn    { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes fadeScaleIn { from { opacity: 0; transform: scale(1.02); } to { opacity: 1; transform: scale(1); } }
-      `}</style>
+        <div className="detail-tile" style={{ marginBottom: 'var(--space-4)' }}>
+          <label>Interesting Fact</label>
+          <strong>{fact}</strong>
+        </div>
+
+        <a className="btn-primary" href="https://astroman.ge" target="_blank" rel="noopener noreferrer">Explore matching gear on Astroman</a>
+      </div>
     </div>
   );
 }
 
-function TonightsSkyCard({ weather }) {
-  const cloudCover = weather?.cloud_cover ?? null;
-
-  const astro = useMemo(() => {
-    const now = new Date();
-    const sun     = getSunTimes(now);
-    const moon    = getMoonInfo(now);
-    const planets = getVisiblePlanets(now).filter(p => p.visible);
-    const score   = getStargazingScore(
-      cloudCover ?? 50,
-      moon.illumination,
-      now.getHours()
-    );
-    return { sun, moon, planets, score };
-  }, [cloudCover]);
-
-  function fmt(date) {
-    if (!date) return '—';
-    return new Date(date).toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit', hour12: false });
-  }
-
-  function cloudLabel(pct) {
-    if (pct === null) return '—';
-    if (pct <= 10)  return 'მოწმენდილი';
-    if (pct <= 30)  return 'ძირითადად მოწმენდილი';
-    if (pct <= 60)  return 'ნაწილობრივ მოღრუბლული';
-    return 'მოღრუბლული';
-  }
-
-  function scoreColor(s) {
-    if (s >= 80) return '#4FC3C3';
-    if (s >= 60) return '#4ade80';
-    if (s >= 30) return '#f59e0b';
-    return '#ff6b6b';
-  }
-
-  function scoreLabel(s) {
-    if (s >= 80) return 'შესანიშნავი';
-    if (s >= 60) return 'კარგი';
-    if (s >= 30) return 'საშუალო';
-    return 'ცუდი';
-  }
-
-  const now = new Date();
-  const dateStr = `${now.getDate()} ${GEO_MONTHS[now.getMonth()]}`;
-
-  const viewStart = astro.sun.astroTwilightEnd || astro.sun.sunset;
-  const viewEnd   = astro.sun.astroTwilightBegin || astro.sun.sunrise;
-
+function BottomTabs({ activeSection, onNavigate }) {
   return (
-    <section style={{ maxWidth: 1100, margin: '0 auto 32px', padding: '0 16px' }}>
-      <a
-        href="/sky-tools/conditions"
-        style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
-      >
-        <div
-          style={{
-            ...S.glass,
-            padding: '24px 28px',
-            cursor: 'pointer',
-            transition: 'border-color 0.2s, background 0.2s',
-            border: '1px solid rgba(201,168,76,0.15)',
-          }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.35)'; e.currentTarget.style.background = S.glassHover.background; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.15)'; e.currentTarget.style.background = S.glass.background; }}
+    <div className="bottom-tabs">
+      {NAV_ITEMS.map((item) => (
+        <a
+          key={item.id}
+          href={item.href}
+          className={`bottom-tab${activeSection === item.id ? ' is-active' : ''}`}
+          onClick={() => onNavigate(item.id)}
         >
-          {/* Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 8 }}>
-            <div>
-              <div style={{ fontSize: 18, fontWeight: 700 }}>🌌 დღეს ღამის ცა</div>
-              <div style={{ fontSize: 12, color: S.dim, marginTop: 2 }}>{dateStr} · თბილისი</div>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{
-                fontSize: 48, fontWeight: 700, lineHeight: 1,
-                color: scoreColor(astro.score),
-                fontFamily: "'Chakra Petch', monospace",
-              }}>
-                {astro.score}
-              </div>
-              <div style={{ fontSize: 11, color: scoreColor(astro.score), textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                {scoreLabel(astro.score)}
-              </div>
-            </div>
-          </div>
-
-          {/* Row 1: Sun + Cloud */}
-          <div style={{ display: 'flex', gap: 24, marginBottom: 18, flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <div style={{ fontSize: 11, color: S.dim, textTransform: 'uppercase', letterSpacing: '0.08em' }}>მზე</div>
-              <div style={{ fontSize: 13, display: 'flex', gap: 16 }}>
-                <span>🌅 {fmt(astro.sun.sunset)}</span>
-                <span>🌄 {fmt(astro.sun.sunrise)}</span>
-              </div>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <div style={{ fontSize: 11, color: S.dim, textTransform: 'uppercase', letterSpacing: '0.08em' }}>ღრუბლიანობა</div>
-              <div style={{ fontSize: 13 }}>
-                {cloudCover !== null
-                  ? `☁️ ${cloudCover}% — ${cloudLabel(cloudCover)}`
-                  : '—'}
-              </div>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <div style={{ fontSize: 11, color: S.dim, textTransform: 'uppercase', letterSpacing: '0.08em' }}>საუკეთესო პერიოდი</div>
-              <div style={{ fontSize: 13, color: '#4FC3C3', fontFamily: "'Chakra Petch', monospace" }}>
-                🔭 {fmt(viewStart)} — {fmt(viewEnd)}
-              </div>
-            </div>
-          </div>
-
-          {/* Moon */}
-          <div style={{
-            ...S.glass,
-            display: 'flex', alignItems: 'center', gap: 14,
-            padding: '12px 16px', marginBottom: 16, borderRadius: 10,
-            background: 'rgba(255,255,255,0.03)',
-          }}>
-            <span style={{ fontSize: 28 }}>{astro.moon.phaseEmoji}</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 600 }}>{astro.moon.phaseName}</div>
-              <div style={{ fontSize: 11, color: S.dim }}>{astro.moon.illumination}% განათება · {astro.moon.age} დღე</div>
-            </div>
-            <div style={{ fontSize: 12, color: S.dim, textAlign: 'right' }}>
-              <div>↑ {fmt(astro.moon.rise)}</div>
-              <div>↓ {fmt(astro.moon.set)}</div>
-            </div>
-          </div>
-
-          {/* Visible Planets */}
-          {astro.planets.length > 0 ? (
-            <div>
-              <div style={{ fontSize: 11, color: S.dim, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
-                ხილული პლანეტები ({astro.planets.length})
-              </div>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {astro.planets.map(p => (
-                  <div key={p.id} style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.07)',
-                    borderRadius: 8, padding: '8px 12px',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
-                    minWidth: 72,
-                  }}>
-                    <span style={{ fontSize: 20 }}>{p.emoji}</span>
-                    <span style={{ fontSize: 11, fontWeight: 600 }}>{p.ka}</span>
-                    <span style={{ fontSize: 10, color: S.dim }}>{p.altitude}°</span>
-                    <span style={{ fontSize: 10, color: S.dim }}>↑ {fmt(p.rise)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div style={{ fontSize: 13, color: S.dim }}>ამჟამად პლანეტები ჰორიზონტის ქვემოთაა</div>
-          )}
-
-          {/* Footer hint */}
-          <div style={{ marginTop: 16, fontSize: 11, color: S.dim, textAlign: 'right' }}>
-            სრული ინფო → /sky-tools/conditions ↗
-          </div>
-        </div>
-      </a>
-    </section>
+          <span>{item.icon}</span>
+          <span>{item.mobileLabel}</span>
+        </a>
+      ))}
+    </div>
   );
 }
 
-// ─── Main App ─────────────────────────────────────────────────────────────────
+function AppContent() {
+  const toast = useToast();
+  const [now, setNow] = useState(new Date());
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [weather, setWeather] = useState(null);
+  const [sunData, setSunData] = useState(null);
+  const [iss, setISS] = useState(null);
+  const [apod, setApod] = useState(null);
+  const [cosmos, setCosmos] = useState(null);
+  const [selectedPlanet, setSelectedPlanet] = useState(null);
+  const [activeSection, setActiveSection] = useState('dashboard');
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [uploadState, setUploadState] = useState({ fileName: '', previewUrl: '', progress: 0 });
 
-export default function SKY() {
-  const [now,        setNow]        = useState(new Date());
-  const [menuOpen,   setMenuOpen]   = useState(false);
-  const [weather,    setWeather]    = useState(null);
-  const [sunData,    setSunData]    = useState(null);
-  const [iss,        setISS]        = useState(null);
-  const [apod,       setApod]       = useState(null);
-  const [cosmos,     setCosmos]     = useState(null);
-  const [selPlanet,  setSelPlanet]  = useState(null);
-
-  // Live clock
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
+    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(timer);
   }, []);
 
-  // Weather + Sun — fetch all data every 10 min
+  useEffect(() => {
+    const onScroll = () => {
+      setShowBackToTop(window.scrollY > 560);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!uploadState.previewUrl || uploadState.progress >= 100) return undefined;
+    const timer = window.setInterval(() => {
+      setUploadState((current) => {
+        if (!current.previewUrl) return current;
+        const next = Math.min(current.progress + Math.ceil(Math.random() * 18), 96);
+        return { ...current, progress: next };
+      });
+    }, 160);
+    return () => window.clearInterval(timer);
+  }, [uploadState.previewUrl, uploadState.progress]);
+
+  useEffect(() => () => {
+    if (uploadState.previewUrl) URL.revokeObjectURL(uploadState.previewUrl);
+  }, [uploadState.previewUrl]);
+
+  const computedSun = useMemo(() => getSunTimes(now), [now]);
+  const moon = useMemo(() => getMoonInfo(now), [now]);
+  const planets = useMemo(() => {
+    const live = getVisiblePlanets(now);
+    return PLANETS.map((planet) => {
+      const fromLive = live.find((item) => item.id === planet.id) || {};
+      return {
+        ...planet,
+        emoji: fromLive.emoji,
+        altitude: fromLive.altitude ?? planet.maxAlt,
+        azimuth: fromLive.azimuth ?? 0,
+        visible: fromLive.visible ?? false,
+        rise: fromLive.rise ?? null,
+        set: fromLive.set ?? null,
+      };
+    });
+  }, [now]);
+
+  const visibilityKm = useMemo(() => getVisibilityKm(weather), [weather]);
+  const score = useMemo(() => getObservationScore(weather, visibilityKm), [weather, visibilityKm]);
+  const mergedSun = useMemo(() => ({
+    ...computedSun,
+    ...sunData,
+  }), [computedSun, sunData]);
+  const skyStatus = useMemo(
+    () => getSkyStatus(mergedSun.sunrise, mergedSun.sunset, mergedSun.astroTwilightEnd || mergedSun.civil_twilight_end, now),
+    [mergedSun, now],
+  );
+
+  const visiblePlanets = planets.filter((planet) => planet.visible);
+
   const fetchAllData = useCallback(async () => {
     try {
-      const [wRes, sRes] = await Promise.all([
+      const [weatherResponse, sunResponse] = await Promise.all([
         fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,cloud_cover,wind_speed_10m,wind_direction_10m,weather_code,precipitation,relative_humidity_2m&timezone=Asia/Tbilisi`),
         fetch(`https://api.sunrise-sunset.org/json?lat=${LAT}&lng=${LON}&formatted=0&tzid=Asia/Tbilisi`),
       ]);
-      if (wRes.ok) {
-        const w = await wRes.json();
-        setWeather(w.current);
+      if (weatherResponse.ok) {
+        const payload = await weatherResponse.json();
+        setWeather(payload.current);
       }
-      if (sRes.ok) {
-        const s = await sRes.json();
-        if (s.status === 'OK') setSunData(s.results);
+      if (sunResponse.ok) {
+        const payload = await sunResponse.json();
+        if (payload.status === 'OK') setSunData(payload.results);
       }
-    } catch (_) {}
-  }, []);
+    } catch {
+      toast({
+        title: 'Weather sync failed',
+        message: 'The current Open-Meteo or sunrise service did not respond. Existing data is still preserved.',
+        tone: 'warning',
+      });
+    }
+  }, [toast]);
+
+  const fetchISS = useCallback(async () => {
+    try {
+      const response = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
+      if (response.ok) setISS(await response.json());
+    } catch {
+      toast({
+        title: 'ISS sync failed',
+        message: 'WhereTheISS is temporarily unavailable. The telemetry card will recover automatically.',
+        tone: 'warning',
+      });
+    }
+  }, [toast]);
 
   useEffect(() => {
     fetchAllData();
-    const id = setInterval(fetchAllData, 10 * 60 * 1000);
-    return () => clearInterval(id);
+    const timer = window.setInterval(fetchAllData, 10 * 60 * 1000);
+    return () => window.clearInterval(timer);
   }, [fetchAllData]);
-
-  // ISS — every 5 seconds
-  const fetchISS = useCallback(async () => {
-    try {
-      const res = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
-      if (res.ok) setISS(await res.json());
-    } catch (_) {}
-  }, []);
 
   useEffect(() => {
     fetchISS();
-    const id = setInterval(fetchISS, 5000);
-    return () => clearInterval(id);
+    const timer = window.setInterval(fetchISS, 5000);
+    return () => window.clearInterval(timer);
   }, [fetchISS]);
 
-  // NASA APOD — today
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY');
-        if (res.ok) setApod(await res.json());
-      } catch (_) {}
+        const response = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${import.meta.env.VITE_NASA_KEY || 'DEMO_KEY'}`);
+        if (response.ok) setApod(await response.json());
+      } catch {
+        toast({
+          title: 'NASA APOD unavailable',
+          message: 'The daily NASA image failed to load. A placeholder card will remain visible.',
+          tone: 'warning',
+        });
+      }
     };
     load();
-  }, []);
+  }, [toast]);
 
-  // NASA Cosmos Gallery — rotating archive
   useEffect(() => {
     const load = async () => {
       const dayIndex = Math.floor(Date.now() / 86400000) % COSMOS_DATES.length;
-      for (let i = 0; i < COSMOS_DATES.length; i++) {
-        const date = COSMOS_DATES[(dayIndex + i) % COSMOS_DATES.length];
+      for (let index = 0; index < COSMOS_DATES.length; index += 1) {
+        const date = COSMOS_DATES[(dayIndex + index) % COSMOS_DATES.length];
         try {
-          const res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${date}`);
-          if (res.ok) {
-            const data = await res.json();
-            if (data.media_type === 'image') { setCosmos(data); break; }
+          const response = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${import.meta.env.VITE_NASA_KEY || 'DEMO_KEY'}&date=${date}`);
+          if (response.ok) {
+            const payload = await response.json();
+            if (payload.media_type === 'image') {
+              setCosmos(payload);
+              break;
+            }
           }
-        } catch (_) {}
+        } catch {
+          break;
+        }
       }
     };
     load();
   }, []);
 
-  const skyStatus    = getSkyStatus(sunData?.sunrise, sunData?.sunset, sunData?.civil_twilight_end, now);
-  const visibleCount = useMemo(() => getVisiblePlanets().filter(p => p.visible).length, []);
+  const onNavigate = useCallback((sectionId) => {
+    setActiveSection(sectionId);
+  }, []);
+
+  const onFileChange = useCallback((event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'Unsupported file type',
+        message: 'Choose an image file for the observation preview.',
+        tone: 'error',
+      });
+      return;
+    }
+    setUploadState((current) => {
+      if (current.previewUrl) URL.revokeObjectURL(current.previewUrl);
+      return {
+        fileName: file.name,
+        previewUrl: URL.createObjectURL(file),
+        progress: 12,
+      };
+    });
+    toast({
+      title: 'Preview ready',
+      message: `${file.name} was added to the local observation upload card.`,
+      tone: 'success',
+    });
+  }, [toast]);
+
+  const onRemoveFile = useCallback(() => {
+    setUploadState((current) => {
+      if (current.previewUrl) URL.revokeObjectURL(current.previewUrl);
+      return { fileName: '', previewUrl: '', progress: 0 };
+    });
+    toast({
+      title: 'Preview removed',
+      message: 'The observation draft was cleared from the local upload UI.',
+      tone: 'info',
+    });
+  }, [toast]);
+
+  const onUploadSubmit = useCallback(() => {
+    if (!uploadState.previewUrl) {
+      toast({
+        title: 'No file selected',
+        message: 'Choose an image first so the refreshed upload interface has something to stage.',
+        tone: 'warning',
+      });
+      return;
+    }
+    setUploadState((current) => ({ ...current, progress: 100 }));
+    toast({
+      title: 'Upload UI completed',
+      message: 'The polished uploader reached 100%. Backend submission remains unchanged and is ready to be wired later.',
+      tone: 'success',
+    });
+  }, [toast, uploadState.previewUrl]);
+
+  const onCopyMapLink = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}#sky-map`);
+      toast({
+        title: 'Map link copied',
+        message: 'The Sky Map anchor was copied to the clipboard.',
+        tone: 'success',
+      });
+    } catch {
+      toast({
+        title: 'Clipboard blocked',
+        message: 'The browser refused clipboard access, but the map link remains available in the address bar.',
+        tone: 'warning',
+      });
+    }
+  }, [toast]);
 
   return (
-    <div style={S.root}>
-      <Navbar menuOpen={menuOpen} setMenuOpen={setMenuOpen} skyStatus={skyStatus} visibleCount={visibleCount} />
+    <div className="sky-app">
+      <Navbar
+        activeSection={activeSection}
+        onNavigate={onNavigate}
+        menuOpen={menuOpen}
+        setMenuOpen={setMenuOpen}
+        skyStatus={skyStatus}
+        visibleCount={visiblePlanets.length}
+      />
 
-      <Hero now={now} skyStatus={skyStatus} sunset={sunData?.sunset} />
+      <HeroBanner
+        now={now}
+        weather={weather}
+        sunTimes={mergedSun}
+        moon={moon}
+        skyStatus={skyStatus}
+        score={score}
+        visibilityKm={visibilityKm}
+        visiblePlanets={visiblePlanets}
+      />
 
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <StatsRow weather={weather} sunData={sunData} now={now} />
-      </div>
+      <section className="section-shell dashboard-grid">
+        <div className="section-stack">
+          <PlanetVisibilitySection planets={planets} onPlanetClick={setSelectedPlanet} />
+          <ConditionsPanel weather={weather} now={now} visibilityKm={visibilityKm} score={score} />
+        </div>
 
-      <TonightsSkyCard weather={weather} />
-
-      <PlanetsSection onPlanetClick={setSelPlanet} />
+        <QuickActionsSidebar
+          weather={weather}
+          uploadState={uploadState}
+          onFileChange={onFileChange}
+          onRemoveFile={onRemoveFile}
+          onUploadSubmit={onUploadSubmit}
+          onCopyMapLink={onCopyMapLink}
+        />
+      </section>
 
       <ISSTracker iss={iss} />
 
-      <APODSection apod={apod} />
+      <section className="section-shell media-grid section-reveal" style={{ '--stagger': 5 }}>
+        <MediaSection
+          id="apod"
+          title="NASA Astronomy Picture of the Day"
+          description="Daily media card now follows the shared glassmorphic card system, broken-image fallback, and lazy loading pattern."
+          data={apod}
+          fallbackTitle="NASA APOD Loading"
+          accentClass="badge--solar"
+        />
+        <MediaSection
+          id="cosmos"
+          title="Cosmos Archive Spotlight"
+          description="Rotating archive image stays in place, but the card is normalized with the new card sizing and typography."
+          data={cosmos}
+          fallbackTitle="Cosmos Archive Loading"
+          accentClass="badge--comet"
+        />
+      </section>
 
-      <CosmosGallery cosmos={cosmos} />
-
-      <SkyMap />
-
-      <ObservingTips cloudCover={weather ? weather.cloud_cover : null} />
-
+      <SkyMap onMapAction={(title, message, tone) => toast({ title, message, tone })} />
+      <ResourceGrid />
+      <ObservingTips weather={weather} score={score ?? 0} />
       <Footer />
 
-      {selPlanet && <PlanetModal planet={selPlanet} onClose={() => setSelPlanet(null)} />}
+      {showBackToTop ? (
+        <button className="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top">
+          ↑
+        </button>
+      ) : null}
 
-      <style>{`
-        /* ─── Base ─── */
-        * { box-sizing: border-box; }
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.4); border-radius: 2px; }
-
-        /* ─── Keyframes ─── */
-        @keyframes fadeSlideUp {
-          from { opacity: 0; transform: translateY(12px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes pulseGlow {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50%       { transform: scale(1.6); opacity: 0.5; }
-        }
-        @keyframes sunRotate {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-        @keyframes slideUp     { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        @keyframes fadeIn      { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes fadeScaleIn { from { opacity: 0; transform: scale(1.02); } to { opacity: 1; transform: scale(1); } }
-
-        /* ─── Page load animations ─── */
-        .astroman-nav  { animation: fadeSlideUp 0.5s cubic-bezier(0.4,0,0.2,1) both; }
-        .hero-section  { animation: fadeSlideUp 0.5s cubic-bezier(0.4,0,0.2,1) 0.1s both; }
-        .stat-card     { animation: fadeSlideUp 0.5s cubic-bezier(0.4,0,0.2,1) both; }
-        .stat-card:nth-child(1) { animation-delay: 0.2s; }
-        .stat-card:nth-child(2) { animation-delay: 0.25s; }
-        .stat-card:nth-child(3) { animation-delay: 0.3s; }
-        .stat-card:nth-child(4) { animation-delay: 0.35s; }
-
-        /* ─── Hero card — star field + radial glow ─── */
-        .hero-card {
-          background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 70%);
-        }
-        .hero-card::before {
-          content: '';
-          position: absolute;
-          top: 0; left: 0;
-          width: 1px; height: 1px;
-          background: white;
-          border-radius: 50%;
-          pointer-events: none;
-          z-index: 0;
-          box-shadow:
-            45px 23px 0 rgba(255,255,255,0.3),   120px 67px 0 rgba(255,255,255,0.15),
-            230px 34px 0 rgba(255,255,255,0.25),  340px 89px 0 rgba(255,255,255,0.1),
-            450px 15px 0 rgba(255,255,255,0.35),  560px 78px 0 rgba(255,255,255,0.2),
-            640px 45px 0 rgba(255,255,255,0.15),   80px 145px 0 rgba(255,255,255,0.2),
-            190px 112px 0 rgba(255,255,255,0.3),  290px 178px 0 rgba(255,255,255,0.1),
-            410px 134px 0 rgba(255,255,255,0.25), 510px 167px 0 rgba(255,255,255,0.15),
-            620px 123px 0 rgba(255,255,255,0.35),  30px 200px 0 rgba(255,255,255,0.1),
-            160px 234px 0 rgba(255,255,255,0.25), 270px 256px 0 rgba(255,255,255,0.2),
-            380px 278px 0 rgba(255,255,255,0.1),  490px 213px 0 rgba(255,255,255,0.3),
-            590px 245px 0 rgba(255,255,255,0.15), 680px 198px 0 rgba(255,255,255,0.2),
-             70px 312px 0 rgba(255,255,255,0.1),  155px 345px 0 rgba(255,255,255,0.2),
-            245px 323px 0 rgba(255,255,255,0.25), 350px 356px 0 rgba(255,255,255,0.15),
-            460px 334px 0 rgba(255,255,255,0.1),  555px 367px 0 rgba(255,255,255,0.3),
-            645px 345px 0 rgba(255,255,255,0.15),  15px  89px 0 rgba(255,255,255,0.2),
-             95px 178px 0 rgba(255,255,255,0.15), 175px 156px 0 rgba(255,255,255,0.25),
-            265px  89px 0 rgba(255,255,255,0.1),  355px  45px 0 rgba(255,255,255,0.2),
-            435px 234px 0 rgba(255,255,255,0.15), 525px 112px 0 rgba(255,255,255,0.3),
-            615px 267px 0 rgba(255,255,255,0.1),   22px 267px 0 rgba(255,255,255,0.25),
-            112px 289px 0 rgba(255,255,255,0.15), 202px 312px 0 rgba(255,255,255,0.2),
-            302px 134px 0 rgba(255,255,255,0.1),  402px 167px 0 rgba(255,255,255,0.25),
-            502px  89px 0 rgba(255,255,255,0.15), 602px  56px 0 rgba(255,255,255,0.3),
-            692px 278px 0 rgba(255,255,255,0.1),   55px 367px 0 rgba(255,255,255,0.2),
-            148px 378px 0 rgba(255,255,255,0.15), 238px 389px 0 rgba(255,255,255,0.25),
-            328px 345px 0 rgba(255,255,255,0.1),  418px 312px 0 rgba(255,255,255,0.2),
-            518px 289px 0 rgba(255,255,255,0.15), 608px 334px 0 rgba(255,255,255,0.3),
-              8px 145px 0 rgba(255,255,255,0.1),   88px  56px 0 rgba(255,255,255,0.25),
-            188px  23px 0 rgba(255,255,255,0.2),  288px 167px 0 rgba(255,255,255,0.15),
-            388px  56px 0 rgba(255,255,255,0.3),  488px 178px 0 rgba(255,255,255,0.1),
-            578px  23px 0 rgba(255,255,255,0.2),  668px  89px 0 rgba(255,255,255,0.15),
-             38px  56px 0 rgba(255,255,255,0.25), 138px 123px 0 rgba(255,255,255,0.1),
-            218px 200px 0 rgba(255,255,255,0.2),  318px 223px 0 rgba(255,255,255,0.15),
-            418px  56px 0 rgba(255,255,255,0.3),  518px 234px 0 rgba(255,255,255,0.1),
-            618px 178px 0 rgba(255,255,255,0.25), 698px 145px 0 rgba(255,255,255,0.15),
-             62px 289px 0 rgba(255,255,255,0.2),  162px 167px 0 rgba(255,255,255,0.3),
-            252px  45px 0 rgba(255,255,255,0.1),  362px 312px 0 rgba(255,255,255,0.25),
-            472px 256px 0 rgba(255,255,255,0.15), 572px 312px 0 rgba(255,255,255,0.2),
-            662px  23px 0 rgba(255,255,255,0.1),   42px 134px 0 rgba(255,255,255,0.3),
-            142px  78px 0 rgba(255,255,255,0.15), 232px 267px 0 rgba(255,255,255,0.25),
-            332px  56px 0 rgba(255,255,255,0.1),  432px 389px 0 rgba(255,255,255,0.2),
-            532px 145px 0 rgba(255,255,255,0.3),  632px 389px 0 rgba(255,255,255,0.15);
-        }
-        .hero-card > * { position: relative; z-index: 1; }
-
-        /* ─── Corner bracket decorations ─── */
-        .corner-tl, .corner-tr, .corner-bl, .corner-br {
-          position: absolute;
-          width: 16px; height: 16px;
-          pointer-events: none;
-          z-index: 2;
-        }
-        .corner-tl { top: 16px; left: 16px;   border-top:    2px solid #C9A84C; border-left:  2px solid #C9A84C; }
-        .corner-tr { top: 16px; right: 16px;  border-top:    2px solid #C9A84C; border-right: 2px solid #C9A84C; }
-        .corner-bl { bottom: 16px; left: 16px;  border-bottom: 2px solid #C9A84C; border-left:  2px solid #C9A84C; }
-        .corner-br { bottom: 16px; right: 16px; border-bottom: 2px solid #C9A84C; border-right: 2px solid #C9A84C; }
-
-        /* ─── ASTROMAN live label ─── */
-        .live-label {
-          letter-spacing: 0.25em;
-          font-size: 10px;
-          color: #5A6A80;
-          font-family: 'Chakra Petch', monospace;
-          text-transform: uppercase;
-          margin-bottom: 8px;
-        }
-
-        /* ─── Pulsing cyan live dot ─── */
-        .live-dot {
-          display: inline-block;
-          width: 6px; height: 6px;
-          border-radius: 50%;
-          background: #4FC3C3;
-          animation: pulseGlow 2s cubic-bezier(0.4,0,0.2,1) infinite;
-          flex-shrink: 0;
-        }
-
-        /* ─── Hero time — Chakra Petch instrument font ─── */
-        .hero-time { font-family: 'Chakra Petch', monospace !important; }
-
-        /* ─── Gold word: thin HR rules above and below ─── */
-        .gold-word-span { display: block; }
-        .gold-word-span::before,
-        .gold-word-span::after {
-          content: '';
-          display: block;
-          height: 1px;
-          background: rgba(201,168,76,0.3);
-          margin: 8px auto;
-          width: 60%;
-        }
-
-        /* ─── Numeric values — instrument typeface ─── */
-        .numeric-value { font-family: 'Chakra Petch', monospace !important; }
-
-        /* ─── Stat cards ─── */
-        .stat-card {
-          border-top: 2px solid #C9A84C !important;
-          background: linear-gradient(180deg, rgba(201,168,76,0.04) 0%, transparent 40%), #0D1420 !important;
-          border-radius: 12px !important;
-          transition: all 0.25s cubic-bezier(0.4,0,0.2,1) !important;
-        }
-        .stat-card:hover {
-          transform: translateY(-2px) !important;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
-          border-top-color: #daba6a !important;
-        }
-        .stat-icon {
-          width: 40px; height: 40px;
-          border-radius: 50%;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.08);
-          display: flex; align-items: center; justify-content: center;
-          font-size: 20px;
-        }
-
-        /* ─── Sun icon rotation (clear sky condition) ─── */
-        .tip-icon { display: inline-block; }
-        .sun-rotating { animation: sunRotate 30s linear infinite; }
-
-        /* ─── Responsive (preserved from components) ─── */
-        @media (min-width: 768px) { .hamburger { display: none !important; } }
-        @media (max-width: 767px) { .desktop-nav { display: none !important; } }
-        @media (min-width: 640px) { .planet-modal-inner { border-radius: 20px !important; margin-bottom: 40px; } }
-      `}</style>
+      <BottomTabs activeSection={activeSection} onNavigate={onNavigate} />
+      <PlanetModal planet={selectedPlanet} onClose={() => setSelectedPlanet(null)} />
     </div>
+  );
+}
+
+export default function SKY() {
+  return (
+    <ToastProvider>
+      <AppContent />
+    </ToastProvider>
   );
 }

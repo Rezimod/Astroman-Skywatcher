@@ -1,0 +1,99 @@
+:root {
+  --bg-deep: #0b0d17;
+  --bg-surface: #131629;
+  --bg-elevated: #1c2041;
+  --bg-overlay: #252a4a;
+
+  --glass-bg: rgba(19, 22, 41, 0.72);
+  --glass-border: rgba(108, 99, 255, 0.12);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --glass-blur: blur(16px);
+
+  --text-primary: #e8ecf4;
+  --text-secondary: #8b92b0;
+  --text-tertiary: #5a6080;
+  --text-inverse: #0b0d17;
+
+  --accent-nebula: #6c63ff;
+  --accent-nebula-hover: #7b73ff;
+  --accent-nebula-glow: rgba(108, 99, 255, 0.25);
+  --accent-aurora: #00d4aa;
+  --accent-aurora-glow: rgba(0, 212, 170, 0.2);
+  --accent-solar: #ffb547;
+  --accent-solar-glow: rgba(255, 181, 71, 0.2);
+  --accent-mars: #ff6b6b;
+  --accent-mars-glow: rgba(255, 107, 107, 0.2);
+  --accent-comet: #38bdf8;
+  --accent-comet-glow: rgba(56, 189, 248, 0.2);
+
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.18);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-11: 44px;
+  --space-12: 48px;
+  --space-13: 52px;
+  --space-14: 56px;
+  --space-15: 60px;
+  --space-16: 64px;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  --font-display: "Plus Jakarta Sans", "Noto Sans Georgian", sans-serif;
+  --font-body: "Plus Jakarta Sans", "Noto Sans Georgian", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.7;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+
+  --z-dropdown: 50;
+  --z-sticky: 100;
+  --z-modal: 200;
+  --z-toast: 300;
+
+  --sky-excellent: var(--accent-aurora);
+  --sky-good: #4ade80;
+  --sky-watch: #facc15;
+  --sky-strong: #84cc16;
+  --sky-moderate: var(--accent-solar);
+  --sky-poor: var(--accent-mars);
+  --sky-terrible: #9f1239;
+
+  --gradient-night: radial-gradient(circle at top, rgba(56, 189, 248, 0.14), transparent 34%), linear-gradient(135deg, rgba(12, 16, 32, 0.98) 0%, rgba(18, 24, 48, 0.94) 50%, rgba(11, 13, 23, 1) 100%);
+  --gradient-golden: radial-gradient(circle at top left, rgba(255, 181, 71, 0.18), transparent 34%), linear-gradient(135deg, rgba(28, 32, 65, 0.95) 0%, rgba(49, 31, 35, 0.9) 42%, rgba(11, 13, 23, 0.98) 100%);
+  --gradient-day: radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 34%), linear-gradient(135deg, rgba(17, 29, 60, 0.94) 0%, rgba(18, 24, 48, 0.9) 48%, rgba(11, 13, 23, 1) 100%);
+}
