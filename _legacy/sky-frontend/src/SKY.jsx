@@ -69,11 +69,11 @@ const GEO_MONTHS = ['იანვარი', 'თებერვალი', 'მ
 const GEO_DAYS = ['კვირა', 'ორშაბათი', 'სამშაბათი', 'ოთხშაბათი', 'ხუთშაბათი', 'პარასკევი', 'შაბათი'];
 
 const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Dashboard', mobileLabel: 'Dashboard', icon: '◉', href: '#dashboard' },
-  { id: 'conditions', label: 'Sky', mobileLabel: 'Sky', icon: '☁', href: '#conditions' },
-  { id: 'observe', label: 'Observe', mobileLabel: 'Observe', icon: '⬆', href: '#observe' },
-  { id: 'sky-map', label: 'Map', mobileLabel: 'Map', icon: '⌖', href: '#sky-map' },
-  { id: 'resources', label: 'Tools', mobileLabel: 'Tools', icon: '⋯', href: '#resources' },
+  { id: 'dashboard', label: 'Dashboard', mobileLabel: 'Dash', short: 'DS', href: '#dashboard' },
+  { id: 'conditions', label: 'Sky', mobileLabel: 'Sky', short: 'SK', href: '#conditions' },
+  { id: 'observe', label: 'Observe', mobileLabel: 'Observe', short: 'OB', href: '#observe' },
+  { id: 'sky-map', label: 'Map', mobileLabel: 'Map', short: 'MP', href: '#sky-map' },
+  { id: 'resources', label: 'Tools', mobileLabel: 'Tools', short: 'TL', href: '#resources' },
 ];
 
 const COMMUNITY_FEED = [
@@ -89,10 +89,20 @@ const UPCOMING_EVENTS = [
 ];
 
 const RESOURCE_CARDS = [
-  { title: 'Observation Playbook', description: 'Upload flow, field notes, and telescope checklist for first-night observing sessions.', icon: '⬆', href: '#observe' },
-  { title: 'Sky Conditions Brief', description: 'Live cloud, humidity, wind, and moonlight score condensed into one operator-friendly panel.', icon: '☁', href: '#conditions' },
-  { title: 'Astroman Store', description: 'Match tonight’s visibility to refractors, eyepieces, and filters in the main Astroman catalog.', icon: '✦', href: 'https://astroman.ge' },
+  { title: 'Observation Playbook', description: 'Upload flow, field notes, and telescope checklist for first-night observing sessions.', icon: 'UP', href: '#observe' },
+  { title: 'Sky Conditions Brief', description: 'Live cloud, humidity, wind, and moonlight score condensed into one operator-friendly panel.', icon: 'SC', href: '#conditions' },
+  { title: 'Astroman Store', description: 'Match tonight’s visibility to refractors, eyepieces, and filters in the main Astroman catalog.', icon: 'ST', href: 'https://astroman.ge' },
 ];
+
+const PLANET_MARKS = {
+  mercury: 'ME',
+  venus: 'VE',
+  mars: 'MA',
+  jupiter: 'JU',
+  saturn: 'SA',
+  uranus: 'UR',
+  neptune: 'NE',
+};
 
 const ToastContext = createContext(() => {});
 
@@ -318,9 +328,9 @@ function SectionHeader({ title, description, badge }) {
 
 function StarsRating({ rating }) {
   return (
-    <div className="star-score" aria-label={`${rating} stars`}>
+    <div className="star-score" aria-label={`${rating} rating`}>
       {Array.from({ length: 5 }, (_, index) => (
-        <span key={index} className={index < rating ? 'is-lit' : ''}>★</span>
+        <span key={index} className={index < rating ? 'is-lit' : ''}>■</span>
       ))}
     </div>
   );
@@ -413,7 +423,7 @@ function Navbar({ activeSection, onNavigate, menuOpen, setMenuOpen, skyStatus, v
       <nav className="site-nav">
         <div className="nav-inner">
           <a className="brand" href="#dashboard" onClick={() => onNavigate('dashboard')}>
-            <span className="brand-mark">🔭</span>
+            <span className="brand-mark">AS</span>
             <span className="brand-copy">
               <strong>ASTROMAN</strong>
               <span>Skywatcher Live</span>
@@ -442,7 +452,7 @@ function Navbar({ activeSection, onNavigate, menuOpen, setMenuOpen, skyStatus, v
               </div>
             ) : null}
             <button className="menu-button" onClick={() => setMenuOpen((current) => !current)} aria-label="მენიუ">
-              {menuOpen ? '✕' : '☰'}
+              {menuOpen ? 'Close' : 'Menu'}
             </button>
           </div>
         </div>
@@ -511,7 +521,7 @@ function HeroBanner({ now, weather, sunTimes, moon, skyStatus, score, visibility
               </div>
               <div className="metric-chip">
                 <label>Moon & Visibility</label>
-                <strong>{moon.phaseEmoji} {moon.phaseName}</strong>
+                <strong>{moon.phaseName}</strong>
                 <span style={{ color: 'var(--text-secondary)' }}>{moon.illumination}% illumination · visibility {visibilityKm ?? '—'} km</span>
               </div>
             </div>
@@ -584,13 +594,13 @@ function PlanetVisibilitySection({ planets, onPlanetClick }) {
                 textAlign: 'left',
                 cursor: 'pointer',
                 color: 'var(--text-primary)',
-                background: planet.visible ? 'var(--bg-elevated)' : 'var(--glass-bg)',
+                background: planet.visible ? 'var(--bg-elevated)' : 'var(--bg-surface)',
                 borderColor: planet.visible ? tone : 'var(--border-subtle)',
               }}
             >
               <div className="planet-card__header">
                 <div>
-                  <div className="planet-card__symbol" style={{ color: tone }}>{planet.emoji}</div>
+                  <div className="planet-card__symbol" style={{ color: tone }}>{PLANET_MARKS[planet.id]}</div>
                 </div>
                 <span className={`badge ${badgeClass}`}>{planet.visible ? 'Visible now' : 'Below horizon'}</span>
               </div>
@@ -730,7 +740,7 @@ function QuickActionsSidebar({
         <h3>Observation Upload UI</h3>
         <p>UI refresh only. The legacy frontend now shows a polished drag-and-drop shell, local preview, and progress feedback without changing backend logic.</p>
         <div className="dropzone">
-          <div style={{ fontSize: '2rem' }}>☁</div>
+          <div className="resource-card__icon" style={{ width: 64, height: 64 }}>UP</div>
           <strong>Drop an observing shot here</strong>
           <p>JPEG, PNG or HEIC · up to 20MB · preview stays local until the upload pipeline is wired.</p>
           <label className="btn-secondary" style={{ cursor: 'pointer', width: '100%' }}>
@@ -845,7 +855,7 @@ function ISSTracker({ iss }) {
         <SectionHeader
           title="ISS Real-Time Pass Tracker"
           description="Live WheretheISS data remains untouched. The redesign tightens the telemetry into a compact operations board."
-          badge={<span className="badge badge--comet">5s refresh</span>}
+          badge={<span className="badge badge--comet">20s refresh</span>}
         />
         <div className="detail-grid">
           {cards.map((item) => (
@@ -876,7 +886,7 @@ function MediaSection({ id, title, description, data, fallbackTitle, accentClass
   }
 
   const isVideo = data.media_type === 'video';
-  const mediaUrl = data.hdurl || data.url;
+  const mediaUrl = data.url;
 
   return (
     <article id={id} className="sky-card media-card">
@@ -890,7 +900,6 @@ function MediaSection({ id, title, description, data, fallbackTitle, accentClass
             className="empty-state"
             style={{ height: '100%', textDecoration: 'none', color: 'var(--text-primary)' }}
           >
-            <div style={{ fontSize: '3rem' }}>▶</div>
             <strong>Open NASA video</strong>
           </a>
         ) : imgError ? (
@@ -912,6 +921,7 @@ function MediaSection({ id, title, description, data, fallbackTitle, accentClass
 function SkyMap({ onMapAction }) {
   const mapRef = useRef(null);
   const [fullscreen, setFullscreen] = useState(false);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
     const onChange = () => setFullscreen(document.fullscreenElement === mapRef.current);
@@ -920,6 +930,11 @@ function SkyMap({ onMapAction }) {
   }, []);
 
   const toggleFullscreen = useCallback(async () => {
+    if (!mapLoaded) {
+      setMapLoaded(true);
+      onMapAction('Sky map loading', 'The Stellarium iframe is now loading on demand.', 'info');
+      return;
+    }
     try {
       if (document.fullscreenElement === mapRef.current) {
         await document.exitFullscreen();
@@ -931,7 +946,7 @@ function SkyMap({ onMapAction }) {
     } catch {
       onMapAction('Fullscreen unavailable', 'The browser blocked the fullscreen request.', 'warning');
     }
-  }, [onMapAction]);
+  }, [mapLoaded, onMapAction]);
 
   return (
     <section id="sky-map" className="section-shell section-reveal" style={{ '--stagger': 5 }}>
@@ -955,7 +970,15 @@ function SkyMap({ onMapAction }) {
           </div>
 
           <div className="map-frame">
-            <iframe src="https://stellarium-web.org/" title="Stellarium Sky Map" allow="fullscreen" loading="lazy" />
+            {mapLoaded ? (
+              <iframe src="https://stellarium-web.org/" title="Stellarium Sky Map" allow="fullscreen" loading="lazy" />
+            ) : (
+              <div className="map-placeholder">
+                <strong>Sky map is deferred for speed</strong>
+                <p>The live iframe now loads only on demand, which removes the heaviest render cost from the initial page load.</p>
+                <button className="btn-primary" onClick={() => setMapLoaded(true)}>Load Sky Map</button>
+              </div>
+            )}
           </div>
 
           <div className="map-overlay-bottom">
@@ -1121,7 +1144,7 @@ function PlanetModal({ planet, onClose }) {
         <div className="card-header-inline" style={{ marginBottom: 'var(--space-4)' }}>
           <div>
             <p className="eyebrow">Planet Detail</p>
-            <h2 style={{ margin: 0 }}>{planet.emoji} {planet.ka}</h2>
+            <h2 style={{ margin: 0 }}>{planet.ka}</h2>
           </div>
           <button className="icon-button" onClick={onClose} aria-label="დახურვა">✕</button>
         </div>
@@ -1129,7 +1152,7 @@ function PlanetModal({ planet, onClose }) {
         <div className="thumbnail-preview" style={{ marginBottom: 'var(--space-4)' }}>
           {imgError ? (
             <div className="empty-state" style={{ height: '100%' }}>
-              <div style={{ fontSize: '4rem' }}>{planet.emoji}</div>
+              <div className="resource-card__icon" style={{ width: 72, height: 72 }}>{PLANET_MARKS[planet.id]}</div>
               <strong>{planet.ka}</strong>
             </div>
           ) : (
@@ -1177,7 +1200,7 @@ function BottomTabs({ activeSection, onNavigate }) {
           className={`bottom-tab${activeSection === item.id ? ' is-active' : ''}`}
           onClick={() => onNavigate(item.id)}
         >
-          <span>{item.icon}</span>
+          <span>{item.short}</span>
           <span>{item.mobileLabel}</span>
         </a>
       ))}
@@ -1188,6 +1211,7 @@ function BottomTabs({ activeSection, onNavigate }) {
 function AppContent() {
   const toast = useToast();
   const [now, setNow] = useState(new Date());
+  const [astroNow, setAstroNow] = useState(new Date());
   const [menuOpen, setMenuOpen] = useState(false);
   const [weather, setWeather] = useState(null);
   const [sunData, setSunData] = useState(null);
@@ -1201,6 +1225,11 @@ function AppContent() {
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setAstroNow(new Date()), 60 * 1000);
     return () => window.clearInterval(timer);
   }, []);
 
@@ -1228,15 +1257,14 @@ function AppContent() {
     if (uploadState.previewUrl) URL.revokeObjectURL(uploadState.previewUrl);
   }, [uploadState.previewUrl]);
 
-  const computedSun = useMemo(() => getSunTimes(now), [now]);
-  const moon = useMemo(() => getMoonInfo(now), [now]);
+  const computedSun = useMemo(() => getSunTimes(astroNow), [astroNow]);
+  const moon = useMemo(() => getMoonInfo(astroNow), [astroNow]);
   const planets = useMemo(() => {
-    const live = getVisiblePlanets(now);
+    const live = getVisiblePlanets(astroNow);
     return PLANETS.map((planet) => {
       const fromLive = live.find((item) => item.id === planet.id) || {};
       return {
         ...planet,
-        emoji: fromLive.emoji,
         altitude: fromLive.altitude ?? planet.maxAlt,
         azimuth: fromLive.azimuth ?? 0,
         visible: fromLive.visible ?? false,
@@ -1244,7 +1272,7 @@ function AppContent() {
         set: fromLive.set ?? null,
       };
     });
-  }, [now]);
+  }, [astroNow]);
 
   const visibilityKm = useMemo(() => getVisibilityKm(weather), [weather]);
   const score = useMemo(() => getObservationScore(weather, visibilityKm), [weather, visibilityKm]);
@@ -1303,7 +1331,7 @@ function AppContent() {
 
   useEffect(() => {
     fetchISS();
-    const timer = window.setInterval(fetchISS, 5000);
+    const timer = window.setInterval(fetchISS, 20000);
     return () => window.clearInterval(timer);
   }, [fetchISS]);
 
@@ -1487,7 +1515,7 @@ function AppContent() {
 
       {showBackToTop ? (
         <button className="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top">
-          ↑
+          Top
         </button>
       ) : null}
 

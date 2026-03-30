@@ -53,9 +53,9 @@
   --radius-xl: 24px;
   --radius-full: 9999px;
 
-  --font-display: "Plus Jakarta Sans", "Noto Sans Georgian", sans-serif;
-  --font-body: "Plus Jakarta Sans", "Noto Sans Georgian", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Georgian", sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Georgian", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas, monospace;
 
   --text-xs: 0.75rem;
   --text-sm: 0.8125rem;
