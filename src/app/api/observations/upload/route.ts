@@ -17,10 +17,19 @@ function placeholderUrl(filename: string) {
   `)}`;
 }
 
+function estimateXp(objectName: string): number {
+  const hard = ["სატურნი", "ორიონის ნისლეული", "ირმის ნახტომი", "მეტეორი"];
+  const medium = ["იუპიტერი", "მარსი", "ISS", "ვარსკვლავური ბილიკები"];
+  if (hard.some((n) => objectName.includes(n))) return 350;
+  if (medium.some((n) => objectName.includes(n))) return 200;
+  return 100;
+}
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
-    const file = formData.get("file");
+    const file = formData.get("photo") ?? formData.get("file");
+    const objectName = formData.get("objectName")?.toString() ?? "";
 
     if (!(file instanceof File)) {
       return NextResponse.json({ error: "ფაილი არ მოიძებნა" }, { status: 400 });
@@ -58,12 +67,16 @@ export async function POST(request: Request) {
       url: data.publicUrl,
       path,
       fallback: false,
+      estimatedXp: estimateXp(objectName),
+      status: "pending",
     });
   } catch {
     return NextResponse.json({
       url: placeholderUrl("Astroman"),
       path: "fallback",
       fallback: true,
+      estimatedXp: 100,
+      status: "pending",
     });
   }
 }
